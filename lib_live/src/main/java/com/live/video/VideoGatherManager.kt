@@ -135,13 +135,27 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                  */
                 if (orientation == 0 || orientation == 180) { //横屏
                     LiveNativeManager.compressYUV(
-                        srcData, LiveConfig.cameraWidth, LiveConfig.cameraHeight,
-                        dstData, scaleWidth, scaleHeight, 0, orientation, orientation == 270
+                        srcData,
+                        LiveConfig.cameraWidth,
+                        LiveConfig.cameraHeight,
+                        dstData,
+                        scaleWidth,
+                        scaleHeight,
+                        0,
+                        orientation,
+                        orientation == 270
                     )
                 } else { //竖屏
                     LiveNativeManager.compressYUV(
-                        srcData, LiveConfig.cameraWidth, LiveConfig.cameraHeight,
-                        dstData, scaleHeight, scaleWidth, 0, orientation, orientation == 270
+                        srcData,
+                        LiveConfig.cameraWidth,
+                        LiveConfig.cameraHeight,
+                        dstData,
+                        scaleHeight,
+                        scaleWidth,
+                        0,
+                        orientation,
+                        orientation == 270
                     )
                 }
 

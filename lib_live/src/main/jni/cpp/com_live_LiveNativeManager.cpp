@@ -169,8 +169,7 @@ void nv21ToI420(jbyte *src_nv21_data, jint width, jint height, jbyte *src_i420_d
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_init(JNIEnv *env, jclass type, jint width, jint height, jint outWidth,
-                                          jint outHeight) {
+Java_com_live_LiveNativeManager_init(JNIEnv *env, jclass type, jint width, jint height, jint outWidth, jint outHeight) {
     init(width, height, outWidth, outHeight);
     return 0;
 }
@@ -191,7 +190,7 @@ Java_com_live_LiveNativeManager_release(JNIEnv *env, jclass type) {
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_yuvI420ToNV21(JNIEnv *env, jclass type, jbyteArray i420Src_, jbyteArray nv21Src_,
-                                                   jint width, jint height) {
+                                              jint width, jint height) {
 
     jbyte *i420Src = env->GetByteArrayElements(i420Src_, NULL);
     jbyte *nv21Src = env->GetByteArrayElements(nv21Src_, NULL);
@@ -224,9 +223,9 @@ Java_com_live_LiveNativeManager_yuvI420ToNV21(JNIEnv *env, jclass type, jbyteArr
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray src_, jint width, jint height,
-                                                 jbyteArray dst_, jint dst_width, jint dst_height, jint mode,
-                                                 jint degree,
-                                                 jboolean isMirror) {
+                                            jbyteArray dst_, jint dst_width, jint dst_height, jint mode,
+                                            jint degree,
+                                            jboolean isMirror) {
 
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *dst = env->GetByteArrayElements(dst_, NULL);
@@ -256,7 +255,7 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src_, jint width, jint height,
-                                             jbyteArray dst_, jint dst_width, jint dst_height, jint left, jint top) {
+                                        jbyteArray dst_, jint dst_width, jint dst_height, jint left, jint top) {
 
     //裁剪的区域大小不对，left指宽度从哪里开始剪裁，dst_width指从剪裁处开始算的目标宽度，top指高度从哪里开始剪裁
     if (left + dst_width > width || top + dst_height > height) {
@@ -295,15 +294,15 @@ Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint in_width, jint in_height,
-                                                      jint out_width,
-                                                      jint out_height) {
+                                                 jint out_width,
+                                                 jint out_height) {
     videoEncoder = new VideoEncoder();
     //设置相关参数
     videoEncoder->setInWidth(in_width);
     videoEncoder->setInHeight(in_height);
     videoEncoder->setOutWidth(out_width);
     videoEncoder->setOutHeight(out_height);
-    videoEncoder->setBitrate(1200*1000); //设置比特率
+    videoEncoder->setBitrate(1200 * 1000); //设置比特率
     videoEncoder->open();
     return 0;
 
@@ -312,7 +311,7 @@ Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
-                                                        jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
+                                                   jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
     //转为jbyte数组的指针
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
@@ -330,7 +329,7 @@ Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jby
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderAudioInit(JNIEnv *env, jclass type, jint sampleRate, jint channels,
-                                                      jint bitRate) {
+                                                 jint bitRate) {
     audioEncoder = new AudioEncoder(channels, sampleRate, bitRate);
     int value = audioEncoder->init();
     return value;
@@ -340,7 +339,7 @@ Java_com_live_LiveNativeManager_encoderAudioInit(JNIEnv *env, jclass type, jint 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderAudioEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
-                                                        jbyteArray dstFrame_, jint dstSize) {
+                                                   jbyteArray dstFrame_, jint dstSize) {
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
 
@@ -375,12 +374,12 @@ Java_com_live_LiveNativeManager_initRtmpData(JNIEnv *env, jclass type, jstring u
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_sendRtmpVideoSpsPPS(JNIEnv *env, jclass type, jbyteArray sps_, jint spsLen,
-                                                         jbyteArray pps_, jint ppsLen, jlong timeStamp) {
+                                                    jbyteArray pps_, jint ppsLen, jlong timeStamp) {
     if (rtmpLivePush) {
         jbyte *sps = env->GetByteArrayElements(sps_, NULL);
         jbyte *pps = env->GetByteArrayElements(pps_, NULL);
 
-        rtmpLivePush->pushSPSPPS((unsigned char *) sps, spsLen,(unsigned char *) pps, ppsLen);
+        rtmpLivePush->pushSPSPPS((unsigned char *) sps, spsLen, (unsigned char *) pps, ppsLen);
         //rtmpLivePush->send_video_sps_pps((unsigned char *) sps, spsLen,(unsigned char *) pps, ppsLen);
 
         env->ReleaseByteArrayElements(sps_, sps, 0);
@@ -392,7 +391,7 @@ Java_com_live_LiveNativeManager_sendRtmpVideoSpsPPS(JNIEnv *env, jclass type, jb
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_sendRtmpVideoData(JNIEnv *env, jclass type, jbyteArray data_, jint dataLen,
-                                                       jlong timeStamp) {
+                                                  jlong timeStamp) {
     if (rtmpLivePush) {
         jbyte *data = env->GetByteArrayElements(data_, NULL);
 
@@ -418,7 +417,7 @@ Java_com_live_LiveNativeManager_sendRtmpAudioSpec(JNIEnv *env, jclass type, jlon
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_sendRtmpAudioData(JNIEnv *env, jclass type, jbyteArray data_, jint dataLen,
-                                                       jlong timeStamp) {
+                                                  jlong timeStamp) {
 
     if (rtmpLivePush) {
         jbyte *data = env->GetByteArrayElements(data_, NULL);

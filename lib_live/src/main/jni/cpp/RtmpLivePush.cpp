@@ -217,8 +217,7 @@ void RtmpLivePush::pushSPSPPS(unsigned char *sps, int spsLen, unsigned char *pps
  * @param pps
  * @param pps_len
  */
-void RtmpLivePush::addSequenceH264Header(unsigned char *sps, int sps_len, unsigned char *pps,
-                                         int pps_len) {
+void RtmpLivePush::addSequenceH264Header(unsigned char *sps, int sps_len, unsigned char *pps,int pps_len) {
     //LOGI("%s","发送header");
     //LOGI("#######addSequenceH264Header#########pps_lem=%d, sps_len=%d", pps_len, sps_len);
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 1024);

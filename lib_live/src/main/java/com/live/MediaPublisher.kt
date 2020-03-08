@@ -125,8 +125,8 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
     }
 
     //停止推流
-    fun stopPublish(){
-        loop=false
+    fun stopPublish() {
+        loop = false
         Thread.interrupted()
         runnables.clear()
     }
