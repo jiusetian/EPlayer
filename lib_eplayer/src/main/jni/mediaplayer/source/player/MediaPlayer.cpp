@@ -3,7 +3,7 @@
 
 /**
  * FFmpeg操作锁管理回调
- * @param mtx
+ * @param mtx 这是一个二级指针，即指针的指针，传递二级指针的目的是为了改变一级指针的值
  * @param op
  * @return
  */
@@ -789,7 +789,7 @@ int MediaPlayer::readAvDatas() {
                                  & AV_DISPOSITION_ATTACHED_PIC)) {
                 AVPacket copy;
                 //该函数用于复制AVPacket中的buf 和 data，如果使用了计数buffer AVBufferRef,则将AVBufferRef中的数据空间计数加一，不复制其他成员
-                if ((ret = av_copy_packet(&copy, &videoDecoder->getStream()->attached_pic)) <
+                if ((ret = av_packet_ref(&copy, &videoDecoder->getStream()->attached_pic)) <
                     0) { //附加pic
                     break;
                 }

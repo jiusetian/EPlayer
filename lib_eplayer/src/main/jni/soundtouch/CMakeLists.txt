@@ -38,6 +38,7 @@ add_library( soundtouch
              # wrapper
              SoundTouchWrapper.cpp )
 
+#
 target_include_directories( soundtouch
 
                             PRIVATE
@@ -49,4 +50,28 @@ target_link_libraries( soundtouch
 
                        android
                        log )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

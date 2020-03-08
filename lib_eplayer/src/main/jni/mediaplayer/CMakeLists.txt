@@ -15,13 +15,16 @@ set(soundtouch_dir ../SoundTouch)
 #添加子目录，所以soundtouch是当前项目的子项目
 add_subdirectory(${soundtouch_dir} soundtouch)
 
-# 添加头文件路径
-include_directories(source
+# 添加头文件路径，第三个参数是子目录的路径，这里include了代表当前源文件可以直接使用子目录下的头文件
+#同时因为子目录继承了当前CMake，所以从第一和第二个参数来看，子目录也是可以直接使用当前目录的头文件的
+include_directories(
+        source
         android
         ${soundtouch_dir})
 
 # 添加源文件
-add_library(media_player
+add_library(
+        media_player
 
         SHARED
 
@@ -72,8 +75,16 @@ target_link_libraries(
         #原生库
         media_player
         #需要链接的库
-        ffmpeg
+#        ffmpeg
         soundtouch
+        #ffmpeg库
+        avutil
+        swresample
+        swscale
+        avcodec
+        avformat
+        avfilter
+        avdevice
 
         -landroid
         -llog

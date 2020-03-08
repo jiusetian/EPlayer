@@ -33,7 +33,7 @@
  *
  * Libavdevice is a complementary library to @ref libavf "libavformat". It
  * provides various "special" platform-specific muxers and demuxers, e.g. for
- * grabbing devices, audioDecoder capture and playback etc. As a consequence, the
+ * grabbing devices, audio capture and playback etc. As a consequence, the
  * (de)muxers in libavdevice are of the AVFMT_NOFILE type (they use their own
  * I/O functions). The filename passed to avformat_open_input() often does not
  * refer to an actually existing file, but has some special device-specific
@@ -73,8 +73,8 @@ void avdevice_register_all(void);
 /**
  * Audio input devices iterator.
  *
- * If d is NULL, returns the first registered input audioDecoder/video device,
- * if d is non-NULL, returns the next registered input audioDecoder/video device after d
+ * If d is NULL, returns the first registered input audio/video device,
+ * if d is non-NULL, returns the next registered input audio/video device after d
  * or NULL if d is the last one.
  */
 AVInputFormat *av_input_audio_device_next(AVInputFormat  *d);
@@ -82,8 +82,8 @@ AVInputFormat *av_input_audio_device_next(AVInputFormat  *d);
 /**
  * Video input devices iterator.
  *
- * If d is NULL, returns the first registered input audioDecoder/video device,
- * if d is non-NULL, returns the next registered input audioDecoder/video device after d
+ * If d is NULL, returns the first registered input audio/video device,
+ * if d is non-NULL, returns the next registered input audio/video device after d
  * or NULL if d is the last one.
  */
 AVInputFormat *av_input_video_device_next(AVInputFormat  *d);
@@ -91,8 +91,8 @@ AVInputFormat *av_input_video_device_next(AVInputFormat  *d);
 /**
  * Audio output devices iterator.
  *
- * If d is NULL, returns the first registered output audioDecoder/video device,
- * if d is non-NULL, returns the next registered output audioDecoder/video device after d
+ * If d is NULL, returns the first registered output audio/video device,
+ * if d is non-NULL, returns the next registered output audio/video device after d
  * or NULL if d is the last one.
  */
 AVOutputFormat *av_output_audio_device_next(AVOutputFormat *d);
@@ -100,8 +100,8 @@ AVOutputFormat *av_output_audio_device_next(AVOutputFormat *d);
 /**
  * Video output devices iterator.
  *
- * If d is NULL, returns the first registered output audioDecoder/video device,
- * if d is non-NULL, returns the next registered output audioDecoder/video device after d
+ * If d is NULL, returns the first registered output audio/video device,
+ * if d is non-NULL, returns the next registered output audio/video device after d
  * or NULL if d is the last one.
  */
 AVOutputFormat *av_output_video_device_next(AVOutputFormat *d);
@@ -325,14 +325,14 @@ int avdevice_dev_to_app_control_message(struct AVFormatContext *s,
  * Following API allows user to probe device capabilities (supported codecs,
  * pixel formats, sample formats, resolutions, channel counts, etc).
  * It is build on top op AVOption API.
- * Queried capabilities make it possible to set up converters of video or audioDecoder
+ * Queried capabilities make it possible to set up converters of video or audio
  * parameters that fit to the device.
  *
  * List of capabilities that can be queried:
- *  - Capabilities valid for both audioDecoder and video devices:
- *    - codec:          supported audioDecoder/video codecs.
+ *  - Capabilities valid for both audio and video devices:
+ *    - codec:          supported audio/video codecs.
  *                      type: AV_OPT_TYPE_INT (AVCodecID value)
- *  - Capabilities valid for audioDecoder devices:
+ *  - Capabilities valid for audio devices:
  *    - sample_format:  supported sample formats.
  *                      type: AV_OPT_TYPE_INT (AVSampleFormat value)
  *    - sample_rate:    supported sample rates.

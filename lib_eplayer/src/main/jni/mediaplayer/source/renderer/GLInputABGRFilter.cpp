@@ -15,6 +15,7 @@ const std::string kABGRFragmentShader = SHADER_TO_STRING(
         }
 );
 
+
 GLInputABGRFilter::GLInputABGRFilter() {
     for (int i = 0; i < 1; ++i) {
         inputTextureHandle[i] = 0;

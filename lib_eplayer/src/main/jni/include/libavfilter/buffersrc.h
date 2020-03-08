@@ -73,7 +73,7 @@ unsigned av_buffersrc_get_nb_failed_requests(AVFilterContext *buffer_src);
 typedef struct AVBufferSrcParameters {
     /**
      * video: the pixel format, value corresponds to enum AVPixelFormat
-     * audioDecoder: the sample format, value corresponds to enum AVSampleFormat
+     * audio: the sample format, value corresponds to enum AVSampleFormat
      */
     int format;
     /**
@@ -106,12 +106,12 @@ typedef struct AVBufferSrcParameters {
     AVBufferRef *hw_frames_ctx;
 
     /**
-     * Audio only, the audioDecoder sampling rate in samples per secon.
+     * Audio only, the audio sampling rate in samples per secon.
      */
     int sample_rate;
 
     /**
-     * Audio only, the audioDecoder channel layout
+     * Audio only, the audio channel layout
      */
     uint64_t channel_layout;
 } AVBufferSrcParameters;
@@ -193,6 +193,14 @@ av_warn_unused_result
 int av_buffersrc_add_frame_flags(AVFilterContext *buffer_src,
                                  AVFrame *frame, int flags);
 
+/**
+ * Close the buffer source after EOF.
+ *
+ * This is similar to passing NULL to av_buffersrc_add_frame_flags()
+ * except it takes the timestamp of the EOF, i.e. the timestamp of the end
+ * of the last frame.
+ */
+int av_buffersrc_close(AVFilterContext *ctx, int64_t pts, unsigned flags);
 
 /**
  * @}

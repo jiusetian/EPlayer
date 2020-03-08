@@ -5,20 +5,11 @@
 
 //std::string是标准C++的字符串实现。为了让程序好移植，要用std::string
 const std::string kYUV420PFragmentShader = SHADER_TO_STRING(
-        precision
-        mediump float;
-        varying
-                highp
-        vec2 textureCoordinate;
-        uniform
-                lowp
-        sampler2D inputTextureY;
-        uniform
-                lowp
-        sampler2D inputTextureU;
-        uniform
-                lowp
-        sampler2D inputTextureV;
+        precision mediump float;
+        varying highp vec2 textureCoordinate;
+        uniform lowp sampler2D inputTextureY;
+        uniform lowp sampler2D inputTextureU;
+        uniform lowp sampler2D inputTextureV;
 
         void main() {
             vec3 yuv;

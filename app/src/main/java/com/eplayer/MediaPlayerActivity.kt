@@ -29,6 +29,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     private var isPlayComplete = false //播放是否完成
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_player)
@@ -69,12 +70,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                 changeSurfaceSize()
                 //播放进度相关
                 tv_current_position.setText(
-                    StringUtils.generateStandardTime(
-                        Math.max(
-                            eMediaPlayer.getCurrentPosition(),
-                            0
-                        )
-                    )
+                    StringUtils.generateStandardTime(Math.max(eMediaPlayer.getCurrentPosition(), 0))
                 )
                 tv_duration.setText(StringUtils.generateStandardTime(Math.max(eMediaPlayer.getDuration(), 0)))
                 seekbar.setMax(Math.max(eMediaPlayer.getDuration(), 0).toInt())
@@ -219,6 +215,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         //播放暂停
         if (v.id == R.id.iv_pause_play) {
             if (eMediaPlayer.isPlaying && !isPlayComplete) { //暂停
+                LogUtil.d("边距="+surfaceView.paddingTop)
                 eMediaPlayer.pause()
                 iv_pause_play.setImageResource(R.drawable.ic_player_play)
             } else if (!isPlayComplete) { //播放

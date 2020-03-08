@@ -15,13 +15,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     companion object {
         private const val REQUEST_PERMISSION_CODE = 10
-        private val perms = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO) //权限
+        private val perms = arrayOf(
+            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE
+            , Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) //权限
 
     }
 
     //视频播放路径
-    private val PATH = Environment.getExternalStorageDirectory().getPath() + File.separator + "hello.mp4"
-    //private val PATH = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
+     private val PATH = Environment.getExternalStorageDirectory().getPath() + File.separator + "hello.mp4"
+   // private val PATH = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,15 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             val intent = Intent(this, MediaPlayerActivity::class.java)
             intent.putExtra("path", PATH)
             startActivity(intent)
+        }
+
+        btn_both.setOnClickListener {
+            if (EasyPermissions.hasPermissions(this, *perms)) {
+                val intent = Intent(this, TwoScreenActivity::class.java)
+                intent.putExtra("path", PATH)
+                startActivity(intent)
+            } else
+                requestPerms(*perms)
         }
     }
 

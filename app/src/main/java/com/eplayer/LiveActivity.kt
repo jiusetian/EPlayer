@@ -23,6 +23,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_live)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         }
@@ -110,7 +111,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
             }
 
             rtmp_publish_img->{
-                mediaPublisher.getMediaEncoder().startRecord()
+               // mediaPublisher.getMediaEncoder().startRecord()
             }
         }
     }

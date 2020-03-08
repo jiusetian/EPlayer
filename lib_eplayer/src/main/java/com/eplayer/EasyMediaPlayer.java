@@ -63,7 +63,14 @@ public class EasyMediaPlayer implements IMediaPlayer {
     public static final boolean BYPASS_METADATA_FILTER = false;
 
     static {
-        System.loadLibrary("ffmpeg");
+//        System.loadLibrary("avutil");
+//        System.loadLibrary("swresample");
+//        System.loadLibrary("swscale");
+//        System.loadLibrary("avcodec");
+//        System.loadLibrary("avformat");
+//        System.loadLibrary("avfilter");
+//        System.loadLibrary("avdevice");
+        //System.loadLibrary("ffmpeg");
         System.loadLibrary("soundtouch");
         System.loadLibrary("media_player");
         native_init();

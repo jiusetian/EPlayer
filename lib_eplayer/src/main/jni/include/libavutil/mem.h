@@ -338,7 +338,7 @@ av_alloc_size(2, 3) void *av_realloc_array(void *ptr, size_t nmemb, size_t size)
  * @warning Unlike av_malloc(), the allocated memory is not guaranteed to be
  *          correctly aligned.
  */
-av_alloc_size(2, 3) int av_reallocp_array(void *ptr, size_t nmemb, size_t size);
+int av_reallocp_array(void *ptr, size_t nmemb, size_t size);
 
 /**
  * Reallocate the given buffer if it is not large enough, otherwise do nothing.
@@ -530,21 +530,21 @@ void av_memcpy_backptr(uint8_t *dst, int back, int cnt);
  *
  * @code
  * type **array = NULL; //< an array of pointers to values
- * int    resampleSize    = 0;    //< a variable to keep track of the length of the array
+ * int    nb    = 0;    //< a variable to keep track of the length of the array
  *
  * type to_be_added  = ...;
  * type to_be_added2 = ...;
  *
- * av_dynarray_add(&array, &resampleSize, &to_be_added);
- * if (resampleSize == 0)
+ * av_dynarray_add(&array, &nb, &to_be_added);
+ * if (nb == 0)
  *     return AVERROR(ENOMEM);
  *
- * av_dynarray_add(&array, &resampleSize, &to_be_added2);
- * if (resampleSize == 0)
+ * av_dynarray_add(&array, &nb, &to_be_added2);
+ * if (nb == 0)
  *     return AVERROR(ENOMEM);
  *
  * // Now:
- * //  resampleSize           == 2
+ * //  nb           == 2
  * // &to_be_added  == array[0]
  * // &to_be_added2 == array[1]
  *
@@ -557,24 +557,24 @@ void av_memcpy_backptr(uint8_t *dst, int back, int cnt);
  *
  * @code
  * type *array = NULL; //< an array of values
- * int   resampleSize    = 0;    //< a variable to keep track of the length of the array
+ * int   nb    = 0;    //< a variable to keep track of the length of the array
  *
  * type to_be_added  = ...;
  * type to_be_added2 = ...;
  *
- * type *addr = av_dynarray2_add((void **)&array, &resampleSize, sizeof(*array), NULL);
+ * type *addr = av_dynarray2_add((void **)&array, &nb, sizeof(*array), NULL);
  * if (!addr)
  *     return AVERROR(ENOMEM);
  * memcpy(addr, &to_be_added, sizeof(to_be_added));
  *
  * // Shortcut of the above.
- * type *addr = av_dynarray2_add((void **)&array, &resampleSize, sizeof(*array),
+ * type *addr = av_dynarray2_add((void **)&array, &nb, sizeof(*array),
  *                               (const void *)&to_be_added2);
  * if (!addr)
  *     return AVERROR(ENOMEM);
  *
  * // Now:
- * //  resampleSize           == 2
+ * //  nb           == 2
  * //  to_be_added  == array[0]
  * //  to_be_added2 == array[1]
  *

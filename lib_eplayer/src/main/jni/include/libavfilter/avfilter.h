@@ -195,6 +195,21 @@ typedef struct AVFilter {
      */
 
     /**
+     * Filter pre-initialization function
+     *
+     * This callback will be called immediately after the filter context is
+     * allocated, to allow allocating and initing sub-objects.
+     *
+     * If this callback is not NULL, the uninit callback will be called on
+     * allocation failure.
+     *
+     * @return 0 on success,
+     *         AVERROR code on failure (but the code will be
+     *           dropped and treated as ENOMEM by the calling code)
+     */
+    int (*preinit)(AVFilterContext *ctx);
+
+    /**
      * Filter initialization function.
      *
      * This callback will be called only once during the filter lifetime, after
@@ -251,7 +266,7 @@ typedef struct AVFilter {
      *
      * This callback must set AVFilterLink.out_formats on every input link and
      * AVFilterLink.in_formats on every output link to a list of pixel/sample
-     * formats that the filter supports on that link. For audioDecoder links, this
+     * formats that the filter supports on that link. For audio links, this
      * filter must also set @ref AVFilterLink.in_samplerates "in_samplerates" /
      * @ref AVFilterLink.out_samplerates "out_samplerates" and
      * @ref AVFilterLink.in_channel_layouts "in_channel_layouts" /
@@ -418,7 +433,7 @@ struct AVFilterLink {
     int w;                      ///< agreed upon image width
     int h;                      ///< agreed upon image height
     AVRational sample_aspect_ratio; ///< agreed upon sample aspect ratio
-    /* These parameters apply only to audioDecoder */
+    /* These parameters apply only to audio */
     uint64_t channel_layout;    ///< channel layout of current buffer (see libavutil/channel_layout.h)
     int sample_rate;            ///< samples per second
 
@@ -482,7 +497,7 @@ struct AVFilterLink {
 
     /**
      * Current timestamp of the link, as defined by the most recent
-     * frame(s), in link timeBase units.
+     * frame(s), in link time_base units.
      */
     int64_t current_pts;
 

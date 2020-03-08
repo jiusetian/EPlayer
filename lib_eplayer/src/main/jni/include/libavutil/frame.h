@@ -25,6 +25,7 @@
 #ifndef AVUTIL_FRAME_H
 #define AVUTIL_FRAME_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "avutil.h"
@@ -106,7 +107,7 @@ enum AVFrameSideDataType {
      */
     AV_FRAME_DATA_SKIP_SAMPLES,
     /**
-     * This side data must be associated with an audioDecoder frame and corresponds to
+     * This side data must be associated with an audio frame and corresponds to
      * enum AVAudioServiceType defined in avcodec.h.
      */
     AV_FRAME_DATA_AUDIO_SERVICE_TYPE,
@@ -127,6 +128,19 @@ enum AVFrameSideDataType {
      * libavutil/spherical.h.
      */
     AV_FRAME_DATA_SPHERICAL,
+
+    /**
+     * Content light level (based on CTA-861.3). This payload contains data in
+     * the form of the AVContentLightMetadata struct.
+     */
+    AV_FRAME_DATA_CONTENT_LIGHT_LEVEL,
+
+    /**
+     * The data contains an ICC profile as an opaque octet buffer following the
+     * format described by ISO 15076-1 with an optional name defined in the
+     * metadata key entry "name".
+     */
+    AV_FRAME_DATA_ICC_PROFILE,
 };
 
 enum AVActiveFormatDescription {
@@ -155,7 +169,7 @@ typedef struct AVFrameSideData {
 } AVFrameSideData;
 
 /**
- * This structure describes decoded (raw) audioDecoder or video data.
+ * This structure describes decoded (raw) audio or video data.
  *
  * AVFrame must be allocated using av_frame_alloc(). Note that this only
  * allocates the AVFrame itself, the buffers for the data must be managed
@@ -202,9 +216,9 @@ typedef struct AVFrame {
 
     /**
      * For video, size in bytes of each picture line.
-     * For audioDecoder, size in bytes of each plane.
+     * For audio, size in bytes of each plane.
      *
-     * For audioDecoder, only linesize[0] may be set. For planar audioDecoder, each channel
+     * For audio, only linesize[0] may be set. For planar audio, each channel
      * plane must be the same size.
      *
      * For video the linesizes should be multiples of the CPUs alignment
@@ -222,31 +236,40 @@ typedef struct AVFrame {
      *
      * For video, this should simply point to data[].
      *
-     * For planar audioDecoder, each channel has a separate data pointer, and
+     * For planar audio, each channel has a separate data pointer, and
      * linesize[0] contains the size of each channel buffer.
-     * For packed audioDecoder, there is just one data pointer, and linesize[0]
+     * For packed audio, there is just one data pointer, and linesize[0]
      * contains the total size of the buffer for all channels.
      *
      * Note: Both data and extended_data should always be set in a valid frame,
-     * but for planar audioDecoder with more channels that can fit in data,
+     * but for planar audio with more channels that can fit in data,
      * extended_data must be used in order to access all channels.
      */
     uint8_t **extended_data;
 
     /**
-     * width and height of the video frame
+     * @name Video dimensions
+     * Video frames only. The coded dimensions (in pixels) of the video frame,
+     * i.e. the size of the rectangle that contains some well-defined values.
+     *
+     * @note The part of the frame intended for display/presentation is further
+     * restricted by the @ref cropping "Cropping rectangle".
+     * @{
      */
     int width, height;
+    /**
+     * @}
+     */
 
     /**
-     * number of audioDecoder samples (per channel) described by this frame
+     * number of audio samples (per channel) described by this frame
      */
     int nb_samples;
 
     /**
      * format of the frame, -1 if unknown or unset
      * Values correspond to enum AVPixelFormat for video frames,
-     * enum AVSampleFormat for audioDecoder)
+     * enum AVSampleFormat for audio)
      */
     int format;
 
@@ -266,7 +289,7 @@ typedef struct AVFrame {
     AVRational sample_aspect_ratio;
 
     /**
-     * Presentation timestamp in timeBase units (time when frame should be shown to user).
+     * Presentation timestamp in time_base units (time when frame should be shown to user).
      */
     int64_t pts;
 
@@ -346,12 +369,12 @@ typedef struct AVFrame {
     int64_t reordered_opaque;
 
     /**
-     * Sample rate of the audioDecoder data.
+     * Sample rate of the audio data.
      */
     int sample_rate;
 
     /**
-     * Channel layout of the audioDecoder data.
+     * Channel layout of the audio data.
      */
     uint64_t channel_layout;
 
@@ -362,7 +385,7 @@ typedef struct AVFrame {
      * also be non-NULL for all j < i.
      *
      * There may be at most one AVBuffer per data plane, so for video this array
-     * always contains all the references. For planar audioDecoder with more than
+     * always contains all the references. For planar audio with more than
      * AV_NUM_DATA_POINTERS channels, there may be more buffers than can fit in
      * this array. Then the extra AVBufferRef pointers are stored in the
      * extended_buf array.
@@ -370,7 +393,7 @@ typedef struct AVFrame {
     AVBufferRef *buf[AV_NUM_DATA_POINTERS];
 
     /**
-     * For planar audioDecoder which requires more than AV_NUM_DATA_POINTERS
+     * For planar audio which requires more than AV_NUM_DATA_POINTERS
      * AVBufferRef pointers, this array will hold all the references which
      * cannot fit into AVFrame.buf.
      *
@@ -451,7 +474,7 @@ typedef struct AVFrame {
 
     /**
      * duration of the corresponding packet, expressed in
-     * AVStream->timeBase units, 0 if unknown.
+     * AVStream->time_base units, 0 if unknown.
      * - encoding: unused
      * - decoding: Read by user.
      */
@@ -465,7 +488,7 @@ typedef struct AVFrame {
     AVDictionary *metadata;
 
     /**
-     * decodeFrame error flags of the frame, set to a combination of
+     * decode error flags of the frame, set to a combination of
      * FF_DECODE_ERROR_xxx flags if the decoder produced a frame, but there
      * were errors during the decoding.
      * - encoding: unused
@@ -476,7 +499,7 @@ typedef struct AVFrame {
 #define FF_DECODE_ERROR_MISSING_REFERENCE   2
 
     /**
-     * number of audioDecoder channels, only used for audioDecoder.
+     * number of audio channels, only used for audio.
      * - encoding: unused
      * - decoding: Read by user.
      */
@@ -524,6 +547,22 @@ typedef struct AVFrame {
      * purpose.
      */
     AVBufferRef *opaque_ref;
+
+    /**
+     * @anchor cropping
+     * @name Cropping
+     * Video frames only. The number of pixels to discard from the the
+     * top/bottom/left/right border of the frame to obtain the sub-rectangle of
+     * the frame intended for presentation.
+     * @{
+     */
+    size_t crop_top;
+    size_t crop_bottom;
+    size_t crop_left;
+    size_t crop_right;
+    /**
+     * @}
+     */
 } AVFrame;
 
 /**
@@ -626,12 +665,12 @@ void av_frame_unref(AVFrame *frame);
 void av_frame_move_ref(AVFrame *dst, AVFrame *src);
 
 /**
- * Allocate new buffer(s) for audioDecoder or video data.
+ * Allocate new buffer(s) for audio or video data.
  *
  * The following fields must be set on frame before calling this function:
- * - format (pixel format for video, sample format for audioDecoder)
+ * - format (pixel format for video, sample format for audio)
  * - width and height for video
- * - nb_samples and channel_layout for audioDecoder
+ * - nb_samples and channel_layout for audio
  *
  * This function will fill AVFrame.data and AVFrame.buf arrays and, if
  * necessary, allocate and fill AVFrame.extended_data and AVFrame.extended_buf.
@@ -642,7 +681,9 @@ void av_frame_move_ref(AVFrame *dst, AVFrame *src);
  *           cases.
  *
  * @param frame frame in which to store the new buffers.
- * @param align required buffer size alignment
+ * @param align Required buffer size alignment. If equal to 0, alignment will be
+ *              chosen automatically for the current CPU. It is highly
+ *              recommended to pass 0 here unless you know what you are doing.
  *
  * @return 0 on success, a negative AVERROR on error.
  */
@@ -692,7 +733,7 @@ int av_frame_copy(AVFrame *dst, const AVFrame *src);
  * Copy only "metadata" fields from src to dst.
  *
  * Metadata for the purpose of this function are those fields that do not affect
- * the data layout in the buffers.  E.g. pts, sample rate (for audioDecoder) or sample
+ * the data layout in the buffers.  E.g. pts, sample rate (for audio) or sample
  * aspect ratio (for video), but not width/height or channel layout.
  * Side data is also copied.
  */
@@ -733,6 +774,40 @@ AVFrameSideData *av_frame_get_side_data(const AVFrame *frame,
  * from the frame.
  */
 void av_frame_remove_side_data(AVFrame *frame, enum AVFrameSideDataType type);
+
+
+/**
+ * Flags for frame cropping.
+ */
+enum {
+    /**
+     * Apply the maximum possible cropping, even if it requires setting the
+     * AVFrame.data[] entries to unaligned pointers. Passing unaligned data
+     * to FFmpeg API is generally not allowed, and causes undefined behavior
+     * (such as crashes). You can pass unaligned data only to FFmpeg APIs that
+     * are explicitly documented to accept it. Use this flag only if you
+     * absolutely know what you are doing.
+     */
+    AV_FRAME_CROP_UNALIGNED     = 1 << 0,
+};
+
+/**
+ * Crop the given video AVFrame according to its crop_left/crop_top/crop_right/
+ * crop_bottom fields. If cropping is successful, the function will adjust the
+ * data pointers and the width/height fields, and set the crop fields to 0.
+ *
+ * In all cases, the cropping boundaries will be rounded to the inherent
+ * alignment of the pixel format. In some cases, such as for opaque hwaccel
+ * formats, the left/top cropping is ignored. The crop fields are set to 0 even
+ * if the cropping was rounded or ignored.
+ *
+ * @param frame the frame which should be cropped
+ * @param flags Some combination of AV_FRAME_CROP_* flags, or 0.
+ *
+ * @return >= 0 on success, a negative AVERROR on error. If the cropping fields
+ * were invalid, AVERROR(ERANGE) is returned, and nothing is changed.
+ */
+int av_frame_apply_cropping(AVFrame *frame, int flags);
 
 /**
  * @return a string identifying the side data type

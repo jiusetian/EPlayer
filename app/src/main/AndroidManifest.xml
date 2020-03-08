@@ -22,14 +22,14 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".MediaPlayerActivity"
-                  android:configChanges="orientation|screenSize"
-        >
+        <activity android:name=".TwoScreenActivity">
         </activity>
-
+        <activity
+                android:name=".MediaPlayerActivity"
+                android:configChanges="orientation|screenSize">
+        </activity>
         <activity android:name=".LiveActivity">
         </activity>
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

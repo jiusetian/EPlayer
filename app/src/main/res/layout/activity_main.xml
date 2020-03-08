@@ -26,4 +26,13 @@
             app:layout_constraintLeft_toLeftOf="@+id/btn_live"
     />
 
+    <Button
+            android:id="@+id/btn_both"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="分屏测试"
+            app:layout_constraintTop_toBottomOf="@+id/btn_play"
+            app:layout_constraintLeft_toLeftOf="@+id/btn_play"
+    />
+
 </android.support.constraint.ConstraintLayout>
