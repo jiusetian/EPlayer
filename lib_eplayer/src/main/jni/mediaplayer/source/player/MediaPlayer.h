@@ -88,7 +88,7 @@ private:
 
     int startDecodeAndSync();
 
-    int readAvDatas();
+    int readAvFrame();
 
     int readPackets();
 

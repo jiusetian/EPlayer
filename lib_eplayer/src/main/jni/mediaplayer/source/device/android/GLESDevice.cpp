@@ -159,8 +159,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
  * @param vPitch
  * @return
  */
-int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPitch, uint8_t *vData,
-                            int vPitch) {
+int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPitch, uint8_t *vData,int vPitch) {
     if (!mHaveEGlContext) {
         return -1;
     }

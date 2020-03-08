@@ -30,35 +30,35 @@ import java.util.Map;
 public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
-     Constant to retrieve only the new metadata since the last
-     call.
-     // FIXME: unhide.
-     // FIXME: add link to getMetadata(boolean, boolean)
-     {@hide}
+     * Constant to retrieve only the new metadata since the last
+     * call.
+     * // FIXME: unhide.
+     * // FIXME: add link to getMetadata(boolean, boolean)
+     * {@hide}
      */
     public static final boolean METADATA_UPDATE_ONLY = true;
 
     /**
-     Constant to retrieve all the metadata.
-     // FIXME: unhide.
-     // FIXME: add link to getMetadata(boolean, boolean)
-     {@hide}
+     * Constant to retrieve all the metadata.
+     * // FIXME: unhide.
+     * // FIXME: add link to getMetadata(boolean, boolean)
+     * {@hide}
      */
     public static final boolean METADATA_ALL = false;
 
     /**
-     Constant to enable the metadata filter during retrieval.
-     // FIXME: unhide.
-     // FIXME: add link to getMetadata(boolean, boolean)
-     {@hide}
+     * Constant to enable the metadata filter during retrieval.
+     * // FIXME: unhide.
+     * // FIXME: add link to getMetadata(boolean, boolean)
+     * {@hide}
      */
     public static final boolean APPLY_METADATA_FILTER = true;
 
     /**
-     Constant to disable the metadata filter during retrieval.
-     // FIXME: unhide.
-     // FIXME: add link to getMetadata(boolean, boolean)
-     {@hide}
+     * Constant to disable the metadata filter during retrieval.
+     * // FIXME: unhide.
+     * // FIXME: add link to getMetadata(boolean, boolean)
+     * {@hide}
      */
     public static final boolean BYPASS_METADATA_FILTER = false;
 
@@ -123,7 +123,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video
      * portion of the media.
-     *
+     * <p>
      * Either a surface holder or surface must be set if a display or video sink
      * is needed.  Not calling this method or {@link #setSurface(Surface)}
      * when playing back a video will result in only the audio track being played.
@@ -150,7 +150,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * does not support {@link #setScreenOnWhilePlaying(boolean)}.  Setting a
      * Surface will un-set any Surface or SurfaceHolder that was previously set.
      * A null surface will result in only the audio track being played.
-     *
+     * <p>
      * If the Surface sends frames to a {@link SurfaceTexture}, the timestamps
      * returned from {@link SurfaceTexture#getTimestamp()} will have an
      * unspecified zero point.  These timestamps cannot be directly compared
@@ -160,7 +160,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * but it is reset when the position is set.
      *
      * @param surface The {@link Surface} to be used for the video portion of
-     * the media.
+     *                the media.
      */
     @Override
     public void setSurface(Surface surface) {
@@ -180,11 +180,11 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * result in an exception.</p>
      *
      * @param context the Context to use
-     * @param uri the Uri from which to get the datasource
+     * @param uri     the Uri from which to get the datasource
      * @return a MediaPlayer object, or null if creation failed
      */
     public static EasyMediaPlayer create(Context context, Uri uri) {
-        return create (context, uri, null);
+        return create(context, uri, null);
     }
 
     /**
@@ -195,8 +195,8 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * result in an exception.</p>
      *
      * @param context the Context to use
-     * @param uri the Uri from which to get the datasource
-     * @param holder the SurfaceHolder to use for displaying the video
+     * @param uri     the Uri from which to get the datasource
+     * @param holder  the SurfaceHolder to use for displaying the video
      * @return a MediaPlayer object, or null if creation failed
      */
     public static EasyMediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
@@ -233,8 +233,8 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * result in an exception.</p>
      *
      * @param context the Context to use
-     * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for
-     *              the resource to use as the datasource
+     * @param resid   the raw resource id (<var>R.raw.&lt;something></var>) for
+     *                the resource to use as the datasource
      * @return a MediaPlayer object, or null if creation failed
      */
     public static EasyMediaPlayer create(Context context, int resid) {
@@ -264,7 +264,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Sets the data source as a content Uri.
      *
      * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
+     * @param uri     the Content URI of the data you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
@@ -277,7 +277,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Sets the data source as a content Uri.
      *
      * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
+     * @param uri     the Content URI of the data you want to play
      * @param headers the headers to be sent together with the request for the data
      * @throws IllegalStateException if it is called in an invalid state
      */
@@ -286,7 +286,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
 
         String scheme = uri.getScheme();
-        if(scheme == null || scheme.equals("file")) {
+        if (scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
             return;
         }
@@ -336,7 +336,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
      *
-     * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @param path    the path of the file, or the http/rtsp URL of the stream you want to play
      * @param headers the headers associated with the http request for the stream you want to play
      * @throws IllegalStateException if it is called in an invalid state
      * @hide pending API council
@@ -352,7 +352,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
             values = new String[headers.size()];
 
             int i = 0;
-            for (Map.Entry<String, String> entry: headers.entrySet()) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
                 keys[i] = entry.getKey();
                 values[i] = entry.getValue();
                 ++i;
@@ -384,7 +384,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
      *
-     * @param fd the FileDescriptor for the file you want to play
+     * @param fd     the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
      * @throws IllegalStateException if it is called in an invalid state
@@ -399,7 +399,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Prepares the player for playback, synchronously.
-     *
+     * <p>
      * After setting the datasource and the display surface, you need to either
      * call prepare() or prepareAsync(). For files, it is OK to call prepare(),
      * which blocks until MediaPlayer is ready for playback.
@@ -415,7 +415,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Prepares the player for playback, asynchronously.
-     *
+     * <p>
      * After setting the datasource and the display surface, you need to either
      * call prepare() or prepareAsync(). For streams, you should call prepareAsync(),
      * which returns immediately, rather than blocking until enough data has been
@@ -450,7 +450,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Stops playback after playback has been stopped or paused.
      *
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
+     *                               initialized.
      */
     @Override
     public void stop() throws IllegalStateException {
@@ -464,7 +464,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Pauses playback. Call pause() to pause.
      *
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
+     *                               initialized.
      */
     @Override
     public void pause() throws IllegalStateException {
@@ -478,7 +478,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Pauses playback. Call resume() to resume.
      *
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
+     *                               initialized.
      */
     @Override
     public void resume() throws IllegalStateException {
@@ -516,8 +516,8 @@ public class EasyMediaPlayer implements IMediaPlayer {
             mWakeLock = null;
         }
 
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(mode| PowerManager.ON_AFTER_RELEASE, EasyMediaPlayer.class.getName());
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(mode | PowerManager.ON_AFTER_RELEASE, EasyMediaPlayer.class.getName());
         mWakeLock.setReferenceCounted(false);
         if (washeld) {
             mWakeLock.acquire();
@@ -532,7 +532,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * access.
      *
      * @param screenOn Supply true to keep the screen on, false to allow it
-     * to turn off.
+     *                 to turn off.
      */
     @Override
     public void setScreenOnWhilePlaying(boolean screenOn) {
@@ -572,6 +572,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
     public int getRotate() {
         return _getRotate();
     }
+
     private native int _getRotate();
 
     /**
@@ -623,7 +624,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      *
      * @param msec the offset in milliseconds from the start to seek to
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized
+     *                               initialized
      */
     @Override
     public void seekTo(float msec) throws IllegalStateException {
@@ -759,7 +760,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * a particular type. Note that the passed volume values are raw scalars.
      * UI controls should be scaled logarithmically.
      *
-     * @param leftVolume left volume scalar
+     * @param leftVolume  left volume scalar
      * @param rightVolume right volume scalar
      */
     @Override
@@ -773,25 +774,26 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * Sets the audio session ID.
      *
      * @param sessionId the audio session ID.
-     * The audio session ID is a system wide unique identifier for the audio stream played by
-     * this MediaPlayer instance.
-     * The primary use of the audio session ID  is to associate audio effects to a particular
-     * instance of MediaPlayer: if an audio session ID is provided when creating an audio effect,
-     * this effect will be applied only to the audio content of media players within the same
-     * audio session and not to the output mix.
-     * When created, a MediaPlayer instance automatically generates its own audio session ID.
-     * However, it is possible to force this player to be part of an already existing audio session
-     * by calling this method.
-     * This method must be called before one of the overloaded <code> setDataSource </code> methods.
+     *                  The audio session ID is a system wide unique identifier for the audio stream played by
+     *                  this MediaPlayer instance.
+     *                  The primary use of the audio session ID  is to associate audio effects to a particular
+     *                  instance of MediaPlayer: if an audio session ID is provided when creating an audio effect,
+     *                  this effect will be applied only to the audio content of media players within the same
+     *                  audio session and not to the output mix.
+     *                  When created, a MediaPlayer instance automatically generates its own audio session ID.
+     *                  However, it is possible to force this player to be part of an already existing audio session
+     *                  by calling this method.
+     *                  This method must be called before one of the overloaded <code> setDataSource </code> methods.
      * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
-    public void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException {
+    public void setAudioSessionId(int sessionId) throws IllegalArgumentException, IllegalStateException {
         // do nothing
         mSessionId = sessionId;
     }
 
     private int mSessionId;
+
     /**
      * Returns the audio session ID.
      *
@@ -806,6 +808,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Sets mute state on this player.
+     *
      * @param mute
      */
     @Override
@@ -817,16 +820,19 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Sets speed on this player.
+     *
      * @param rate
      */
     @Override
     public void setRate(float rate) {
         _setRate(rate);
     }
+
     private native void _setRate(float rate);
 
     /**
      * Sets pitch on this player.
+     *
      * @param pitch
      */
     @Override
@@ -847,6 +853,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * 设置播放器参数
+     *
      * @param type
      * @param option
      */
@@ -856,6 +863,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * 设置播放器参数
+     *
      * @param category
      * @param type
      * @param option
@@ -865,10 +873,13 @@ public class EasyMediaPlayer implements IMediaPlayer {
     }
 
     private native void _setOption(int category, String type, long option) throws IllegalStateException;
+
     private native void _setOption(int category, String type, String option) throws IllegalStateException;
 
     private static native void native_init();
+
     private native void native_setup(Object mediaplayer_this);
+
     private native void native_finalize();
 
     @Override
@@ -1011,7 +1022,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      */
     private static void postEventFromNative(Object mediaplayer_ref,
                                             int what, int arg1, int arg2, Object obj) {
-        final EasyMediaPlayer mp = (EasyMediaPlayer)((WeakReference) mediaplayer_ref).get();
+        final EasyMediaPlayer mp = (EasyMediaPlayer) ((WeakReference) mediaplayer_ref).get();
         if (mp == null) {
             return;
         }
@@ -1093,7 +1104,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
      * for display.
      *
      * @param listener the callback that will be run
-     * {@hide}
+     *                 {@hide}
      */
     @Override
     public void setOnTimedTextListener(OnTimedTextListener listener) {
@@ -1138,10 +1149,12 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Register a callback to be invoked when on playing position.
+     *
      * @param listener
      */
     public void setOnCurrentPositionListener(OnCurrentPositionListener listener) {
         mOnCurrentPositionListener = listener;
     }
+
     private OnCurrentPositionListener mOnCurrentPositionListener;
 }

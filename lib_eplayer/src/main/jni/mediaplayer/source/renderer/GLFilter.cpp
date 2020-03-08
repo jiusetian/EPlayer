@@ -6,8 +6,8 @@
 
 
 GLFilter::GLFilter() : initialized(false), programHandle(-1), positionHandle(-1), texCoordinateHandle(-1),
-                       nb_textures(1), vertexCount(4), timeStamp(0), intensity(1.0),
-                       textureWidth(0), textureHeight(0), displayWidth(0), displayHeight(0) {
+                       nb_textures(1), vertexCount(4), timeStamp(0), intensity(1.0), textureWidth(0), textureHeight(0),
+                       displayWidth(0), displayHeight(0) {
 
     for (int i = 0; i < MAX_TEXTURES; ++i) {
         //初始化纹理句柄
@@ -119,8 +119,8 @@ void GLFilter::drawTexture(GLuint texture, const float *vertices, const float *t
     glUseProgram(0);
 }
 
-void GLFilter::drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices,
-                           const float *textureVertices) {
+void
+GLFilter::drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices, const float *textureVertices) {
     if (frameBuffer) {
         frameBuffer->bindBuffer();
     }

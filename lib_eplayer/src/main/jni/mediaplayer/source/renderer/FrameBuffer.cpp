@@ -11,8 +11,7 @@ TextureAttributes FrameBuffer::defaultTextureAttributes = {
         .type = GL_UNSIGNED_BYTE
 };
 
-FrameBuffer::FrameBuffer(int width, int height, const TextureAttributes textureAttributes)
-        : texture(-1), framebuffer(-1) {
+FrameBuffer::FrameBuffer(int width, int height, const TextureAttributes textureAttributes): texture(-1), framebuffer(-1) {
     this->width = width;
     this->height = height;
     this->textureAttributes = textureAttributes;

@@ -142,7 +142,6 @@ int VideoDecoder::decodeVideo() {
             ret = -1;
             break;
         }
-
         // 送去解码
         playerState->mMutex.lock();
         ret = avcodec_send_packet(pCodecCtx, packet);
@@ -162,7 +161,6 @@ int VideoDecoder::decodeVideo() {
             continue;
         } else { //解码正常
             got_picture = 1;
-
             // 是否重排pts，默认情况下需要重排pts的
             if (playerState->reorderVideoPts == -1) {
                 frame->pts = av_frame_get_best_effort_timestamp(frame);
@@ -178,15 +176,14 @@ int VideoDecoder::decodeVideo() {
                     dpts = av_q2d(pStream->time_base) * frame->pts;
                 }
                 // 计算视频帧的长宽比
-                frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(pFormatCtx, pStream,
-                                                                          frame);
+                frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(pFormatCtx, pStream, frame);
                 // 是否需要做舍帧操作，主要看音视频同步是否差距过大
                 if (playerState->frameDrop > 0 ||
                     (playerState->frameDrop > 0 && playerState->syncType != AV_SYNC_VIDEO)) {
                     if (frame->pts != AV_NOPTS_VALUE) {
                         double diff = dpts - masterClock->getClock();
-                        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD &&
-                            diff < 0 && packetQueue->getPacketSize() > 0) {
+                        if (!isnan(diff) && fabs(diff) < AV_NOSYNC_THRESHOLD && diff < 0 &&
+                            packetQueue->getPacketSize() > 0) {
                             av_frame_unref(frame);
                             got_picture = 0;
                         }
@@ -209,10 +206,8 @@ int VideoDecoder::decodeVideo() {
             vp->height = frame->height;
             vp->format = frame->format;
             vp->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-            vp->duration = frame_rate.num && frame_rate.den
-                           ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0;
+            vp->duration = frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0;
             av_frame_move_ref(vp->frame, frame); //移动引用的意思
-
             // 入队帧，这是一个生产者消费者模式的队列
             frameQueue->pushFrame();
         }

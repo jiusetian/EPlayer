@@ -90,8 +90,7 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, void *obj) {
     // TODO obj needs changing into jobject
     //调用java层的static方法mObject, msg, ext1, ext2, obj 均为方法参数，对应java层handler的方法obtainMessage(what, arg1, arg2, obj)
     //msg一般对应消息ID
-    env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
-                              msg, ext1, ext2, obj);
+    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, msg, ext1, ext2, obj);
 
     if (env->ExceptionCheck()) {
         LOGW("An exception occurred while notifying an event.");
@@ -214,8 +213,7 @@ void EMediaPlayer_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring pat
     }
 
     status_t opStatus = mp->setDataSource(path, 0, headers);
-    process_media_player_call(env, thiz, opStatus, "java/io/IOException",
-                              "setDataSource failed.");
+    process_media_player_call(env, thiz, opStatus, "java/io/IOException", "setDataSource failed.");
 
     env->ReleaseStringUTFChars(path_, path);
 }
@@ -259,8 +257,7 @@ void EMediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescrip
     strcat(path, str);
 
     status_t opStatus = mp->setDataSource(path, offset, NULL);
-    process_media_player_call(env, thiz, opStatus, "java/io/IOException",
-                              "setDataSourceFD failed.");
+    process_media_player_call(env, thiz, opStatus, "java/io/IOException", "setDataSourceFD failed.");
 
 }
 
@@ -546,8 +543,7 @@ jint EMediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz) {
     return mp->getVideoHeight();
 }
 
-void EMediaPlayer_setOption(JNIEnv *env, jobject thiz,
-                            int category, jstring type_, jstring option_) {
+void EMediaPlayer_setOption(JNIEnv *env, jobject thiz, int category, jstring type_, jstring option_) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException");
@@ -565,8 +561,7 @@ void EMediaPlayer_setOption(JNIEnv *env, jobject thiz,
     env->ReleaseStringUTFChars(option_, option);
 }
 
-void EMediaPlayer_setOptionLong(JNIEnv *env, jobject thiz,
-                                int category, jstring type_, jlong option_) {
+void EMediaPlayer_setOptionLong(JNIEnv *env, jobject thiz, int category, jstring type_, jlong option_) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException");

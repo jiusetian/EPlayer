@@ -12,12 +12,12 @@ extern "C" {
 
 
 struct retriever_fields_t {
-    jfieldID  context;
+    jfieldID context;
 };
 
 static retriever_fields_t fields;
 static Mutex sLock;
-static const char * const RETRIEVER_CLASS_NAME = "com/eplayer/EMediaMetadataRetriever";
+static const char *const RETRIEVER_CLASS_NAME = "com/eplayer/EMediaMetadataRetriever";
 
 // -------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ static jstring newUTFString(JNIEnv *env, const char *data) {
         LOGE("convertString: OutOfMemoryError is thrown.");
     } else {
         //获取字节数组的指针
-        jbyte* bytes = env->GetByteArrayElements(array, NULL);
+        jbyte *bytes = env->GetByteArrayElements(array, NULL);
         if (bytes != NULL) {
             //将data的数据复制到数组中
             memcpy(bytes, data, size);
@@ -64,12 +64,12 @@ static jstring newUTFString(JNIEnv *env, const char *data) {
  * @param className
  * @param msg
  */
-void throwException(JNIEnv* env, const char* className, const char* msg) {
+void throwException(JNIEnv *env, const char *className, const char *msg) {
     jclass exception = env->FindClass(className);
     env->ThrowNew(exception, msg);
 }
 
-static int getFDFromFileDescriptor(JNIEnv * env, jobject fileDescriptor) {
+static int getFDFromFileDescriptor(JNIEnv *env, jobject fileDescriptor) {
     jint fd = -1;
     jclass fdClass = env->FindClass("java/io/FileDescriptor");
 
@@ -89,12 +89,12 @@ static MediaMetadataRetriever *getRetriever(JNIEnv *env, jobject thiz) {
 }
 
 static void setRetriever(JNIEnv *env, jobject thiz, long retriever) {
-    MediaMetadataRetriever *old = (MediaMetadataRetriever *)env->GetLongField(thiz, fields.context);
+    MediaMetadataRetriever *old = (MediaMetadataRetriever *) env->GetLongField(thiz, fields.context);
     env->SetLongField(thiz, fields.context, retriever);
 }
 
 // -------------------------------------------------------------------------------------------------
-static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const char * exception, const char *message) {
+static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const char *exception, const char *message) {
     if (opStatus == (status_t) INVALID_OPERATION) {
         throwException(env, "java/lang/IllegalStateException", NULL);
     } else if (opStatus != (status_t) OK) {
@@ -108,10 +108,8 @@ static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const c
     }
 }
 
-static void
-EMediaMetadataRetriever_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path_,
-        jobjectArray keys, jobjectArray values) {
+static void EMediaMetadataRetriever_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring path_, jobjectArray keys,
+                                                            jobjectArray values) {
 
     LOGV("setDataSource");
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
@@ -199,8 +197,7 @@ EMediaMetadataRetriever_setDataSource(JNIEnv *env, jobject thiz, jstring path_) 
 
 
 static void
-EMediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz,
-                                           jobject fileDescriptor, jlong offset, jlong length) {
+EMediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length) {
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
         throwException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -236,8 +233,7 @@ EMediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz,
 
 }
 
-static jbyteArray
-EMediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option) {
+static jbyteArray EMediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option) {
 
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
@@ -266,8 +262,8 @@ EMediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, 
 }
 
 static jbyteArray
-EMediaMetadataRetriever_getScaleFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option,
-                                               jint width, jint height) {
+EMediaMetadataRetriever_getScaleFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option, jint width,
+                                            jint height) {
 
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
@@ -295,8 +291,7 @@ EMediaMetadataRetriever_getScaleFrameAtTime(JNIEnv *env, jobject thiz, jlong tim
 
 }
 
-static jbyteArray
-EMediaMetadataRetriever_getEmbeddedPicture(JNIEnv *env, jobject thiz, jint pictureType) {
+static jbyteArray EMediaMetadataRetriever_getEmbeddedPicture(JNIEnv *env, jobject thiz, jint pictureType) {
 
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
@@ -325,8 +320,7 @@ EMediaMetadataRetriever_getEmbeddedPicture(JNIEnv *env, jobject thiz, jint pictu
     return array;
 }
 
-static jstring
-EMediaMetadataRetriever_extractMetadata(JNIEnv *env, jobject thiz, jstring key_) {
+static jstring EMediaMetadataRetriever_extractMetadata(JNIEnv *env, jobject thiz, jstring key_) {
 
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
@@ -355,8 +349,7 @@ EMediaMetadataRetriever_extractMetadata(JNIEnv *env, jobject thiz, jstring key_)
 }
 
 static jstring
-EMediaMetadataRetriever_extractMetadataFromChapter(JNIEnv *env, jobject thiz, jstring key_,
-                                                      jint chapter) {
+EMediaMetadataRetriever_extractMetadataFromChapter(JNIEnv *env, jobject thiz, jstring key_, jint chapter) {
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
         throwException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -382,8 +375,7 @@ EMediaMetadataRetriever_extractMetadataFromChapter(JNIEnv *env, jobject thiz, js
     return newUTFString(env, value);
 }
 
-static jobject
-EMediaMetadataRetriever_getAllMetadata(JNIEnv *env, jobject thiz) {
+static jobject EMediaMetadataRetriever_getAllMetadata(JNIEnv *env, jobject thiz) {
 
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     if (retriever == NULL) {
@@ -417,32 +409,28 @@ EMediaMetadataRetriever_getAllMetadata(JNIEnv *env, jobject thiz) {
     }
 }
 
-static void
-EMediaMetadataRetriever_setup(JNIEnv *env, jobject thiz) {
-    MediaMetadataRetriever* retriever = new MediaMetadataRetriever();
+static void EMediaMetadataRetriever_setup(JNIEnv *env, jobject thiz) {
+    MediaMetadataRetriever *retriever = new MediaMetadataRetriever();
     if (retriever == NULL) {
         throwException(env, "java/lang/RuntimeException", "Out of memory");
         return;
     }
-    setRetriever(env, thiz, (long)retriever);
+    setRetriever(env, thiz, (long) retriever);
 }
 
-static void
-EMediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
+static void EMediaMetadataRetriever_release(JNIEnv *env, jobject thiz) {
     Mutex::Autolock lock(sLock);
     MediaMetadataRetriever *retriever = getRetriever(env, thiz);
     delete retriever;
     setRetriever(env, thiz, 0);
 }
 
-static void
-EMediaMetadataRetriever_native_finalize(JNIEnv *env, jobject thiz) {
+static void EMediaMetadataRetriever_native_finalize(JNIEnv *env, jobject thiz) {
     LOGV("native_finalize");
     EMediaMetadataRetriever_release(env, thiz);
 }
 
-static void
-EMediaMetadataRetriever_native_init(JNIEnv *env) {
+static void EMediaMetadataRetriever_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass(RETRIEVER_CLASS_NAME);
     if (clazz == NULL) {
         return;
@@ -454,33 +442,33 @@ EMediaMetadataRetriever_native_init(JNIEnv *env) {
 }
 
 static JNINativeMethod nativeMethods[] = {
-        {"setDataSource", "(Ljava/lang/String;)V", (void *)EMediaMetadataRetriever_setDataSource},
+        {"setDataSource",              "(Ljava/lang/String;)V",                   (void *) EMediaMetadataRetriever_setDataSource},
         {
          "_setDataSource",
-                          "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
-                                                   (void *)EMediaMetadataRetriever_setDataSourceAndHeaders
+                                       "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+                                                                                  (void *) EMediaMetadataRetriever_setDataSourceAndHeaders
         },
-        {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)EMediaMetadataRetriever_setDataSourceFD},
+        {"setDataSource",              "(Ljava/io/FileDescriptor;JJ)V",           (void *) EMediaMetadataRetriever_setDataSourceFD},
 
-        {"_getFrameAtTime", "(JI)[B", (void *)EMediaMetadataRetriever_getFrameAtTime},
-        {"_getScaledFrameAtTime", "(JIII)[B", (void *)EMediaMetadataRetriever_getScaleFrameAtTime},
-        {"getEmbeddedPicture", "(I)[B", (void *)EMediaMetadataRetriever_getEmbeddedPicture},
+        {"_getFrameAtTime",            "(JI)[B",                                  (void *) EMediaMetadataRetriever_getFrameAtTime},
+        {"_getScaledFrameAtTime",      "(JIII)[B",                                (void *) EMediaMetadataRetriever_getScaleFrameAtTime},
+        {"getEmbeddedPicture",         "(I)[B",                                   (void *) EMediaMetadataRetriever_getEmbeddedPicture},
 
-        {"extractMetadata", "(Ljava/lang/String;)Ljava/lang/String;", (void *)EMediaMetadataRetriever_extractMetadata},
-        {"extractMetadataFromChapter", "(Ljava/lang/String;I)Ljava/lang/String;", (void *)EMediaMetadataRetriever_extractMetadataFromChapter},
+        {"extractMetadata",            "(Ljava/lang/String;)Ljava/lang/String;",  (void *) EMediaMetadataRetriever_extractMetadata},
+        {"extractMetadataFromChapter", "(Ljava/lang/String;I)Ljava/lang/String;", (void *) EMediaMetadataRetriever_extractMetadataFromChapter},
 
-        {"_getAllMetadata", "()Ljava/util/HashMap;", (void *)EMediaMetadataRetriever_getAllMetadata},
+        {"_getAllMetadata",            "()Ljava/util/HashMap;",                   (void *) EMediaMetadataRetriever_getAllMetadata},
 
-        {"release", "()V", (void *)EMediaMetadataRetriever_release},
-        {"native_setup", "()V", (void *)EMediaMetadataRetriever_setup},
-        {"native_init", "()V", (void *)EMediaMetadataRetriever_native_init},
-        {"native_finalize", "()V", (void *)EMediaMetadataRetriever_native_finalize},
+        {"release",                    "()V",                                     (void *) EMediaMetadataRetriever_release},
+        {"native_setup",               "()V",                                     (void *) EMediaMetadataRetriever_setup},
+        {"native_init",                "()V",                                     (void *) EMediaMetadataRetriever_native_init},
+        {"native_finalize",            "()V",                                     (void *) EMediaMetadataRetriever_native_finalize},
 
 };
 
 // 注册Native方法
 static int register_eplayer_EMediaMetadataRetriever(JNIEnv *env) {
-    int numMethods = (sizeof(nativeMethods) / sizeof( (nativeMethods)[0]));
+    int numMethods = (sizeof(nativeMethods) / sizeof((nativeMethods)[0]));
     jclass clazz = env->FindClass(RETRIEVER_CLASS_NAME);
     if (clazz == NULL) {
         LOGE("Native registration unable to find class '%s'", RETRIEVER_CLASS_NAME);
@@ -495,8 +483,7 @@ static int register_eplayer_EMediaMetadataRetriever(JNIEnv *env) {
     return JNI_OK;
 }
 
-extern "C"
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     av_jni_set_java_vm(vm, NULL);
     JNIEnv *env;
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {

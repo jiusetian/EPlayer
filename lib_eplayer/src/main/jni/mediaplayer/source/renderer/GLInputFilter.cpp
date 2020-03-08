@@ -18,8 +18,7 @@ GLboolean GLInputFilter::renderTexture(Texture *texture, float *vertices, float 
     return GL_TRUE;
 }
 
-void GLInputFilter::drawTexture(GLuint texture, const float *vertices, const float *textureVertices,
-                                bool viewPortUpdate) {
+void GLInputFilter::drawTexture(GLuint texture, const float *vertices, const float *textureVertices,bool viewPortUpdate) {
     GLFilter::drawTexture(texture, vertices, textureVertices, viewPortUpdate);
 }
 

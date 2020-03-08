@@ -107,7 +107,6 @@ RotationMode InputRenderNode::getRotateMode(Texture *texture) {
 void InputRenderNode::cropTexVertices(Texture *texture) {
     // 帧宽度和linesize宽度不一致，需要裁掉多余的地方，否则会出现绿屏的情况
     if (texture && texture->frameWidth != texture->width) {
-        LOGE("修剪纹理坐标");
         GLsizei padding = texture->width - texture->frameWidth;
         GLfloat normalized = ((GLfloat) padding + 0.5f) / (GLfloat) texture->width;
         const float *vertices = CoordinateUtils::getInputTextureCoordinates(getRotateMode(texture));

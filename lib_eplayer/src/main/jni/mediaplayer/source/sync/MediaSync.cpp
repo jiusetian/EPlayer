@@ -261,8 +261,8 @@ void MediaSync::refreshVideo(double *remaining_time) {
                 duration = calculateDuration(currentFrame, nextFrame);
                 // 如果不处于同步到视频状态，并且处于跳帧状态，则跳过当前帧
                 if ((time > frameTimer + duration) //如果下一帧和当前帧的播放时间都赶不上当前的时间点，那么可能要弃帧了
-                    && (playerState->frameDrop > 0
-                        || (playerState->frameDrop && playerState->syncType != AV_SYNC_VIDEO))) {
+                    && (playerState->frameDrop > 0 ||
+                        (playerState->frameDrop && playerState->syncType != AV_SYNC_VIDEO))) {
                     videoDecoder->getFrameQueue()->popFrame();
                     continue;
                 }
@@ -313,14 +313,12 @@ void MediaSync::refreshVideo(double *remaining_time) {
 }
 
 void MediaSync::checkExternalClockSpeed() {
-    if (videoDecoder && videoDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES
-        || audioDecoder && audioDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES) {
-        extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN,
-                                 extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
-    } else if ((!videoDecoder || videoDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)
-               && (!audioDecoder || audioDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)) {
-        extClock->setSpeed(FFMIN(EXTERNAL_CLOCK_SPEED_MAX,
-                                 extClock->getSpeed() + EXTERNAL_CLOCK_SPEED_STEP));
+    if (videoDecoder && videoDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES ||
+        audioDecoder && audioDecoder->getPacketSize() <= EXTERNAL_CLOCK_MIN_FRAMES) {
+        extClock->setSpeed(FFMAX(EXTERNAL_CLOCK_SPEED_MIN, extClock->getSpeed() - EXTERNAL_CLOCK_SPEED_STEP));
+    } else if ((!videoDecoder || videoDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES) &&
+               (!audioDecoder || audioDecoder->getPacketSize() > EXTERNAL_CLOCK_MAX_FRAMES)) {
+        extClock->setSpeed(FFMIN(EXTERNAL_CLOCK_SPEED_MAX, extClock->getSpeed() + EXTERNAL_CLOCK_SPEED_STEP));
     } else {
         double speed = extClock->getSpeed();
         if (speed != 1.0) {
@@ -385,8 +383,7 @@ void MediaSync::renderVideo() {
             case AV_PIX_FMT_YUV420P: {
                 //LOGE("yuv数据");
                 // 初始化纹理
-                videoDevice->onInitTexture(vp->frame->width, vp->frame->height,
-                                           FMT_YUV420P, BLEND_NONE);
+                videoDevice->onInitTexture(vp->frame->width, vp->frame->height, FMT_YUV420P, BLEND_NONE);
 
                 if (vp->frame->linesize[0] < 0 || vp->frame->linesize[1] < 0 || vp->frame->linesize[2] < 0) {
                     // LOGE("linesize为负数")
@@ -482,8 +479,8 @@ void MediaSync::renderVideo() {
                               pFrameARGB->data, pFrameARGB->linesize);
                 }
 
-                videoDevice->onInitTexture(vp->frame->width, vp->frame->height,
-                                           FMT_ARGB, BLEND_NONE, videoDecoder->getRotate());
+                videoDevice->onInitTexture(vp->frame->width, vp->frame->height, FMT_ARGB, BLEND_NONE,
+                                           videoDecoder->getRotate());
                 ret = videoDevice->onUpdateARGB(pFrameARGB->data[0], pFrameARGB->linesize[0]);
                 if (ret < 0) {
                     return;

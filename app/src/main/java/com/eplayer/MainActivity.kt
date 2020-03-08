@@ -24,7 +24,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     //视频播放路径
      private val PATH = Environment.getExternalStorageDirectory().getPath() + File.separator + "hello.mp4"
-   // private val PATH = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
+    //private val PATH = "rtmp://58.200.131.2:1935/livetv/hunantv"
+    //private val PATH = "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8"
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

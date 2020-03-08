@@ -1,8 +1,7 @@
 
 #include "AudioResampler.h"
 
-AudioResampler::AudioResampler(PlayerState *playerState, AudioDecoder *audioDecoder,
-                               MediaSync *mediaSync) {
+AudioResampler::AudioResampler(PlayerState *playerState, AudioDecoder *audioDecoder, MediaSync *mediaSync) {
     this->playerState = playerState;
     this->audioDecoder = audioDecoder;
     this->mediaSync = mediaSync;
@@ -129,9 +128,9 @@ void AudioResampler::pcmQueueCallback(uint8_t *stream, int len) {
 
     if (!isnan(audioState->audioClock) && mediaSync) {
         //audioState->audioClock代表当前帧播放完时的时刻，
-        mediaSync->updateAudioClock(audioState->audioClock - (double) (2 * audioState->audio_hw_buf_size +
-                                                                       audioState->writeBufferSize) /
-                                                             audioState->audioParamsTarget.bytes_per_sec,
+        mediaSync->updateAudioClock(audioState->audioClock -
+                                    (double) (2 * audioState->audio_hw_buf_size + audioState->writeBufferSize) /
+                                    audioState->audioParamsTarget.bytes_per_sec,
                                     audioState->audio_callback_time / 1000000.0);
     }
 }
@@ -188,8 +187,7 @@ int AudioResampler::audioFrameResample() {
             continue;
         }
         //获取frame的大小
-        data_size = av_samples_get_buffer_size(NULL, av_frame_get_channels(frame),
-                                               frame->nb_samples,
+        data_size = av_samples_get_buffer_size(NULL, av_frame_get_channels(frame), frame->nb_samples,
                                                (AVSampleFormat) frame->format, 1);
         //音频布局
         dec_channel_layout = (frame->channel_layout &&
@@ -235,11 +233,9 @@ int AudioResampler::audioFrameResample() {
         if (audioState->swr_ctx) {
             const uint8_t **in = (const uint8_t **) frame->extended_data;
             uint8_t **out = &audioState->resampleBuffer;
-            int out_count = (int64_t) wanted_nb_samples * audioState->audioParamsTarget.freq /
-                            frame->sample_rate + 256;
-            int out_size = av_samples_get_buffer_size(NULL, audioState->audioParamsTarget.channels,
-                                                      out_count, audioState->audioParamsTarget.fmt,
-                                                      0);
+            int out_count = (int64_t) wanted_nb_samples * audioState->audioParamsTarget.freq / frame->sample_rate + 256;
+            int out_size = av_samples_get_buffer_size(NULL, audioState->audioParamsTarget.channels, out_count,
+                                                      audioState->audioParamsTarget.fmt, 0);
             int len2;
             if (out_size < 0) {
                 av_log(NULL, AV_LOG_ERROR, "av_samples_get_buffer_size() failed\n");
@@ -299,11 +295,9 @@ int AudioResampler::audioFrameResample() {
                 }
                 int ret_len = soundTouchWrapper->translate(audioState->soundTouchBuffer,
                                                            (float) (playerState->playbackRate),
-                                                           (float) (playerState->playbackPitch !=
-                                                                    1.0f
-                                                                    ? playerState->playbackPitch :
-                                                                    1.0f /
-                                                                    playerState->playbackRate),
+                                                           (float) (playerState->playbackPitch != 1.0f
+                                                                    ? playerState->playbackPitch : 1.0f /
+                                                                                                   playerState->playbackRate),
                                                            resampled_data_size / 2,
                                                            bytes_per_sample,
                                                            audioState->audioParamsTarget.channels,
@@ -328,8 +322,8 @@ int AudioResampler::audioFrameResample() {
 
     // 利用pts更新音频时钟
     if (frame->pts != AV_NOPTS_VALUE) {
-        audioState->audioClock = frame->pts * av_q2d((AVRational) {1, frame->sample_rate})
-                                 + (double) frame->nb_samples / frame->sample_rate;
+        audioState->audioClock = frame->pts * av_q2d((AVRational) {1, frame->sample_rate}) +
+                                 (double) frame->nb_samples / frame->sample_rate;
     } else {
         audioState->audioClock = NAN;
     }

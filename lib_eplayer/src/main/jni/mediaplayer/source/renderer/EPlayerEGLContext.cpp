@@ -51,10 +51,7 @@ bool EPlayerEGLContext::init(int flags) {
     if ((flags & FLAG_TRY_GLES3) != 0) {
         EGLConfig config = getConfig(flags, 3);
         if (config != NULL) {
-            int attrib3_list[] = {
-                    EGL_CONTEXT_CLIENT_VERSION, 3,
-                    EGL_NONE
-            };
+            int attrib3_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
             //创建渲染上下文
             EGLContext context = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT, attrib3_list);
             checkEglError("eglCreateContext");
@@ -68,10 +65,7 @@ bool EPlayerEGLContext::init(int flags) {
     if (eglContext == EGL_NO_CONTEXT) {
         //获取配置属性
         EGLConfig config = getConfig(flags, 2);
-        int attrib2_list[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 2,
-                EGL_NONE
-        };
+        int attrib2_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
         //创建图形上下文
         EGLContext context = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT, attrib2_list);
         checkEglError("eglCreateContext");

@@ -286,9 +286,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
     SLuint32    locatorType;//缓冲区队列类型
     SLuint32    numBuffers;//buffer位数
     }*/
-    SLDataLocator_AndroidSimpleBufferQueue android_queue = {
-            SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
-            OPENSLES_BUFFERS
+    SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, OPENSLES_BUFFERS
     };
 
     // 根据通道数设置通道mask
@@ -334,8 +332,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
      const SLboolean * pInterfaceRequired
      );
      */
-    result = (*slEngine)->CreateAudioPlayer(slEngine, &slPlayerObject, &slDataSource,
-                                            &audioSink, 3, ids, req);
+    result = (*slEngine)->CreateAudioPlayer(slEngine, &slPlayerObject, &slDataSource, &audioSink, 3, ids, req);
     if (result != SL_RESULT_SUCCESS) {
         LOGE("%s: slEngine->CreateAudioPlayer() failed", __func__);
         return -1;
@@ -359,8 +356,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
         return -1;
     }
     // 注册回调缓冲区，通过缓冲区里面的数据进行播放
-    result = (*slPlayerObject)->GetInterface(slPlayerObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
-                                             &slBufferQueueItf);
+    result = (*slPlayerObject)->GetInterface(slPlayerObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &slBufferQueueItf);
     if (result != SL_RESULT_SUCCESS) {
         LOGE("%s: slPlayerObject->GetInterface(SL_IID_ANDROIDSIMPLEBUFFERQUEUE) failed", __func__);
         return -1;
@@ -403,9 +399,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
     memset(buffer, 0, buffer_capacity);
     //分配缓冲队列
     for (int i = 0; i < OPENSLES_BUFFERS; ++i) {
-        result = (*slBufferQueueItf)->Enqueue(slBufferQueueItf,
-                                              buffer + i * bytes_per_buffer,
-                                              bytes_per_buffer);
+        result = (*slBufferQueueItf)->Enqueue(slBufferQueueItf, buffer + i * bytes_per_buffer, bytes_per_buffer);
         if (result != SL_RESULT_SUCCESS) {
             LOGE("%s: slBufferQueueItf->Enqueue(000...) failed", __func__);
         }

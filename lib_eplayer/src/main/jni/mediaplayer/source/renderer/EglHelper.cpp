@@ -18,6 +18,7 @@ EglHelper::EglHelper() {
 EglHelper::~EglHelper() {
     release();
 }
+
 /**
  * 主要初始化eglplayer和EGLContext
  * @param flags
@@ -58,10 +59,7 @@ bool EglHelper::init(EGLContext sharedContext, int flags) {
     if ((flags & FLAG_TRY_GLES3) != 0) {
         EGLConfig config = getConfig(flags, 3);
         if (config != NULL) {
-            int attrib3_list[] = {
-                    EGL_CONTEXT_CLIENT_VERSION, 3,
-                    EGL_NONE
-            };
+            int attrib3_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
             // sharedContext：允许其它 EGLContext 共享数据，使用 EGL_NO_CONTEXT 表示不共享
             EGLContext context = eglCreateContext(mEglDisplay, config, sharedContext, attrib3_list);
             checkEglError("eglCreateContext");
@@ -76,10 +74,7 @@ bool EglHelper::init(EGLContext sharedContext, int flags) {
     // 判断如果GLES3的EGLContext没有获取到，则尝试使用GLES2
     if (mEglContext == EGL_NO_CONTEXT) {
         EGLConfig config = getConfig(flags, 2);
-        int attrib2_list[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 2,
-                EGL_NONE
-        };
+        int attrib2_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
         EGLContext context = eglCreateContext(mEglDisplay, config, sharedContext, attrib2_list);
         checkEglError("eglCreateContext");
         if (eglGetError() == EGL_SUCCESS) {
@@ -92,8 +87,7 @@ bool EglHelper::init(EGLContext sharedContext, int flags) {
 #if defined(__ANDROID__)
     // 获取eglPresentationTimeANDROID方法的地址，读取动态库中eglGetProcAddress函数指针
     // eglGetProcAddress返回的是egl函数eglPresentationTimeANDROID的指针，
-    eglPresentationTimeANDROID = (EGL_PRESENTATION_TIME_ANDROIDPROC) eglGetProcAddress(
-            "eglPresentationTimeANDROID");
+    eglPresentationTimeANDROID = (EGL_PRESENTATION_TIME_ANDROIDPROC) eglGetProcAddress("eglPresentationTimeANDROID");
     if (!eglPresentationTimeANDROID) {
         LOGE("eglPresentationTimeANDROID is not available!");
     }
@@ -202,8 +196,7 @@ void EglHelper::setPresentationTime(EGLSurface eglSurface, long nsecs) {
 #endif
 
 bool EglHelper::isCurrent(EGLSurface eglSurface) {
-    return (mEglContext == eglGetCurrentContext())
-           && (eglSurface == eglGetCurrentSurface(EGL_DRAW));
+    return (mEglContext == eglGetCurrentContext()) && (eglSurface == eglGetCurrentSurface(EGL_DRAW));
 }
 
 int EglHelper::querySurface(EGLSurface eglSurface, int what) {

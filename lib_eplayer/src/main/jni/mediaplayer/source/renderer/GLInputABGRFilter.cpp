@@ -3,9 +3,12 @@
 #include "GLInputABGRFilter.h"
 
 const std::string kABGRFragmentShader = SHADER_TO_STRING(
-        precision mediump float;
-        uniform sampler2D inputTexture;
-        varying vec2 textureCoordinate;
+        precision
+        mediump float;
+        uniform
+        sampler2D inputTexture;
+        varying
+        vec2 textureCoordinate;
 
         void main() {
             vec4 abgr = texture2D(inputTexture, textureCoordinate);

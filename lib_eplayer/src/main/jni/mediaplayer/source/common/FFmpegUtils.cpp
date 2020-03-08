@@ -28,14 +28,12 @@ AVDictionary *filterCodecOptions(AVDictionary *opts, enum AVCodecID codec_id,
 
     AVDictionary *ret = NULL;
     AVDictionaryEntry *t = NULL;
-    int flags = s->oformat ? AV_OPT_FLAG_ENCODING_PARAM
-                           : AV_OPT_FLAG_DECODING_PARAM;
+    int flags = s->oformat ? AV_OPT_FLAG_ENCODING_PARAM : AV_OPT_FLAG_DECODING_PARAM;
     char prefix = 0;
     const AVClass *cc = avcodec_get_class();
 
     if (!codec) {
-        codec = s->oformat ? avcodec_find_encoder(codec_id)
-                           : avcodec_find_decoder(codec_id);
+        codec = s->oformat ? avcodec_find_encoder(codec_id) : avcodec_find_decoder(codec_id);
     }
 
     switch (st->codecpar->codec_type) {
@@ -75,12 +73,13 @@ AVDictionary *filterCodecOptions(AVDictionary *opts, enum AVCodecID codec_id,
             }
         }
 
-        if (av_opt_find(&cc, t->key, NULL, flags, AV_OPT_SEARCH_FAKE_OBJ) || !codec
-            || (codec->priv_class
-                && av_opt_find(&codec->priv_class, t->key, NULL, flags, AV_OPT_SEARCH_FAKE_OBJ))) {
+        if (av_opt_find(&cc, t->key, NULL, flags, AV_OPT_SEARCH_FAKE_OBJ) || !codec || (codec->priv_class
+                                                                                        &&
+                                                                                        av_opt_find(&codec->priv_class,
+                                                                                                    t->key, NULL, flags,
+                                                                                                    AV_OPT_SEARCH_FAKE_OBJ))) {
             av_dict_set(&ret, t->key, t->value, 0);
-        } else if (t->key[0] == prefix
-                   && av_opt_find(&cc, t->key + 1, NULL, flags, AV_OPT_SEARCH_FAKE_OBJ)) {
+        } else if (t->key[0] == prefix && av_opt_find(&cc, t->key + 1, NULL, flags, AV_OPT_SEARCH_FAKE_OBJ)) {
             av_dict_set(&ret, t->key + 1, t->value, 0);
         }
 
@@ -137,8 +136,7 @@ AVDictionary **setupStreamInfoOptions(AVFormatContext *s, AVDictionary *codec_op
     }
     //遍历流
     for (i = 0; i < s->nb_streams; i++) {
-        opts[i] = filterCodecOptions(codec_opts, s->streams[i]->codecpar->codec_id,
-                                     s, s->streams[i], NULL);
+        opts[i] = filterCodecOptions(codec_opts, s->streams[i]->codecpar->codec_id, s, s->streams[i], NULL);
     }
     return opts;
 }
@@ -169,8 +167,7 @@ void printError(const char *filename, int err) {
  */
 double getRotation(AVStream *st) {
     AVDictionaryEntry *rotate_tag = av_dict_get(st->metadata, "rotate", NULL, 0);
-    uint8_t *displaymatrix = av_stream_get_side_data(st,
-                                                     AV_PKT_DATA_DISPLAYMATRIX, NULL);
+    uint8_t *displaymatrix = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
     double theta = 0;
 
     if (rotate_tag && *rotate_tag->value && strcmp(rotate_tag->value, "0")) {
@@ -210,8 +207,7 @@ double getRotation(AVStream *st) {
  * @return
  */
 int isRealTime(AVFormatContext *s) {
-    if (!strcmp(s->iformat->name, "rtp") || !strcmp(s->iformat->name, "rtsp")
-        || !strcmp(s->iformat->name, "sdp")) {
+    if (!strcmp(s->iformat->name, "rtp") || !strcmp(s->iformat->name, "rtsp") || !strcmp(s->iformat->name, "sdp")) {
         return 1;
     }
 

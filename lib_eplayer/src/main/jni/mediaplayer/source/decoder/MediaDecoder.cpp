@@ -88,10 +88,8 @@ int MediaDecoder::hasEnoughPackets() {
     Mutex::Autolock lock(mMutex);
     return (packetQueue == NULL) || (packetQueue->isAbort())
            || (pStream->disposition & AV_DISPOSITION_ATTACHED_PIC)
-           || (packetQueue->getPacketSize() > MIN_FRAMES) && (!packetQueue->getDuration()
-                                                              ||
-                                                              av_q2d(pStream->time_base) * packetQueue->getDuration() >
-                                                              1.0);
+           || (packetQueue->getPacketSize() > MIN_FRAMES) &&
+              (!packetQueue->getDuration() || av_q2d(pStream->time_base) * packetQueue->getDuration() > 1.0);
 }
 
 void MediaDecoder::run() {
