@@ -3,4 +3,4 @@
   
   lib_eplayer：视频播放器项目，涉及技术包括FFmpeg、OpenGLES、OpenGLSL等
   
-  lib_live：基于x264、fdkaac、librtmp开发的直播推流项目
+  lib_live：直播推流项目，涉及技术包括x264、fdkaac、librtmp等
