@@ -88,9 +88,9 @@ private:
 
     int startDecodeAndSync();
 
-    int readAvFrame();
+    int readAvPackets();
 
-    int readPackets();
+    int startPlayer();
 
     // prepare decoder with stream_index
     int prepareDecoder(int streamIndex);

@@ -199,9 +199,9 @@ void MediaSync::refreshVideo(double *remaining_time) {
         if (videoDecoder->getFrameSize() > 0) {
             double lastDuration, duration, delay;
             Frame *currentFrame, *lastFrame;
-            // 上一帧
+            // 上一帧，即已经开始播放的那一帧视频
             lastFrame = videoDecoder->getFrameQueue()->lastFrame();
-            // 当前帧
+            // 当前帧，即将要播放的视频帧
             currentFrame = videoDecoder->getFrameQueue()->currentFrame();
             // 判断是否需要强制更新帧的时间
             if (frameTimerRefresh) {
@@ -209,14 +209,14 @@ void MediaSync::refreshVideo(double *remaining_time) {
                 frameTimerRefresh = 0;
             }
 
-            // 如果处于暂停状态，则直接显示
+            // 如果处于暂停状态，则跳出，则会一直播放正在显示的那一帧
             if (playerState->abortRequest || playerState->pauseRequest) {
                 break;
             }
 
-            // 计算上一次显示时长
+            // 计算上一帧显示时长，即当前正在播放的帧的正常播放时长
             lastDuration = calculateDuration(lastFrame, currentFrame);
-            // 根据上一次显示的时长，计算延时
+            // 计算延时，即到播放下一帧需要延时多长时间
             delay = calculateDelay(lastDuration);
             // 处理超过延时阈值的情况
             if (fabs(delay) > AV_SYNC_THRESHOLD_MAX) {
@@ -231,22 +231,24 @@ void MediaSync::refreshVideo(double *remaining_time) {
             if (isnan(frameTimer) || time < frameTimer) {
                 frameTimer = time;
             }
-            // 如果当前时间小于帧计时器的时间 + 延时时间，则表示还没到当前帧
+            // 如果当前时间小于当前帧的播放时刻，表示还没到播放时间
             if (time < frameTimer + delay) {
-                //取小的那个作为延时时长，比如第一个delay应该是0.015秒，而*remaining_time默认每次延时过后都会重新赋值为0.01，所以第一次延时就是0.01秒，
+                //取小的那个作为延时时长，比如第一个delay应该是0.015秒，而*remaining_time默认每次延时过后都会重新赋值为0.01
+                // 所以第一次延时就是0.01秒
                 //而第二次，frameTimer + delay - time应该变为0.005秒，所以这次就延时0.005秒，这样就完成了延时任务，然后就可以播放视频帧了
                 *remaining_time = FFMIN(frameTimer + delay - time, *remaining_time);
                 break;
             }
-            // 更新帧计时器
+            //当前帧播放时刻到了，需要更新帧计时器，此时的帧计时器其实代表当前帧的播放时刻
             frameTimer += delay;
-            // 帧计时器落后当前时间超过了阈值，则用当前的时间作为帧计时器时间
+            // 帧计时器落后当前时间超过了阈值，则用当前的时间作为帧计时器时间，一般播放视频暂停以后，因为time一直在增加，而frameTimer
+            //切一直没有增加，所以time - frameTimer会大于最大阈值，此时应该将frameTimer更新为当前时间
             if (delay > 0 && time - frameTimer > AV_SYNC_THRESHOLD_MAX) {
                 //一般暂停后重新播放会执行这里
                 frameTimer = time;
             }
 
-            // 更新视频时钟的pts
+            // 更新视频时钟，代表当前视频的播放时刻
             mMutex.lock();
             if (!isnan(currentFrame->pts)) {
                 //设置视频时钟
@@ -260,15 +262,17 @@ void MediaSync::refreshVideo(double *remaining_time) {
                 Frame *nextFrame = videoDecoder->getFrameQueue()->nextFrame();
                 duration = calculateDuration(currentFrame, nextFrame);
                 // 如果不处于同步到视频状态，并且处于跳帧状态，则跳过当前帧
-                if ((time > frameTimer + duration) //如果下一帧和当前帧的播放时间都赶不上当前的时间点，那么可能要弃帧了
-                    && (playerState->frameDrop > 0 ||
-                        (playerState->frameDrop && playerState->syncType != AV_SYNC_VIDEO))) {
+                //当前帧vp未能及时播放，即下一帧播放时刻(is->frame_timer+duration)小于当前系统时刻(time)，那么可能要弃帧了
+                if ((time > frameTimer + duration) && (playerState->frameDrop > 0 || (playerState->frameDrop &&
+                                                                                      playerState->syncType !=
+                                                                                      AV_SYNC_VIDEO))) {
+                    //舍弃上一帧，不播放当前帧，继续循环
                     videoDecoder->getFrameQueue()->popFrame();
                     continue;
                 }
             }
 
-            // 下一帧
+            // 取出并舍弃一帧，即上一帧lastFrame，此时当前帧就变成了上一帧
             videoDecoder->getFrameQueue()->popFrame();
             //当还需要延时的时候，是执行不到这里的，所以延时阶段forceRefresh为0，所以就不会调用renderVideo方法，但是当延时到期以后，就会执行到这里，
             //代表需要进行视频渲染了，然后就会调用renderVideo方法，调用之后forceRefresh又为0
@@ -307,7 +311,7 @@ void MediaSync::refreshVideo(double *remaining_time) {
     // 显示画面
     if (!playerState->displayDisable && forceRefresh && videoDecoder
         && videoDecoder->getFrameQueue()->getShowIndex()) {
-        renderVideo(); //此时是渲染上一帧
+        renderVideo(); //渲染
     }
     forceRefresh = 0;
 }
@@ -336,16 +340,17 @@ double MediaSync::calculateDelay(double delay) {
     double sync_threshold, diff = 0;
     // 如果不是同步到视频流，则需要计算延时时间
     if (playerState->syncType != AV_SYNC_VIDEO) {
-        // 计算差值，videoClock->getClock()是下一帧播放播放的时间戳，这里计算下一帧视频的播放时间和当前音频播放时间的差值
+        // 计算差值，videoClock->getClock()是当前播放帧的时间戳，这里计算当前播放视频帧的时间戳和音频时间戳的差值
+        //diff代表
         diff = videoClock->getClock() - getMasterClock(); //这里是同步到音频时钟，所以主时钟就是音频时钟
-        // 用差值与同步阈值计算延时
+        // 计算阈值
         sync_threshold = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, delay));
         if (!isnan(diff) && fabs(diff) < maxFrameDuration) {
-            if (diff <= -sync_threshold) { //代表音频快了
+            if (diff <= -sync_threshold) { //视频慢了，需要加快视频播放
                 delay = FFMAX(0, delay + diff);
-            } else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD) { //代表音频慢了
+            } else if (diff >= sync_threshold && delay > AV_SYNC_FRAMEDUP_THRESHOLD) { //视频快了而且上一帧视频的播放时长超过了阈值
                 delay = delay + diff;
-            } else if (diff >= sync_threshold) { //代表音频慢了
+            } else if (diff >= sync_threshold) { //视频快了
                 delay = 2 * delay;
             }
         }
@@ -371,6 +376,7 @@ void MediaSync::renderVideo() {
         mMutex.unlock();
         return;
     }
+    //取出帧进行播放
     Frame *vp = videoDecoder->getFrameQueue()->lastFrame();
     int ret = 0;
     if (!vp->uploaded) {

@@ -356,7 +356,49 @@ PlayerState *MediaPlayer::getPlayerState() {
 }
 
 void MediaPlayer::run() {
-    readPackets();
+    startPlayer();
+}
+
+/**
+ * 关键函数，开始播放
+ * @return
+ */
+int MediaPlayer::startPlayer() {
+    int ret = 0;
+    //解封装和准备解码器
+    ret = demuxAndPrepareDecoder();
+    // 出错返回
+    if (ret < 0) {
+        mExit = true;
+        mCondition.signal();
+        //通知准备播放器失败
+        if (playerState->messageQueue) {
+            const char errorMsg[] = "prepare decoder failed!";
+            playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
+        }
+        return -1; //解封装出错
+    }
+
+    //开始解码器和同步播放
+    startDecodeAndSync();
+
+    //读取packet数据
+    ret = readAvPackets();
+    //LOGE("返回值%d", ret);
+    if (ret < 0 && ret != AVERROR_EOF) { // 播放出错
+        //LOGE("出错");
+        if (playerState->messageQueue) {
+            const char errorMsg[] = "error when reading packets!";
+            playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
+        }
+    }
+
+    // 停止消息队列
+    if (playerState->messageQueue && ret != AVERROR_EOF) {
+        playerState->messageQueue->stop();
+    }
+
+    return ret;
 }
 
 /**
@@ -686,7 +728,7 @@ int MediaPlayer::startDecodeAndSync() {
  * 读取av数据
  * @return
  */
-int MediaPlayer::readAvFrame() {
+int MediaPlayer::readAvPackets() {
 
     // 读数据包流程
     eof = 0;
@@ -882,47 +924,6 @@ int MediaPlayer::readAvFrame() {
     return ret;
 }
 
-/**
- * 关键函数
- * @return
- */
-int MediaPlayer::readPackets() {
-    int ret = 0;
-    //解封装和准备解码器
-    ret = demuxAndPrepareDecoder();
-    // 出错返回
-    if (ret < 0) {
-        mExit = true;
-        mCondition.signal();
-        //通知准备播放器失败
-        if (playerState->messageQueue) {
-            const char errorMsg[] = "prepare decoder failed!";
-            playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
-        }
-        return -1; //解封装出错
-    }
-
-    //开始解码器和同步播放
-    startDecodeAndSync();
-
-    //读取av数据
-    ret = readAvFrame();
-    //LOGE("返回值%d", ret);
-    if (ret < 0 && ret != AVERROR_EOF) { // 播放出错
-        //LOGE("出错");
-        if (playerState->messageQueue) {
-            const char errorMsg[] = "error when reading packets!";
-            playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
-        }
-    }
-
-    // 停止消息队列
-    if (playerState->messageQueue && ret != AVERROR_EOF) {
-        playerState->messageQueue->stop();
-    }
-
-    return ret;
-}
 
 int MediaPlayer::prepareDecoder(int streamIndex) {
     AVCodecContext *avctx; //解码上下文
@@ -956,12 +957,12 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
         // 优先使用指定的解码器
         switch (avctx->codec_type) {
             case AVMEDIA_TYPE_AUDIO: {
-                //LOGE("音频时间基%d,%d",pFormatCtx->streams[streamIndex]->time_base.den,pFormatCtx->streams[streamIndex]->time_base.num);
+                LOGE("音频时间基%d,%d",pFormatCtx->streams[streamIndex]->time_base.den,pFormatCtx->streams[streamIndex]->time_base.num);
                 forcedCodecName = playerState->audioCodecName;
                 break;
             }
             case AVMEDIA_TYPE_VIDEO: {
-                //LOGE("时间基%d,%d",pFormatCtx->streams[streamIndex]->time_base.den,pFormatCtx->streams[streamIndex]->time_base.num);
+                LOGE("视频时间基%d,%d",pFormatCtx->streams[streamIndex]->time_base.den,pFormatCtx->streams[streamIndex]->time_base.num);
                 forcedCodecName = playerState->videoCodecName;
                 break;
             }
