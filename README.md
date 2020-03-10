@@ -1,4 +1,6 @@
 # EPlayer
-基于FFmpeg3.4.7 
-模仿ffplay开发的播放器
-基于x264、fdkaac、librtmp开发的直播推流
+  FFmpeg版本：3.4.7 
+  
+  lib_eplayer为视频播放器项目
+
+  lib_live为基于x264、fdkaac、librtmp开发的直播推流项目
