@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include "SLESDevice.h"
+#include "device/android/header/SLESDevice.h"
 
 #define OPENSLES_BUFFERS 4 // 最大缓冲区数量
 #define OPENSLES_BUFLEN  10 // 缓冲区长度(毫秒)

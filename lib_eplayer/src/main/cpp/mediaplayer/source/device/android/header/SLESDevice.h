@@ -1,7 +1,7 @@
 #ifndef EPLAYER_SLESDEVICE_H
 #define EPLAYER_SLESDEVICE_H
 
-#include <device/header/AudioDevice.h>
+#include "../../header/AudioDevice.h"
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 #include <pthread.h>

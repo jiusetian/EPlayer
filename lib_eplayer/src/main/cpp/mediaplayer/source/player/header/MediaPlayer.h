@@ -9,8 +9,8 @@
 #include "../../decoder/header/VideoDecoder.h"
 
 #if defined(__ANDROID__)
-#include "../../device/android/SLESDevice.h"
-#include "../../device/android/GLESDevice.h"
+#include "device/android/header/SLESDevice.h"
+#include "device/android/header/GLESDevice.h"
 #else
 #include <device/AudioDevice.h>
 #include <device/VideoDevice.h>
