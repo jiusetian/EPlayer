@@ -92,7 +92,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * Default constructor. Consider using one of the create() methods for
-     * synchronously instantiating a MediaPlayer from a Uri or resource.
+     * synchronously instantiating apostEventFromNative MediaPlayer from a Uri or resource.
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances may
      * result in an exception.</p>
@@ -914,6 +914,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
         @Override
         public void handleMessage(Message msg) {
             if (mMediaPlayer.mNativeContext == 0) {
+                //cpp层的easymediaplayer实例已经不存在了
                 Log.w(TAG, "mediaplayer went away with unhandled events");
                 return;
             }

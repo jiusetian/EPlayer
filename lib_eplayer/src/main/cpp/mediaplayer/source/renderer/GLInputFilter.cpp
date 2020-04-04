@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include "GLInputFilter.h"
+#include "renderer/header/GLInputFilter.h"
 
 GLInputFilter::GLInputFilter() {
 

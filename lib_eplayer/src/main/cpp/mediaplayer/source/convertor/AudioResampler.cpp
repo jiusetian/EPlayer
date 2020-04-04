@@ -74,7 +74,7 @@ int AudioResampler::setResampleParams(AudioDeviceSpec *spec, int64_t wanted_chan
 /**
  * PCM队列回调方法，用于取得PCM数据
  * @param stream
- * @param len
+ * @param len 需要读取数据的长度
  */
 void AudioResampler::pcmQueueCallback(uint8_t *stream, int len) {
     int bufferSize, length;
@@ -296,8 +296,7 @@ int AudioResampler::audioFrameResample() {
                 int ret_len = soundTouchWrapper->translate(audioState->soundTouchBuffer,
                                                            (float) (playerState->playbackRate),
                                                            (float) (playerState->playbackPitch != 1.0f
-                                                                    ? playerState->playbackPitch : 1.0f /
-                                                                                                   playerState->playbackRate),
+                                                                    ? playerState->playbackPitch : 1.0f /playerState->playbackRate),
                                                            resampled_data_size / 2,
                                                            bytes_per_sample,
                                                            audioState->audioParamsTarget.channels,

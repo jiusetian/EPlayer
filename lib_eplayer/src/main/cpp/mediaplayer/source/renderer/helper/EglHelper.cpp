@@ -1,7 +1,7 @@
 
 #include "EglHelper.h"
 #include "AndroidLog.h"
-#include "EPlayerEGLContext.h"
+#include "renderer/header/EPlayerEGLContext.h"
 
 EglHelper::EglHelper() {
     mEglDisplay = EGL_NO_DISPLAY;

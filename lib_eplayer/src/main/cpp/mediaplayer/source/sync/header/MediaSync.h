@@ -1,12 +1,12 @@
 
 #ifndef EPLAYER_MEDIASYNC_H
 #define EPLAYER_MEDIASYNC_H
-#include <sync/MediaClock.h>
-#include <player/PlayerState.h>
-#include <decoder/VideoDecoder.h>
-#include <decoder/AudioDecoder.h>
+#include "MediaClock.h"
+#include "../../player/header/PlayerState.h"
+#include "../../decoder/header/VideoDecoder.h"
+#include "../../decoder/header/AudioDecoder.h"
 
-#include <device/VideoDevice.h>
+#include "../../device/header/VideoDevice.h"
 
 /**
  * 视频同步器

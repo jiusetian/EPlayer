@@ -45,19 +45,19 @@ add_library(
         source/queue/FrameQueue.cpp
         source/queue/PacketQueue.cpp
         source/queue/AVMessageQueue.cpp
-        #
+        #render
         source/renderer/EPlayerEGLContext.cpp
-        source/renderer/CoordinateUtils.cpp
-        source/renderer/EglHelper.cpp
+        source/renderer/helper/CoordinateUtils.cpp
+        source/renderer/helper/EglHelper.cpp
         source/renderer/FrameBuffer.cpp
         source/renderer/GLFilter.cpp
         source/renderer/GLInputABGRFilter.cpp
         source/renderer/GLInputFilter.cpp
         source/renderer/GLInputYUV420PFilter.cpp
         source/renderer/InputRenderNode.cpp
-        source/renderer/OpenGLUtils.cpp
+        source/renderer/helper/OpenGLUtils.cpp
         source/renderer/RenderNode.cpp
-        source/renderer/vecmath.cpp
+        source/renderer/helper/vecmath.cpp
         #
         source/sync/MediaClock.cpp
         source/sync/MediaSync.cpp

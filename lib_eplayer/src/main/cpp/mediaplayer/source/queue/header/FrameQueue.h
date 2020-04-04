@@ -2,12 +2,12 @@
 #ifndef EPLAYER_FRAMEQUEUE_H
 #define EPLAYER_FRAMEQUEUE_H
 
-#include <Mutex.h>
-#include <Condition.h>
-#include <common/FFmpegUtils.h>
+#include "../../../../common/Mutex.h"
+#include "../../../../common/Condition.h"
+#include "../../common/FFmpegUtils.h"
 
 extern "C" {
-#include <libavcodec/avcodec.h>
+#include "../../../../include/libavcodec/avcodec.h"
 };
 
 #define FRAME_QUEUE_SIZE 10

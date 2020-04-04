@@ -2,7 +2,7 @@
 #ifndef EPLAYER_AUDIODEVICE_H
 #define EPLAYER_AUDIODEVICE_H
 
-#include <player/PlayerState.h>
+#include "player/header/PlayerState.h"
 
 // 音频PCM填充回调
 //首先这是一个函数指针，指向一个返回void，参数如下所示的函数，然后用typedef给这个函数指针起一个别名为AudioPCMCallback

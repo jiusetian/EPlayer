@@ -2,10 +2,10 @@
 #ifndef EPLAYER_AUDIORESAMPLER_H
 #define EPLAYER_AUDIORESAMPLER_H
 
-#include <player/PlayerState.h>
-#include <sync/MediaSync.h>
+#include <player/header/PlayerState.h>
+#include <sync/header/MediaSync.h>
 #include <SoundTouchWrapper.h>
-#include <device/AudioDevice.h>
+#include <device/header/AudioDevice.h>
 #include "AndroidLog.h"
 
 /**

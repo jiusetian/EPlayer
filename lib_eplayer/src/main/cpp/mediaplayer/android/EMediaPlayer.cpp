@@ -1,6 +1,6 @@
 
-#include "EMediaPlayer.h"
-#include <queue/AVMessageQueue.h>
+#include "header/EMediaPlayer.h"
+#include <queue/header/AVMessageQueue.h>
 
 EMediaPlayer::EMediaPlayer() {
     msgThread = nullptr;
@@ -13,6 +13,7 @@ EMediaPlayer::EMediaPlayer() {
     mAudioSessionId = 0;
     mSeeking = false;
     mSeekingPosition = 0;
+
 }
 
 EMediaPlayer::~EMediaPlayer() {
@@ -21,7 +22,6 @@ EMediaPlayer::~EMediaPlayer() {
 
 //对应于java层的mediaplayer创建对象的时候调用，即在构造函数中被调用
 void EMediaPlayer::init() {
-
     mMutex.lock();
     abortRequest = false;
     mCondition.signal();
@@ -32,6 +32,7 @@ void EMediaPlayer::init() {
     if (videoDevice == nullptr) {
         videoDevice = new GLESDevice();
     }
+
     //消息分发的线程
     if (msgThread == nullptr) {
         //this就是runnable
@@ -307,6 +308,8 @@ void EMediaPlayer::notify(int msg, int ext1, int ext2, void *obj, int len) {
 }
 
 void EMediaPlayer::postEvent(int what, int arg1, int arg2, void *obj) {
+    string str;
+
     if (mListener != nullptr) {
         mListener->notify(what, arg1, arg2, obj);
     }

@@ -1,11 +1,11 @@
 
 #ifndef EPLAYER_GLESDEVICE_H
 #define EPLAYER_GLESDEVICE_H
-#include <device/VideoDevice.h>
+#include <device/header/VideoDevice.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include <renderer/EglHelper.h>
-#include <renderer/InputRenderNode.h>
+#include <renderer/helper/EglHelper.h>
+#include <renderer/header/InputRenderNode.h>
 
 class GLESDevice : public VideoDevice {
 public:
@@ -34,6 +34,7 @@ private:
     void resetVertices();
 
     void resetTexVertices();
+
 private:
     Mutex mMutex;
     Condition mCondition;

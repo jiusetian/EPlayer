@@ -1,5 +1,5 @@
 
-#include "VideoDevice.h"
+#include "device/header/VideoDevice.h"
 
 VideoDevice::VideoDevice() {
 

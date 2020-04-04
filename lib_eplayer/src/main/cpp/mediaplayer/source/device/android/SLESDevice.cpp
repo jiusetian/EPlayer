@@ -182,12 +182,12 @@ void SLESDevice::run() {
             //buffer是缓存区的总大小，bytes_per_buffer是一个缓冲区的大小，这里一共有4个
             next_buffer = buffer + next_buffer_index * bytes_per_buffer;
             next_buffer_index = (next_buffer_index + 1) % OPENSLES_BUFFERS;
-            //当暂停的时候，是取不到数据的
+            //通过回调函数取数据，即将数据保存到sl的缓冲区
             audioDeviceSpec.callback(audioDeviceSpec.userdata, next_buffer, bytes_per_buffer);
         }
         mMutex.unlock();
 
-        // 更新音量
+        // 是否要更新音量
         if (updateVolume) {
             if (slVolumeItf != NULL) {
                 SLmillibel level = getAmplificationLevel((leftVolume + rightVolume) / 2);
@@ -238,7 +238,7 @@ void slBufferPCMCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
 
 /**
  * 打开音频设备，并返回缓冲区大小
- * @param desired
+ * @param desired 期望的参数设置
  * @param obtained
  * @return
  */
@@ -256,7 +256,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
         LOGE("%s: slObject->Realize() failed", __func__);
         return -1;
     }
-    // 获取引擎接口engineEngine
+    // 获取引擎接口SLEngineItf
     result = (*slObject)->GetInterface(slObject, SL_IID_ENGINE, &slEngine);
     if (result != SL_RESULT_SUCCESS) {
         LOGE("%s: slObject->GetInterface() failed", __func__);
@@ -286,8 +286,8 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
     SLuint32    locatorType;//缓冲区队列类型
     SLuint32    numBuffers;//buffer位数
     }*/
-    SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, OPENSLES_BUFFERS
-    };
+    SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
+                                                            OPENSLES_BUFFERS};
 
     // 根据通道数设置通道mask
     SLuint32 channelMask;
@@ -305,6 +305,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
             return -1;
         }
     }
+
     //pcm格式
     SLDataFormat_PCM format_pcm = {
             SL_DATAFORMAT_PCM,              // 播放器PCM格式
@@ -312,7 +313,7 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
             getSLSampleRate(desired->freq), // SL采样率
             SL_PCMSAMPLEFORMAT_FIXED_16,    // 位数 16位
             SL_PCMSAMPLEFORMAT_FIXED_16,    // 和位数一致
-            channelMask,                    // 格式
+            channelMask,                    // 声道
             SL_BYTEORDER_LITTLEENDIAN       // 小端存储
     };
     //新建一个数据源 将上述配置信息放到这个数据源中
@@ -332,7 +333,8 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
      const SLboolean * pInterfaceRequired
      );
      */
-    result = (*slEngine)->CreateAudioPlayer(slEngine, &slPlayerObject, &slDataSource, &audioSink, 3, ids, req);
+    result = (*slEngine)->CreateAudioPlayer(slEngine, &slPlayerObject, &slDataSource, &audioSink, 3,
+                                            ids, req);
     if (result != SL_RESULT_SUCCESS) {
         LOGE("%s: slEngine->CreateAudioPlayer() failed", __func__);
         return -1;
@@ -356,7 +358,8 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
         return -1;
     }
     // 注册回调缓冲区，通过缓冲区里面的数据进行播放
-    result = (*slPlayerObject)->GetInterface(slPlayerObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &slBufferQueueItf);
+    result = (*slPlayerObject)->GetInterface(slPlayerObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
+                                             &slBufferQueueItf);
     if (result != SL_RESULT_SUCCESS) {
         LOGE("%s: slPlayerObject->GetInterface(SL_IID_ANDROIDSIMPLEBUFFERQUEUE) failed", __func__);
         return -1;
@@ -369,11 +372,11 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
     }
 
     // 这里计算缓冲区大小等参数，其实frames_per_buffer应该是一个缓冲区有多少个采样点的意思
-    bytes_per_frame = format_pcm.numChannels * format_pcm.bitsPerSample / 8;  // 一帧占多少字节
-    milli_per_buffer = OPENSLES_BUFLEN;                                        // 每个缓冲区占多少毫秒
+    bytes_per_frame = format_pcm.numChannels * format_pcm.bitsPerSample / 8;    // 一帧占多少字节
+    milli_per_buffer = OPENSLES_BUFLEN;                                         // 每个缓冲区占多少毫秒
     frames_per_buffer = milli_per_buffer * format_pcm.samplesPerSec / 1000000;  // 一个缓冲区有多少帧数据
-    bytes_per_buffer = bytes_per_frame * frames_per_buffer;                    // 一个缓冲区大小
-    buffer_capacity = OPENSLES_BUFFERS * bytes_per_buffer;                     //总共的缓存容量
+    bytes_per_buffer = bytes_per_frame * frames_per_buffer;                     // 一个缓冲区大小
+    buffer_capacity = OPENSLES_BUFFERS * bytes_per_buffer;                      // 总共的缓存容量
 
     LOGI("OpenSL-ES: bytes_per_frame  = %d bytes\n", bytes_per_frame);
     LOGI("OpenSL-ES: milli_per_buffer = %d ms\n", milli_per_buffer);
@@ -399,7 +402,8 @@ int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) 
     memset(buffer, 0, buffer_capacity);
     //分配缓冲队列
     for (int i = 0; i < OPENSLES_BUFFERS; ++i) {
-        result = (*slBufferQueueItf)->Enqueue(slBufferQueueItf, buffer + i * bytes_per_buffer, bytes_per_buffer);
+        result = (*slBufferQueueItf)->Enqueue(slBufferQueueItf, buffer + i * bytes_per_buffer,
+                                              bytes_per_buffer);
         if (result != SL_RESULT_SUCCESS) {
             LOGE("%s: slBufferQueueItf->Enqueue(000...) failed", __func__);
         }

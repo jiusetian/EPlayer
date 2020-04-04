@@ -3,16 +3,16 @@
 #define EPLAYER_MEDIAMETADATARETRIEVER_H
 
 #include <cstdint>
-#include <Mutex.h>
+#include "../../common/Mutex.h"
 #include "Metadata.h"
 
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/dict.h>
-#include <libavutil/opt.h>
-#include <libavutil/imgutils.h>
+#include "../../include/libavcodec/avcodec.h"
+#include "../../include/libavformat/avformat.h"
+#include "../../include/libswscale/swscale.h"
+#include "../../include/libavutil/dict.h"
+#include "../../include/libavutil/opt.h"
+#include "../../include/libavutil/imgutils.h"
 };
 
 //保存相关元数据，方便使用

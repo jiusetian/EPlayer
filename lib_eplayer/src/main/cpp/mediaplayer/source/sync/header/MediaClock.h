@@ -6,7 +6,7 @@
 #include <math.h>
 
 extern "C" {
-#include <libavutil/time.h>
+#include "../../../../include/libavutil/time.h"
 };
 
 class MediaClock {

@@ -1,8 +1,8 @@
 
-#include "InputRenderNode.h"
+#include "renderer/header/InputRenderNode.h"
 #include <cstring>
-#include "GLInputYUV420PFilter.h"
-#include "GLInputABGRFilter.h"
+#include "renderer/header/GLInputYUV420PFilter.h"
+#include "renderer/header/GLInputABGRFilter.h"
 #include "AndroidLog.h"
 
 /**

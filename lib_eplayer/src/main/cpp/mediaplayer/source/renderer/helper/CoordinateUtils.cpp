@@ -7,11 +7,6 @@ static const float vertices_default[] = {
         1.0f, -1.0f,  // right, bottom
         -1.0f, 1.0f,  // left,  top
         1.0f, 1.0f,  // right, top
-
-//        -0.5f, -0.5f,  // left,  bottom
-//        0.5f, -0.5f,  // right, bottom
-//        -0.5f, 0.5f,  // left,  top
-//        0.5f, 0.5f,  // right, top
 };
 
 static const short indices_default[] = {

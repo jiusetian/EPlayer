@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include <renderer/CoordinateUtils.h>
+#include <renderer/helper/CoordinateUtils.h>
 #include "GLESDevice.h"
 
 GLESDevice::GLESDevice() {
@@ -214,7 +214,7 @@ int GLESDevice::onRequestRender(bool flip) {
     if (mRenderNode != NULL && eglSurface != EGL_NO_SURFACE) {
         eglHelper->makeCurrent(eglSurface);
         if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
-            // LOGE("请求渲染的宽高=%d，%d",mSurfaceWidth,mSurfaceHeight);
+            //LOGE("请求渲染的宽高=%d，%d",mSurfaceWidth,mSurfaceHeight);
             mRenderNode->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
             //LOGE("window的宽高=%d，%d",ANativeWindow_getWidth(mWindow),ANativeWindow_getHeight(mWindow));
         }

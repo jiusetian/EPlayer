@@ -146,11 +146,15 @@ int VideoEncoder::encodeFrame(char *inBytes, int frameSize, int pts, char *outBy
 }
 
 /**
- * 设置编码参数
+ * 设置编码参数，没有问题的配置
  */
 void VideoEncoder::setParams() {
-    //没有问题的配置
+
+    //Preset可选项: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo
+    //Tune可选项: film（胶片电影）, animation（动画片）, grain（颗粒感很重的）, stillimage（静态图像）, psnr（信噪比）
+    //ssim（结构相似性）, fastdecode（快速解码。主要用于一些低性能的播放设备）, zerolatency（低时延。主要用于直播等）
     x264_param_default_preset(&params, "veryfast", "zerolatency");
+
     params.i_csp = X264_CSP_I420; // 设置帧数据格式为420
     //设置帧宽度和高度
     params.i_width = getOutWidth();
@@ -177,32 +181,34 @@ void VideoEncoder::setParams() {
     //恒定码率，会尽量控制在固定码率
     params.rc.i_rc_method = X264_RC_ABR;//X264_RC_CRF;
 
-
     //是否把SPS和PPS放入每一个关键帧
     //SPS Sequence Parameter Set 序列参数集，PPS Picture Parameter Set 图像参数集
     //为了提高图像的纠错能力,该参数设置是让每个I帧都附带sps/pps。
     params.b_repeat_headers = 1; //1;
-    //设置Level级别,编码复杂度
+    //设置Level级别,编码复杂度,用于控制视频画质，取值为[0-51]，数值越低画质越好，默认值23，通常取值范围：[18-28]
     //params.i_level_idc = 51;
 
     //profile
     //默认：无
-    //说明：限制输出文件的profile。这个参数将覆盖其它所有值，此选项能保证输出profile兼容的视频流。如果使用了这个选项，将不能进行无损压缩（qp 0 or crf 0）。
+    //说明：限制输出文件的profile。这个参数将覆盖其它所有值，此选项能保证输出profile兼容的视频流。如果使用了这个选项，将不能进行无损压缩（qp 0 or crf 0）
     //可选：baseline，main，high
     //建议：不设置。除非解码环境只支持main或者baseline profile的解码。
-    x264_param_apply_profile(&params, "baseline");
+    //如果你的播放器仅能支持特定等级的话，就需要指定等级选项。大多数播放器支持高等级，就不需要指定等级选项了
+    x264_param_apply_profile(&params, "high");
 
 }
 
 void VideoEncoder::setParams2() {
 
     /*有问题的配置====》是params.b_intra_refresh = 1;设置有点问题，注释掉即可*/
+
     //解决编码延时的设置
     //preset
     //默认：medium
     //一些在压缩效率和运算时间中平衡的预设值。如果指定了一个预设值，它会在其它选项生效前生效。
     //可选：ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow and placebo.
     //建议：可接受的最慢的值
+
     //tune
     //默认：无
     //说明：在上一个选项基础上进一步优化输入。如果定义了一个tune值，它将在preset之后，其它选项之前生效。
@@ -270,10 +276,10 @@ void VideoEncoder::setParams2() {
 
     //profile
     //默认：无
-    //说明：限制输出文件的profile。这个参数将覆盖其它所有值，此选项能保证输出profile兼容的视频流。如果使用了这个选项，将不能进行无损压缩（qp 0 or crf 0）。
+    //说明：限制输出文件的profile。这个参数将覆盖其它所有值，此选项能保证输出profile兼容的视频流。如果使用了这个选项，将不能进行无损压缩（qp 0 or crf 0）
     //可选：baseline，main，high
-    //建议：不设置。除非解码环境只支持main或者baseline profile的解码。
-    x264_param_apply_profile(&params, "baseline");
+    //建议：不设置。除非解码环境只支持main或者baseline profile的解码
+    x264_param_apply_profile(&params, "main");
 }
 
 bool VideoEncoder::close() {

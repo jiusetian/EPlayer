@@ -1,5 +1,5 @@
 
-#include "MediaSync.h"
+#include "sync/header/MediaSync.h"
 
 MediaSync::MediaSync(PlayerState *playerState) {
     this->playerState = playerState;
@@ -396,7 +396,7 @@ void MediaSync::renderVideo() {
                     av_log(NULL, AV_LOG_ERROR, "Negative linesize is not supported for YUV.\n");
                     return;
                 }
-                //比如YUV420中，data[0]专门存Y，data[1]专门存U，data[2]专门存V
+                //上载纹理数据，比如YUV420中，data[0]专门存Y，data[1]专门存U，data[2]专门存V
                 ret = videoDevice->onUpdateYUV(vp->frame->data[0], vp->frame->linesize[0],
                                                vp->frame->data[1], vp->frame->linesize[1],
                                                vp->frame->data[2], vp->frame->linesize[2]);

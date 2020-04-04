@@ -6,7 +6,7 @@
 #include <Mutex.h>
 #include <Condition.h>
 #include <Thread.h>
-#include <player/MediaPlayer.h>
+#include <player/header/MediaPlayer.h>
 
 enum media_event_type {
     MEDIA_NOP = 0, // interface test message
@@ -72,14 +72,15 @@ enum media_info_type {
             MEDIA_INFO_TIMED_TEXT_ERROR = 900,
 };
 
-
+//这是一个抽象类，类似于Java的接口，notify方法留给实现类去定义
 class MediaPlayerListener {
 public:
-    //定义了一个虚函数，留给继承者实现
+    //定义一个虚函数，留给继承者实现
     virtual void notify(int msg, int ext1, int ext2, void *obj) {}
 };
 
 class EMediaPlayer : public Runnable {
+
 public:
     EMediaPlayer();
 

@@ -66,6 +66,7 @@ GLuint OpenGLUtils::createProgram(const char *vertexShader, const char *fragShad
 }
 
 GLuint OpenGLUtils::loadShader(GLenum type, const char *shaderSrc) {
+
     GLuint shader;
     GLint compiled;
     // 创建shader

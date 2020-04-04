@@ -1,6 +1,6 @@
 
-#include <player/PlayerState.h>
-#include "MediaClock.h"
+#include <player/header/PlayerState.h>
+#include "sync/header/MediaClock.h"
 
 MediaClock::MediaClock() {
     init();

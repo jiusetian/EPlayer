@@ -2,8 +2,8 @@
 
 #ifndef EPLAYER_AUDIODECODER_H
 #define EPLAYER_AUDIODECODER_H
-#include <decoder/MediaDecoder.h>
-#include <player/PlayerState.h>
+#include "MediaDecoder.h"
+#include "player/header/PlayerState.h"
 
 class AudioDecoder : public MediaDecoder {
 public:

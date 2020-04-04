@@ -2,23 +2,23 @@
 #ifndef EPLAYER_MEDIAPLAYER_H
 #define EPLAYER_MEDIAPLAYER_H
 
-#include <sync/MediaClock.h>
-#include <SoundTouchWrapper.h>
-#include <player/PlayerState.h>
-#include <decoder/AudioDecoder.h>
-#include <decoder/VideoDecoder.h>
+#include "sync/header/MediaClock.h"
+#include "../../../../soundtouch/SoundTouchWrapper.h"
+#include "PlayerState.h"
+#include "../../decoder/header/AudioDecoder.h"
+#include "../../decoder/header/VideoDecoder.h"
 
 #if defined(__ANDROID__)
-#include <device/android/SLESDevice.h>
-#include <device/android/GLESDevice.h>
+#include "../../device/android/SLESDevice.h"
+#include "../../device/android/GLESDevice.h"
 #else
 #include <device/AudioDevice.h>
 #include <device/VideoDevice.h>
 #endif
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include <sync/MediaSync.h>
-#include <convertor/AudioResampler.h>
+#include "sync/header/MediaSync.h"
+#include "../../convertor/AudioResampler.h"
 
 
 class MediaPlayer : public Runnable {
@@ -118,6 +118,7 @@ private:
     int attachmentRequest;                  // 视频封面数据包请求
 
     AudioDevice *audioDevice;               // 音频输出设备
+
     AudioResampler *audioResampler;         // 音频重采样器
 
     MediaSync *mediaSync;                   // 媒体同步器

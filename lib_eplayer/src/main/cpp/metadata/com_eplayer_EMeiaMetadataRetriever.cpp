@@ -4,7 +4,7 @@
 #include <AndroidLog.h>
 #include <string.h>
 
-#include "MediaMetadataRetriever.h"
+#include "header/MediaMetadataRetriever.h"
 
 extern "C" {
 #include <libavcodec/jni.h>

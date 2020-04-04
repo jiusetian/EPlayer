@@ -3,10 +3,10 @@
 #define EPLAYER_METADATA_H
 
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/opt.h>
+#include "../../include/libavcodec/avcodec.h"
+#include "../../include/libavformat/avformat.h"
+#include "../../include/libswscale/swscale.h"
+#include "../../include/libavutil/opt.h"
 };
 
 #include <stdio.h>

@@ -1,5 +1,5 @@
 
-#include "AudioDecoder.h"
+#include "decoder/header/AudioDecoder.h"
 
 AudioDecoder::AudioDecoder(AVCodecContext *avctx, AVStream *stream, int streamIndex, PlayerState *playerState)
         : MediaDecoder(avctx, stream, streamIndex, playerState) {

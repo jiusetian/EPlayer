@@ -3,8 +3,8 @@
 #include <Mutex.h>
 #include <Condition.h>
 #include <Errors.h>
-#include <JNIHelp.h>
-#include <EMediaPlayer.h>
+#include <header/JNIHelp.h>
+#include <header/EMediaPlayer.h>
 #include <cstring>
 #include <cstdio>
 #include <memory.h>
@@ -17,7 +17,7 @@ const char *CLASS_NAME = "com/eplayer/EasyMediaPlayer";
 
 // -------------------------------------------------------------------------------------------------
 struct fields_t {
-    jfieldID context; //c++层mediaplayer对象在java层的引用变量ID
+    jfieldID context; //c++层的easymediaplayer实例在java层的引用的id值
     jmethodID post_event; //java层信息回调函数的函数ID
 };
 //结构体引用，声明的时候已经分配好内存，不用手动分配和释放内存空间
@@ -28,8 +28,9 @@ static JavaVM *javaVM = NULL;
 static JNIEnv *getJNIEnv() {
 
     JNIEnv *env;
-    //assert的作用是先计算()里面的表达式 ，如果其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用abort来终止程序运行
+    //assert的作用是先计算()里面的表达式 ，若其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用abort来终止程序运行
     assert(javaVM != NULL);
+    //因为要通过GetEnv给指针env赋值，所以用&env，指针引用就是指针的指针
     if (javaVM->GetEnv((void **) &env, JNI_VERSION_1_4) != JNI_OK) {
         return NULL;
     }
@@ -43,22 +44,24 @@ public:
 
     ~JNIMediaPlayerListener();
 
-    //重写了基类的虚函数，所以后面要用override关键字
+    //后面用override，代表重写基类的虚函数
     void notify(int msg, int ext1, int ext2, void *obj) override;
 
 private:
     //将无参构造函数设置为私有，不被外界调用
     JNIMediaPlayerListener();
 
-    jclass mClass; //java层mediaplayer的class对象
-    jobject mObject; //对应java层mediaplayer的实例对象，是一个弱引用
+    jclass mClass; //java层easymediaplayer类的class实例
+    //cpp层对java层的easymediaplayer实例的弱引用，因为是弱引用，所以当java层的实例要销毁即不再有强引用的时候，这个弱引用不会造成内存泄漏
+    //回调消息通知notify方法的时候，传递这个弱引用给java层，在java层再通过调用对应的方法通知消息
+    jobject mObject;
 };
 
 //定义构造函数
 JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv *env, jobject thiz, jobject weak_thiz) {
-// Hold onto the MediaPlayer class for use in calling the static method
+    // Hold onto the MediaPlayer class for use in calling the static method
     // that posts events to the application thread.
-    //根据对象获取所属类，参数为java对象实例
+    //获取class对象，参数为java的对象实例
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
         LOGE("Can't find com/eplayer/EMediaPlayer");
@@ -68,8 +71,8 @@ JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv *env, jobject thiz, jobjec
     //创建一个全局引用，不用时必须调用 DeleteGlobalRef() 方法释放，参数为某个Java 对象实例，可以是局部引用或全局引用
     mClass = (jclass) env->NewGlobalRef(clazz);
 
-    // We use a weak reference so the MediaPlayer object can be garbage collected.
-    // The reference is only used as a proxy for callbacks.
+    // We use a weak reference so the MediaPlayer object can be garbage collected
+    // The reference is only used as a proxy for callbacks
     mObject = env->NewGlobalRef(weak_thiz);
 }
 
@@ -88,8 +91,8 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, void *obj) {
     bool status = (javaVM->AttachCurrentThread(&env, NULL) >= 0);
 
     // TODO obj needs changing into jobject
-    //调用java层的static方法mObject, msg, ext1, ext2, obj 均为方法参数，对应java层handler的方法obtainMessage(what, arg1, arg2, obj)
-    //msg一般对应消息ID
+    //调用java层的static方法，mObject, msg, ext1, ext2, obj 均为方法参数，对应java层handler的方法obtainMessage(what, arg1, arg2, obj)，msg为消息ID
+    //调用java层的static方法，关键需要java层对应类的class对象和方法ID，后面就是参数
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, msg, ext1, ext2, obj);
 
     if (env->ExceptionCheck()) {
@@ -106,13 +109,13 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, void *obj) {
 // -------------------------------------------------------------------------------------------------
 
 static EMediaPlayer *getMediaPlayer(JNIEnv *env, jobject thiz) {
-    //获取到java保存的c++的mediaplayer对象，然后将其转换为EMediaPlayer * 指针的类型
+    //获取java层保存的c++的emediaplayer的实例引用，然后将其转换为EMediaPlayer * 指针的类型
     EMediaPlayer *const mp = (EMediaPlayer *) env->GetLongField(thiz, fields.context);
     return mp;
 }
 
 /**
- * 将c++的mediaplayer对象保存到java层中去，其中fields.context是java层的某个变量的ID，是一个long类型的变量
+ * 将c++的mediaplayer对象保存到java层，其中fields.context是java层的变量的ID，是一个long类型的变量
  */
 static EMediaPlayer *setMediaPlayer(JNIEnv *env, jobject thiz, long mediaPlayer) {
     EMediaPlayer *old = (EMediaPlayer *) env->GetLongField(thiz, fields.context);
@@ -171,10 +174,10 @@ void EMediaPlayer_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring pat
     //MMS协议：MMS（MicrosoftMediaServerprotocol）是一种串流媒体传送协议，用来访问并流式接收Windows Media服务器中.asf文件的一种协议
     //strstr(str1,str2) 函数用于判断字符串str2是否是str1的子串。如果是，则该函数返回str1字符串从str2第一次出现的位置开始到str1结尾的字符串；否则，返回NULL
     const char *restrict = strstr(path, "mms://"); //是否为mms协议的多媒体
-    //strdup也是复制字符串，返回一个指针,指向为复制字符串分配的空间;如果分配空间失败,则返回NULL值
+    //strdup是复制字符串，返回一个指针,指向为复制字符串分配的空间;如果分配空间失败,则返回NULL值
     char *restrict_to = restrict ? strdup(restrict) : NULL;
     if (restrict_to != NULL) {
-        //把 src 所指向的字符串复制到 dest，最多复制 n 个字符。当 src 的长度小于 n 时，dest 的剩余部分将用空字节填充
+        //把src所指向的字符串复制到dest，最多复制n个字符。当src的长度小于n时，dest的剩余部分将用空字节填充
         strncpy(restrict_to, "mmsh://", 6);
         //将path输出到屏幕
         puts(path);
@@ -198,6 +201,7 @@ void EMediaPlayer_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring pat
         for (i = 0; i < keysCount; i++) {
             jstring key = (jstring) env->GetObjectArrayElement(keys, i);
             rawString = env->GetStringUTFChars(key, NULL);
+            //char *strcat(char *dest, const char *src) 把src所指向的字符串追加到dest所指向的字符串的结尾
             strcat(hdrs, rawString);
             strcat(hdrs, ": ");
             env->ReleaseStringUTFChars(key, rawString);
@@ -205,7 +209,7 @@ void EMediaPlayer_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring pat
             jstring value = (jstring) env->GetObjectArrayElement(values, i);
             rawString = env->GetStringUTFChars(value, NULL);
             strcat(hdrs, rawString);
-            strcat(hdrs, "\r\n");
+            strcat(hdrs, "\r\n"); //回车换行
             env->ReleaseStringUTFChars(value, rawString);
         }
 
@@ -261,8 +265,8 @@ void EMediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescrip
 
 }
 
-//主要获取一个java层的mediaplayer的一个变量ID和一个方法ID，这个方法在java层static块中执行，比构造方法先执行，类的static代码块只在第一次调用构造方法适合执行，
-//第二次将不再执行static代码块了
+//主要获取一个java层的mediaplayer的一个变量ID和一个方法ID，这个方法在java层static块中执行，比构造方法先执行，
+// 类的static代码块只在第一次调用构造方法适合执行，第二次将不再执行static代码块了
 void EMediaPlayer_init(JNIEnv *env) {
 
     //根据类的全路径找到相应的 jclass 对象
@@ -362,6 +366,7 @@ void EMediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject surface) {
     }
     ANativeWindow *window = NULL;
     if (surface != NULL) {
+        //将java层Surface转换为C++的ANativeWindow
         window = ANativeWindow_fromSurface(env, surface);
     }
     mp->setVideoSurface(window);

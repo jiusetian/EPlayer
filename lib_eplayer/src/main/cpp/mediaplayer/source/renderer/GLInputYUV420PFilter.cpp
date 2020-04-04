@@ -1,7 +1,7 @@
 
 #include <AndroidLog.h>
-#include "GLInputYUV420PFilter.h"
-#include "OpenGLUtils.h"
+#include "renderer/header/GLInputYUV420PFilter.h"
+#include "renderer/helper/OpenGLUtils.h"
 
 //std::string是标准C++的字符串实现。为了让程序好移植，要用std::string
 const std::string kYUV420PFragmentShader = SHADER_TO_STRING(
@@ -50,17 +50,20 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
         //创建着色器程序
         programHandle = OpenGLUtils::createProgram(vertexShader, fragmentShader);
         OpenGLUtils::checkGLError("createProgram");
+
         //glGetAttribLocation查询由program指定的先前链接的程序对象，用于name指定的属性变量，并返回绑定到该属性变量的通用顶点属性的索引
         //获取着色器程序中，指定为attribute类型变量的id
         positionHandle = glGetAttribLocation(programHandle, "aPosition"); //顶点数据的索引
         texCoordinateHandle = glGetAttribLocation(programHandle, "aTextureCoord"); //纹理坐标的索引
+
         //获取着色器程序中，指定为uniform类型变量的id
-        ////获取片元着色器里面几个指定的uniform变量的地址，纹理采样器句柄
+        //获取片元着色器里面几个指定的uniform变量的地址，纹理采样器句柄
         inputTextureHandle[0] = glGetUniformLocation(programHandle, "inputTextureY");
         inputTextureHandle[1] = glGetUniformLocation(programHandle, "inputTextureU");
         inputTextureHandle[2] = glGetUniformLocation(programHandle, "inputTextureV");
-        //OpenGL 默认采用四字节的对齐方式，因此存储一个图像所需的字节数并不完全等于宽高像素字节数
-        // GL_UNPACK_ALIGNMENT 指定 OpenGL 如何从数据缓冲区中解包图像数据
+
+        //OpenGL默认采用四字节的对齐方式，因此存储一个图像所需的字节数并不完全等于宽高像素字节数
+        // GL_UNPACK_ALIGNMENT指定OpenGL如何从数据缓冲区中解包图像数据
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         //加载并使用链接好的程序
         glUseProgram(programHandle);
@@ -85,7 +88,8 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
             // 将坐标限制在0到1之间。超出的坐标会重复绘制边缘的像素，变成一种扩展边缘的图案
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            //glUniform1i将i号纹理单元作为整数传递给片元着色器，片元着色器中使用uniform变量对应这个纹理采样器
+            //纹理对象和对应的采样器地址进行绑定，该函数用于将纹理对象传入着色器中，第一个参数为采样器句柄，第二个参数为纹理索引
+            //其与函数glActiveTexture(GLenum texture)中的参数相对应，即第二个参数等于texture
             glUniform1i(inputTextureHandle[i], i);
         }
         setInitialized(true);
@@ -110,6 +114,7 @@ GLboolean GLInputYUV420PFilter::uploadTexture(Texture *texture) {
 
     // 更新绑定纹理的数据，Y的高度等于图片的高度，U和V的高度等于图片高度的1/2
     const GLsizei heights[3] = {texture->height, texture->height / 2, texture->height / 2};
+
     for (int i = 0; i < 3; ++i) {
         //激活纹理，这里的纹理对象分别有Y、U、V三种
         glActiveTexture(GL_TEXTURE0 + i);
@@ -138,7 +143,7 @@ GLboolean GLInputYUV420PFilter::uploadTexture(Texture *texture) {
                      GL_UNSIGNED_BYTE,
                      texture->pixels[i]);
 
-        //纹理对象和对应的采样器地址进行绑定
+        // 纹理对象和对应的采样器地址进行绑定
         // 该函数用于将纹理对象传入着色器中，第二个参数为纹理索引，其与函数glActiveTexture(GL_TEXTURE0 + i)中的参数相对应，如此处应该使用i
         glUniform1i(inputTextureHandle[i], i);
     }

@@ -12,19 +12,24 @@
 
 #include <string>
 #include "FrameBuffer.h"
-#include "macros.h"
+#include "../helper/macros.h"
+using namespace std;
 
 // OpenGLES 2.0 最大支持32个纹理
 #define MAX_TEXTURES 32
 
 /**
- * 默认的 vertex shader
+ * 默认的vertex shader顶点着色器
  */
 const std::string kDefaultVertexShader = SHADER_TO_STRING(
         precision mediump float;
+        //顶点坐标，顶点坐标一般用vec3表示的，因为3D坐标有x、y、z三个值
         attribute highp vec4 aPosition;
+        //纹理坐标
         attribute highp vec2 aTextureCoord;
+        //纹理坐标传递到片元着色器的变量，通过varying通道传递
         varying vec2 textureCoordinate;
+
         void main() {
             gl_Position  = aPosition;
             textureCoordinate = aTextureCoord.xy;
@@ -133,6 +138,7 @@ class GLFilter {
         int textureHeight;      // 纹理高度
         int displayWidth;       // 显示输出宽度
         int displayHeight;      // 显示输出高度
+
 };
 
 #endif //EPLAYER_GLFILTER_H

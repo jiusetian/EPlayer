@@ -1,5 +1,5 @@
 
-#include "VideoDecoder.h"
+#include "decoder/header/VideoDecoder.h"
 
 VideoDecoder::VideoDecoder(AVFormatContext *pFormatCtx, AVCodecContext *avctx,
                            AVStream *stream, int streamIndex, PlayerState *playerState)
@@ -38,9 +38,11 @@ void VideoDecoder::setMasterClock(MediaClock *masterClock) {
 //开始视频的解码
 void VideoDecoder::start() {
     MediaDecoder::start();
+
     if (frameQueue) {
         frameQueue->start();
     }
+
     //解码线程
     if (!decodeThread) {
         decodeThread = new Thread(this);
@@ -51,6 +53,7 @@ void VideoDecoder::start() {
 
 void VideoDecoder::stop() {
     MediaDecoder::stop();
+
     if (frameQueue) {
         frameQueue->abort();
     }

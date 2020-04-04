@@ -2,23 +2,23 @@
 #ifndef PLAYERSTATE_H
 #define PLAYERSTATE_H
 
-#include <Mutex.h>
-#include <Condition.h>
-#include <Thread.h>
+#include "../../../../common/Mutex.h"
+#include "../../../../common/Condition.h"
+#include "../../../../common/Thread.h"
 
-#include <common/FFmpegUtils.h>
+#include "../../common/FFmpegUtils.h"
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/mem.h>
-#include <libavutil/rational.h>
-#include <libavutil/time.h>
-#include <libswresample/swresample.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/avstring.h>
+#include "../../../../include/libavcodec/avcodec.h"
+#include "../../../../include/libavformat/avformat.h"
+#include "../../../../include/libavutil/mem.h"
+#include "../../../../include/libavutil/rational.h"
+#include "../../../../include/libavutil/time.h"
+#include "../../../../include/libswresample/swresample.h"
+#include "../../../../include/libswscale/swscale.h"
+#include "../../../../include/libavutil/imgutils.h"
+#include "../../../../include/libavutil/avstring.h"
 };
-#include <queue/AVMessageQueue.h>
+#include "queue/header/AVMessageQueue.h"
 
 #define VIDEO_QUEUE_SIZE 3
 #define SAMPLE_QUEUE_SIZE 9

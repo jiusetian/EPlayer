@@ -3,9 +3,9 @@
 #define EPLAYER_VIDEODECODER_H
 
 
-#include <decoder/MediaDecoder.h>
-#include <player/PlayerState.h>
-#include <sync/MediaClock.h>
+#include "MediaDecoder.h"
+#include "player/header/PlayerState.h"
+#include "sync/header/MediaClock.h"
 
 class VideoDecoder : public MediaDecoder {
 public:
@@ -16,6 +16,7 @@ public:
 
     void setMasterClock(MediaClock *masterClock);
 
+    //override保留字表示当前函数重写了基类的虚函数
     void start() override;
 
     void stop() override;

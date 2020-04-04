@@ -1,5 +1,5 @@
 
-#include "RenderNode.h"
+#include "renderer/header/RenderNode.h"
 
 RenderNode::RenderNode(RenderNodeType type) : prevNode(nullptr), nextNode(nullptr), glFilter(nullptr),
                                               frameBuffer(nullptr), nodeType(type), textureWidth(-1), textureHeight(-1),
@@ -94,8 +94,7 @@ bool RenderNode::drawFrame(GLuint texture, const float *vertices, const float *t
 }
 
 int RenderNode::drawFrameBuffer(GLuint texture, const float *vertices, const float *textureVertices) {
-
-    // FrameBuffer 没有 或者是 滤镜还没初始化，则直接返回输入的纹理
+    // FrameBuffer没有或者是滤镜还没初始化，则直接返回输入的纹理
     if (!frameBuffer || !frameBuffer->isInitialized() || !glFilter || !glFilter->isInitialized()) {
         return texture;
     }

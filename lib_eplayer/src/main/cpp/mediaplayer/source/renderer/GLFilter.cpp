@@ -1,7 +1,7 @@
 
 #include <cstdlib>
-#include "GLFilter.h"
-#include "OpenGLUtils.h"
+#include "renderer/header/GLFilter.h"
+#include "renderer/helper/OpenGLUtils.h"
 #include <AndroidLog.h>
 
 
@@ -27,12 +27,14 @@ void GLFilter::initProgram() {
 }
 
 void GLFilter::initProgram(const char *vertexShader, const char *fragmentShader) {
+
     if (isInitialized()) {
         return;
     }
     if (vertexShader && fragmentShader) {
         programHandle = OpenGLUtils::createProgram(vertexShader, fragmentShader);
-//        OpenGLUtils::checkGLError("createProgram");
+        //OpenGLUtils::checkGLError("createProgram");
+        //获取着色器程序中，指定为attribute类型变量的id
         positionHandle = glGetAttribLocation(programHandle, "aPosition");
         texCoordinateHandle = glGetAttribLocation(programHandle, "aTextureCoord");
         inputTextureHandle[0] = glGetUniformLocation(programHandle, "inputTexture");
@@ -131,11 +133,11 @@ GLFilter::drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *ver
 }
 
 void GLFilter::bindAttributes(const float *vertices, const float *textureVertices) {
-    // 绑定顶点坐标
+    // 写入顶点坐标
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     glEnableVertexAttribArray(positionHandle);
 
-    // 绑定纹理坐标
+    // 写入纹理坐标
     glVertexAttribPointer(texCoordinateHandle, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);
     glEnableVertexAttribArray(texCoordinateHandle);
 
