@@ -1,5 +1,5 @@
 
-#include "renderer/header/RenderNode.h"
+#include "RenderNode.h"
 
 RenderNode::RenderNode(RenderNodeType type) : prevNode(nullptr), nextNode(nullptr), glFilter(nullptr),
                                               frameBuffer(nullptr), nodeType(type), textureWidth(-1), textureHeight(-1),

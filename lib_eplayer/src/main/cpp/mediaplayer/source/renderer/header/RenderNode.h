@@ -5,7 +5,7 @@
 
 #include "FrameBuffer.h"
 
-#include "../helper/NodeType.h"
+#include "NodeType.h"
 #include "GLFilter.h"
 
 /**

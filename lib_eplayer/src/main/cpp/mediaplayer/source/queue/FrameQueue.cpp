@@ -1,5 +1,5 @@
 
-#include "queue/header/FrameQueue.h"
+#include "FrameQueue.h"
 
 FrameQueue::FrameQueue(int max_size, int keep_last) {
     memset(queue, 0, sizeof(Frame) * FRAME_QUEUE_SIZE);

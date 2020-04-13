@@ -3,11 +3,11 @@
 #define EPLAYER_PACKETQUEUE_H
 
 #include <queue>
-#include "../../../../common/Mutex.h"
-#include "../../../../common/Condition.h"
+#include "Mutex.h"
+#include "Condition.h"
 
 extern "C" {
-#include "../../../../include/libavcodec/avcodec.h"
+#include "libavcodec/avcodec.h"
 };
 
 typedef struct PacketList {

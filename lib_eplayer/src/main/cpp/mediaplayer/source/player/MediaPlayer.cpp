@@ -1,5 +1,5 @@
 
-#include "player/header/MediaPlayer.h"
+#include "MediaPlayer.h"
 
 /**
  * FFmpeg操作锁管理回调

@@ -29,7 +29,7 @@
 #include <string>
 #include <jni.h>
 #include <AndroidLog.h>
-#include "header/JNIHelp.h"
+#include "JNIHelp.h"
 
 
 /**

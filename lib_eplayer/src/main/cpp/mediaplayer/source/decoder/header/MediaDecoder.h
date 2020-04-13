@@ -2,10 +2,10 @@
 #ifndef EPLAYER_MEDIADECODER_H
 #define EPLAYER_MEDIADECODER_H
 
-#include "../../../../common/AndroidLog.h"
-#include "player/header/PlayerState.h"
-#include "queue/header/PacketQueue.h"
-#include "queue/header/FrameQueue.h"
+#include "AndroidLog.h"
+#include "PlayerState.h"
+#include "PacketQueue.h"
+#include "FrameQueue.h"
 
 class MediaDecoder : public Runnable {
 public:

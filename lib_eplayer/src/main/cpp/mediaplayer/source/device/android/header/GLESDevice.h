@@ -1,11 +1,11 @@
 
 #ifndef EPLAYER_GLESDEVICE_H
 #define EPLAYER_GLESDEVICE_H
-#include "../../header/VideoDevice.h"
+#include "VideoDevice.h"
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "../../../renderer/helper/EglHelper.h"
-#include "../../../renderer/header/InputRenderNode.h"
+#include "EglHelper.h"
+#include "InputRenderNode.h"
 
 class GLESDevice : public VideoDevice {
 public:

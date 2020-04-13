@@ -12,13 +12,14 @@ if(CMAKE_COMPILER_IS_CLANG)
 endif(CMAKE_COMPILER_IS_CLANG)
 
 # 添加头文件
-#include_directories( include )
+#include_directories(
+#        include
+#        source/SoundTouch
+#        )
 
 # 添加源文件
 add_library( soundtouch
-
              SHARED
-
              # library
              source/SoundTouch/AAFilter.cpp
              source/SoundTouch/BPMDetect.cpp
@@ -40,14 +41,11 @@ add_library( soundtouch
 
 #
 target_include_directories( soundtouch
-
                             PRIVATE
-
                             include
                             source/SoundTouch )
 # 链接静态库
 target_link_libraries( soundtouch
-
                        android
                        log )
 

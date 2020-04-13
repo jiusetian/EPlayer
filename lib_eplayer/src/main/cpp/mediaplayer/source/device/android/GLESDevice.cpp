@@ -1,7 +1,7 @@
 
 #include <AndroidLog.h>
-#include <renderer/helper/CoordinateUtils.h>
-#include "device/android/header/GLESDevice.h"
+#include <CoordinateUtils.h>
+#include "GLESDevice.h"
 
 GLESDevice::GLESDevice() {
     mWindow = NULL;

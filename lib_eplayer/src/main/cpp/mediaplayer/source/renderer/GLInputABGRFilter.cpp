@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include "renderer/header/GLInputABGRFilter.h"
+#include "GLInputABGRFilter.h"
 
 const std::string kABGRFragmentShader = SHADER_TO_STRING(
         precision

@@ -1,5 +1,5 @@
 
-#include "sync/header/MediaSync.h"
+#include "MediaSync.h"
 
 MediaSync::MediaSync(PlayerState *playerState) {
     this->playerState = playerState;

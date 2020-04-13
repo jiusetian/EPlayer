@@ -1,6 +1,6 @@
 
-#include "header/EMediaPlayer.h"
-#include <queue/header/AVMessageQueue.h>
+#include "EMediaPlayer.h"
+#include <AVMessageQueue.h>
 
 EMediaPlayer::EMediaPlayer() {
     msgThread = nullptr;

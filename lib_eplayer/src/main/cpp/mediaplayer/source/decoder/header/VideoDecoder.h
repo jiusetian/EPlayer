@@ -4,8 +4,8 @@
 
 
 #include "MediaDecoder.h"
-#include "player/header/PlayerState.h"
-#include "sync/header/MediaClock.h"
+#include "PlayerState.h"
+#include "MediaClock.h"
 
 class VideoDecoder : public MediaDecoder {
 public:

@@ -11,63 +11,48 @@ else ()
 endif (${ANDROID_PLATFORM_LEVEL} LESS 11)
 
 # 添加 soundtouch 动态库，../是上一级的意思
-set(soundtouch_dir ../SoundTouch)
+set(soundtouch_dir ../soundtouch)
 #添加子目录，所以soundtouch是当前项目的子项目
 add_subdirectory(${soundtouch_dir} soundtouch)
 
-# 添加头文件路径，第三个参数是子目录的路径，这里include了代表当前源文件可以直接使用子目录下的头文件
-#同时因为子目录继承了当前CMake，所以从第一和第二个参数来看，子目录也是可以直接使用当前目录的头文件的
+# 添加头文件路径，代表当前源文件可以直接使用下面路径下的头文件
+#同时因为子目录继承了当前CMake，所以这个设置对子目录也是有效的
 include_directories(
         source
-        android
+        source/common
+        source/convertor
+        source/decoder/header
+        source/device/header
+        source/device/android/header
+        source/player/header
+        source/queue/header
+        source/renderer/header
+        source/renderer/helper
+        source/sync/header
+        android/header
         ${soundtouch_dir})
+
+#源文件全局路径
+file(GLOB my_source
+        ../mediaplayer/source/common/*.cpp
+        ../mediaplayer/source/convertor/*.cpp
+        ../mediaplayer/source/decoder/*.cpp
+        ../mediaplayer/source/device/*.cpp
+        ../mediaplayer/source/device/android/*.cpp
+        ../mediaplayer/source/queue/*.cpp
+        ../mediaplayer/source/renderer/*.cpp
+        ../mediaplayer/source/renderer/helper/*.cpp
+        ../mediaplayer/source/sync/*.cpp
+        ../mediaplayer/source/player/*.cpp
+        ../mediaplayer/android/*.cpp
+        )
 
 # 添加源文件
 add_library(
         media_player
-
         SHARED
-
         # library
-        source/common/FFmpegUtils.cpp
-        #
-        source/convertor/AudioResampler.cpp
-        #
-        source/decoder/AudioDecoder.cpp
-        source/decoder/MediaDecoder.cpp
-        source/decoder/VideoDecoder.cpp
-        #
-        source/device/android/GLESDevice.cpp
-        source/device/android/SLESDevice.cpp
-        source/device/AudioDevice.cpp
-        source/device/VideoDevice.cpp
-
-        source/queue/FrameQueue.cpp
-        source/queue/PacketQueue.cpp
-        source/queue/AVMessageQueue.cpp
-        #render
-        source/renderer/EPlayerEGLContext.cpp
-        source/renderer/helper/CoordinateUtils.cpp
-        source/renderer/helper/EglHelper.cpp
-        source/renderer/FrameBuffer.cpp
-        source/renderer/GLFilter.cpp
-        source/renderer/GLInputABGRFilter.cpp
-        source/renderer/GLInputFilter.cpp
-        source/renderer/GLInputYUV420PFilter.cpp
-        source/renderer/InputRenderNode.cpp
-        source/renderer/helper/OpenGLUtils.cpp
-        source/renderer/RenderNode.cpp
-        source/renderer/helper/vecmath.cpp
-        #
-        source/sync/MediaClock.cpp
-        source/sync/MediaSync.cpp
-        source/player/MediaPlayer.cpp
-        source/player/PlayerState.cpp
-        #
-        # controller
-        android/EMediaPlayer.cpp
-        android/JNIHelp.cpp
-        android/com.eplayer.EasyMediaPlayer.cpp
+        ${my_source}
         )
 
 # 链接静态库

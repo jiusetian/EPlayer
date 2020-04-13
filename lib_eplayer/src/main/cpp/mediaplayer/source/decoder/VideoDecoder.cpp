@@ -1,5 +1,5 @@
 
-#include "decoder/header/VideoDecoder.h"
+#include "VideoDecoder.h"
 
 VideoDecoder::VideoDecoder(AVFormatContext *pFormatCtx, AVCodecContext *avctx,
                            AVStream *stream, int streamIndex, PlayerState *playerState)

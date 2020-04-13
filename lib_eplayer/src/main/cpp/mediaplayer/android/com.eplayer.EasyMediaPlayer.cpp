@@ -3,8 +3,8 @@
 #include <Mutex.h>
 #include <Condition.h>
 #include <Errors.h>
-#include <header/JNIHelp.h>
-#include <header/EMediaPlayer.h>
+#include <JNIHelp.h>
+#include <EMediaPlayer.h>
 #include <cstring>
 #include <cstdio>
 #include <memory.h>

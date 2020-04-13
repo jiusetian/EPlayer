@@ -1,8 +1,8 @@
 
 #ifndef EPLAYER_VIDEODEVICE_H
 #define EPLAYER_VIDEODEVICE_H
-#include "player/header/PlayerState.h"
-#include "../../renderer/header/GLInputFilter.h"
+#include "PlayerState.h"
+#include "GLInputFilter.h"
 
 class VideoDevice {
 public:

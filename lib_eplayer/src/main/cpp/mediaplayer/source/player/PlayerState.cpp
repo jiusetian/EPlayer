@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include "player/header/PlayerState.h"
+#include "PlayerState.h"
 
 PlayerState::PlayerState() {
     init();

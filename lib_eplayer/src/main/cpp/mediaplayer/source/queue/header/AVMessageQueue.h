@@ -2,16 +2,16 @@
 #ifndef EPLAYER_AVMESSAGEQUEUE_H
 #define EPLAYER_AVMESSAGEQUEUE_H
 
-#include "../../../../common/Mutex.h"
-#include "../../../../common/Condition.h"
+#include "Mutex.h"
+#include "Condition.h"
 #include <cstring>
 #include <assert.h>
 
 extern "C" {
-#include "../../../../include/libavutil/mem.h"
+#include "libavutil/mem.h"
 };
 
-#include "../../player/header/PlayerMessage.h"
+#include "PlayerMessage.h"
 
 typedef struct AVMessage {
     int what;

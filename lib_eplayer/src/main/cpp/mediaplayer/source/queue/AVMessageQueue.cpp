@@ -1,5 +1,5 @@
 
-#include "queue/header/AVMessageQueue.h"
+#include "AVMessageQueue.h"
 #include "AndroidLog.h"
 
 AVMessageQueue::AVMessageQueue() {

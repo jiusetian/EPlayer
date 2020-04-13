@@ -17,27 +17,29 @@ endif (CMAKE_COMPILER_IS_CLANG)
 # 添加include目录路径
 #common和include为最外层的头文件，在这里加进去以后，所有当前CMake的子目录都可以直接使用这两个文件的头文件
 #include_directories(common
-#        include1)
-#
+#        include)
+
 ## 添加ffmpeg库，IMPORTED指以导入的形式加入到项目中来，下面的set_target_properties是指定IMPORTED的路径
 #add_library( ffmpeg SHARED IMPORTED )
-#
+
 ##链接库文件，${CMAKE_SOURCE_DIR}指cmakeList.txt所在的文件夹路径， ${ANDROID_ABI}指构建的COU，../代表父级目录
 #set_target_properties( ffmpeg
 #        PROPERTIES IMPORTED_LOCATION
 #        ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libffmpeg.so )
 
 
-##相当于指定一个变量，后面可以通过${var}来引用，这里我们指定ffmpeg的库文件路径
+##相当于指定一个变量，后面可以通过${var}来引用，这里我们指定so库文件路径
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
 
 ##===========================================================================================================
 #添加库文件
 #工具库（大部分库都需要这个库的支持）
 
+#定位头文件位置
 include_directories(common
         include)
 
+#av工具类库
 add_library(
         avutil
         SHARED

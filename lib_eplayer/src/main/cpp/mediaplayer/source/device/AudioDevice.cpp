@@ -1,5 +1,5 @@
 
-#include "device/header/AudioDevice.h"
+#include "AudioDevice.h"
 
 AudioDevice::AudioDevice() {
 

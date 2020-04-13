@@ -1,7 +1,7 @@
 
 #include <cstdlib>
-#include "renderer/header/GLFilter.h"
-#include "renderer/helper/OpenGLUtils.h"
+#include "GLFilter.h"
+#include "OpenGLUtils.h"
 #include <AndroidLog.h>
 
 

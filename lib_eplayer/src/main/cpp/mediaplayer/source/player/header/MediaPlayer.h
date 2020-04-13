@@ -2,23 +2,23 @@
 #ifndef EPLAYER_MEDIAPLAYER_H
 #define EPLAYER_MEDIAPLAYER_H
 
-#include "sync/header/MediaClock.h"
-#include "../../../../soundtouch/SoundTouchWrapper.h"
+#include "MediaClock.h"
+#include "SoundTouchWrapper.h"
 #include "PlayerState.h"
-#include "../../decoder/header/AudioDecoder.h"
-#include "../../decoder/header/VideoDecoder.h"
+#include "AudioDecoder.h"
+#include "VideoDecoder.h"
 
 #if defined(__ANDROID__)
-#include "device/android/header/SLESDevice.h"
-#include "device/android/header/GLESDevice.h"
+#include "SLESDevice.h"
+#include "GLESDevice.h"
 #else
 #include <device/AudioDevice.h>
 #include <device/VideoDevice.h>
 #endif
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "sync/header/MediaSync.h"
-#include "../../convertor/AudioResampler.h"
+#include "MediaSync.h"
+#include "convertor/AudioResampler.h"
 
 
 class MediaPlayer : public Runnable {

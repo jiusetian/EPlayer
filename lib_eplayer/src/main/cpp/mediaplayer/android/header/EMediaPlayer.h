@@ -4,9 +4,12 @@
 
 #include <AndroidLog.h>
 #include <Mutex.h>
-#include <Condition.h>
+ #include <Condition.h>
 #include <Thread.h>
-#include <player/header/MediaPlayer.h>
+#include <android/native_window.h>
+#include <libavutil/dict.h>
+#include <GLESDevice.h>
+#include <MediaPlayer.h>
 
 enum media_event_type {
     MEDIA_NOP = 0, // interface test message

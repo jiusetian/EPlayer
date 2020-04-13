@@ -12,7 +12,8 @@
 
 #include <string>
 #include "FrameBuffer.h"
-#include "../helper/macros.h"
+#include "macros.h"
+#include "Shaderh.h"
 using namespace std;
 
 // OpenGLES 2.0 最大支持32个纹理

@@ -1,5 +1,5 @@
 
-#include "queue/header/PacketQueue.h"
+#include "PacketQueue.h"
 
 PacketQueue::PacketQueue() {
     abort_request = 0;

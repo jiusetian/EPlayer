@@ -4,7 +4,7 @@
 
 #include "RenderNode.h"
 #include "GLInputFilter.h"
-#include "../helper/CoordinateUtils.h"
+#include "CoordinateUtils.h"
 
 /**
  * 输入渲染结点
