@@ -140,7 +140,6 @@ void GLFilter::bindAttributes(const float *vertices, const float *textureVertice
     // 写入纹理坐标
     glVertexAttribPointer(texCoordinateHandle, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);
     glEnableVertexAttribArray(texCoordinateHandle);
-
 }
 
 void GLFilter::bindTexture(GLuint texture) {
@@ -160,6 +159,8 @@ void GLFilter::onDrawAfter() {
 
 void GLFilter::onDrawFrame() {
     //LOGE("绘制纹理");
+    //GL_TRIANGLE_STRIP表示顺序在每三个顶点之间均绘制三角形。这个方法可以保证从相同的方向上所有三角形均被绘制
+    //以V0V1V2,V1V2V3,V2V3V4……的形式绘制三角形
     glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
 }
 

@@ -24,9 +24,9 @@ int AudioEncoder::init() {
         return -1;
     }
 
-    // AACENC_AOT aac规格的设置，设置为aac lc低复杂度规格
-    if (aacEncoder_SetParam(handle, AACENC_AOT, 2) != AACENC_OK) {
-        LOGE("AOT设置失败");
+    // AACENC_AOT AOT是指AUDIO_OBJECT_TYPE，aac规格的设置，设置为aac lc低复杂度规格
+    if (aacEncoder_SetParam(handle, AACENC_AOT, AOT_AAC_LC) != AACENC_OK) {
+        LOGE("aac规格设置失败");
         return -1;
     }
 
@@ -55,7 +55,7 @@ int AudioEncoder::init() {
     }
 
     //数据传输流格式 2: ADTS
-    if (aacEncoder_SetParam(handle, AACENC_TRANSMUX, 2) != AACENC_OK) {
+    if (aacEncoder_SetParam(handle, AACENC_TRANSMUX, TT_MP4_ADTS) != AACENC_OK) {
         LOGE("音频传输流格式设置失败");
         return -1;
     }
@@ -96,19 +96,19 @@ int AudioEncoder::init() {
 int AudioEncoder::encodeAudio(unsigned char *inBytes, int length, unsigned char *outBytes, int outlength) {
     void *inptr, *outptr;
     AACENC_BufDesc in_buf = {0};
-    int identifier = IN_AUDIO_DATA;
+    int in_identifier = IN_AUDIO_DATA;
     int in_elem_size = 2; //每个采样点2个字节，量化宽度
     //输入数据配置
     inptr = inBytes;
     //为什么是二级指针，可能是函数内需要对一级指针的值重新赋值
     in_buf.bufs = &inptr;
     in_buf.numBufs = 1;
-    in_buf.bufferIdentifiers = &identifier;
+    in_buf.bufferIdentifiers = &in_identifier;
     in_buf.bufSizes = &length;
     //buffer中每个样本的大小
     in_buf.bufElSizes = &in_elem_size;
 
-    AACENC_BufDesc out_buf = {0};
+    AACENC_BufDesc out_buf = {0}; //初始化
     int out_identifier = OUT_BITSTREAM_DATA;
     int elSize = 1;
     //out数据放到out_buf中

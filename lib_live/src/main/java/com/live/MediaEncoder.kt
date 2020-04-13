@@ -17,7 +17,7 @@ import kotlin.concurrent.thread
 class MediaEncoder {
 
     companion object {
-        var SAVE_FILE_FOR_TEST = true
+        var SAVE_FILE_FOR_TEST = false
         val VCODEC = "video/avc" //高级视频编码
     }
 

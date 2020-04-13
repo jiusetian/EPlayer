@@ -22,7 +22,7 @@ using namespace std;
  * 默认的vertex shader顶点着色器
  */
 const std::string kDefaultVertexShader = SHADER_TO_STRING(
-        precision mediump float;
+        precision mediump float; //默认精度
         //顶点坐标，顶点坐标一般用vec3表示的，因为3D坐标有x、y、z三个值
         attribute highp vec4 aPosition;
         //纹理坐标

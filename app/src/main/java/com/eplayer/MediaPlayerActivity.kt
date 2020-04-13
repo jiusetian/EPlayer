@@ -184,8 +184,26 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     }
 
+    //根据视频宽高适配Surfaceview的宽高
+    private fun fitSurfaceSize(videoWidth:Int,videoHeight:Int){
+        val vRatio=videoWidth/videoHeight
+        val sRatio=Utils.getScreenWidth(this)/Utils.getScreenHeight(this)
+        //最终view的宽高
+        var viewWidth:Int
+        var viewHeight:Int
 
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
+        if (vRatio>sRatio){
+            viewWidth=Utils.getScreenWidth(this)
+            viewHeight=Utils.getScreenHeight(this)*(sRatio/vRatio)
+        }else if (vRatio<sRatio){
+
+        }
+    }
+
+
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+
+    }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {}
 

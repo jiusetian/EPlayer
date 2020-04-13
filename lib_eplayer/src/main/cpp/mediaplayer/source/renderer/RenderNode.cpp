@@ -4,11 +4,9 @@
 RenderNode::RenderNode(RenderNodeType type) : prevNode(nullptr), nextNode(nullptr), glFilter(nullptr),
                                               frameBuffer(nullptr), nodeType(type), textureWidth(-1), textureHeight(-1),
                                               displayWidth(-1), displayHeight(-1) {
-
 }
 
 RenderNode::~RenderNode() {
-
 }
 
 void RenderNode::init() {

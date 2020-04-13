@@ -41,6 +41,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
     }
 
     private fun initCameraInfo() {
+
         LiveConfig.apply {
             //摄像头预览信息
             val cameraWidth = cameraWidth
