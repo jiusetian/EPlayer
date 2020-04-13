@@ -27,24 +27,24 @@ include_directories(
         source/player/header
         source/queue/header
         source/renderer/header
-        source/renderer/helper
+        source/renderer/utils
         source/sync/header
         android/header
         ${soundtouch_dir})
 
-#源文件全局路径
+#源文件的路径
 file(GLOB my_source
-        ../mediaplayer/source/common/*.cpp
-        ../mediaplayer/source/convertor/*.cpp
-        ../mediaplayer/source/decoder/*.cpp
-        ../mediaplayer/source/device/*.cpp
-        ../mediaplayer/source/device/android/*.cpp
-        ../mediaplayer/source/queue/*.cpp
-        ../mediaplayer/source/renderer/*.cpp
-        ../mediaplayer/source/renderer/helper/*.cpp
-        ../mediaplayer/source/sync/*.cpp
-        ../mediaplayer/source/player/*.cpp
-        ../mediaplayer/android/*.cpp
+        source/common/*.cpp
+        source/convertor/*.cpp
+        source/decoder/*.cpp
+        source/device/*.cpp
+        source/device/android/*.cpp
+        source/queue/*.cpp
+        source/renderer/*.cpp
+        source/renderer/utils/*.cpp
+        source/sync/*.cpp
+        source/player/*.cpp
+        android/*.cpp
         )
 
 # 添加源文件
@@ -53,14 +53,14 @@ add_library(
         SHARED
         # library
         ${my_source}
-        )
+)
 
 # 链接静态库
 target_link_libraries(
         #原生库
         media_player
         #需要链接的库
-#        ffmpeg
+        #        ffmpeg
         soundtouch
         #ffmpeg库
         avutil

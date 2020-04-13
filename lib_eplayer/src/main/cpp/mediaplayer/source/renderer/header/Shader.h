@@ -2,8 +2,8 @@
 // Created by Guns Roses on 2020/4/13.
 //
 
-#ifndef EPLAYER_SHADERH_H
-#define EPLAYER_SHADERH_H
+#ifndef EPLAYER_SHADER_H
+#define EPLAYER_SHADER_H
 
 //#include <glad/glad.h>
 
@@ -11,13 +11,16 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <GLES2/gl2.h>
+#include "AndroidLog.h"
+
 using namespace std;
 
 class Shader {
 public:
-    unsigned int ID;
+    GLuint ID;
 
-    Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
+    Shader(const char* vertexPath, const char* fragmentPath,bool isPath);
 
     void use();
 
@@ -26,4 +29,4 @@ public:
     void setFloat(const string& name, float value) const;
 };
 
-#endif //EPLAYER_SHADERH_H
+#endif //EPLAYER_SHADER_H
