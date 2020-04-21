@@ -15,6 +15,8 @@ public:
 
     void surfaceCreated(ANativeWindow *window);
 
+    //Surface的大小发生改变
+    void surfaceChanged(int width, int height);
 
     void terminate() override;
 

@@ -30,6 +30,7 @@ void EMediaPlayer::init() {
     mMutex.lock();
     //视频播放设备
     if (videoDevice == nullptr) {
+        LOGD("设备初始化");
         videoDevice = new GLESDevice();
     }
 
@@ -92,6 +93,13 @@ status_t EMediaPlayer::getMetadata(bool update_only, bool apply_filter, AVDictio
         return mediaPlayer->getMetadata(metadata);
     }
     return NO_ERROR;
+}
+
+void EMediaPlayer::surfaceChanged(int width, int height) {
+    LOGD("执行2");
+    if (videoDevice!=nullptr){
+        videoDevice->surfaceChanged(width,height);
+    }
 }
 
 status_t EMediaPlayer::setVideoSurface(ANativeWindow *native_window) {

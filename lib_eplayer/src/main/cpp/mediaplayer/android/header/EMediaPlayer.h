@@ -101,6 +101,8 @@ public:
 
     status_t setVideoSurface(ANativeWindow *native_window);
 
+    //Surface的大小发生改变
+    void surfaceChanged(int width, int height);
 
     status_t setListener(MediaPlayerListener *listener);
 

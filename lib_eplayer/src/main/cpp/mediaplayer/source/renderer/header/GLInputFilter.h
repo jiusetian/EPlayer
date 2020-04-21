@@ -74,7 +74,8 @@ protected:
                      const float *textureVertices) override;
 
 protected:
-    GLuint textures[GLES_MAX_PLANE];        // 纹理id
+    // 纹理对象句柄，纹理对象包含纹理映射所需要的数据
+    GLuint textures[GLES_MAX_PLANE];
 };
 
 #endif //EPLAYER_GLINPUTFILTER_H

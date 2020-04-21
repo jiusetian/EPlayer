@@ -9,12 +9,13 @@
     <FrameLayout
             android:id="@+id/fl_video"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
 
 <!--        视频渲染界面-->
         <SurfaceView
                 android:id="@+id/surfaceView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
 <!--        视频控制界面-->
@@ -25,6 +26,7 @@
                 android:orientation="vertical"
                 android:layout_gravity="bottom"
                 android:gravity="center"
+                android:layout_marginBottom="10dp"
         >
 
             <LinearLayout
@@ -35,8 +37,8 @@
             >
                 <ImageView
                         android:id="@+id/iv_pause_play"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="10dp"
                         android:src="@drawable/ic_player_pause"
                         />
@@ -54,7 +56,10 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:layout_gravity="center_horizontal"/>
+                        android:minHeight="60dp"
+                        android:maxHeight="60dp"
+                        android:layout_gravity="center_horizontal"
+                        />
 
                 <TextView
                         android:id="@+id/tv_duration"
@@ -66,25 +71,14 @@
                 />
                 <ImageView
                         android:id="@+id/iv_orientation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@mipmap/iv_land"
                         android:layout_marginEnd="5dp"
                         />
 
             </LinearLayout>
 
-<!--            <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--            >-->
-<!--                <View android:layout_width="0dp"-->
-<!--                      android:layout_height="match_parent"-->
-<!--                      android:layout_weight="1"-->
-<!--                />-->
-
-<!--            </LinearLayout>-->
 
         </LinearLayout>
     </FrameLayout>

@@ -548,6 +548,17 @@ jint EMediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz) {
     return mp->getVideoHeight();
 }
 
+void EMediaPlayer_surfaceChange(JNIEnv *env, jobject thiz,jint width, jint height){
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+    LOGD("执行1");
+    mp->surfaceChanged(width,height);
+}
+
+
 void EMediaPlayer_setOption(JNIEnv *env, jobject thiz, int category, jstring type_, jstring option_) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -616,7 +627,8 @@ static const JNINativeMethod gMethods[] = {
         {"native_setup",        "(Ljava/lang/Object;)V",                    (void *) EMediaPlayer_setup},
         {"native_finalize",     "()V",                                      (void *) EMediaPlayer_finalize},
         {"_setOption",          "(ILjava/lang/String;Ljava/lang/String;)V", (void *) EMediaPlayer_setOption},
-        {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong}
+        {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong},
+        {"_surfaceChange",      "(II)V",                                   (void *) EMediaPlayer_surfaceChange}
 };
 
 // 注册EMediaPlayer的Native方法

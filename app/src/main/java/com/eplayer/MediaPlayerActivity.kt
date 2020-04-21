@@ -29,7 +29,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     private var isPlayComplete = false //播放是否完成
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_player)
@@ -38,8 +37,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
         supportActionBar!!.hide()
         path = intent.getStringExtra(PATH)
-        initView()
         initPlayer()
+        initView()
     }
 
 
@@ -55,7 +54,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        //监听适配尺寸的改变
+        //监听尺寸的改变
         eMediaPlayer.setOnVideoSizeChangedListener { mediaPlayer, width, height ->
             LogUtil.d("视频size改变=" + width + "--" + height)
         }
@@ -67,7 +66,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             //UI线程执行
             runOnUiThread {
                 //改变Surfaceview的宽高
-                changeSurfaceSize()
+                //changeSurfaceSize()
                 //播放进度相关
                 tv_current_position.setText(
                     StringUtils.generateStandardTime(Math.max(eMediaPlayer.getCurrentPosition(), 0))
@@ -156,7 +155,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         if (newConfig.orientation != screenOrientation) {
             screenOrientation = newConfig.orientation
             iv_orientation.setImageResource(if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) R.mipmap.iv_land else R.mipmap.iv_port)
-            changeSurfaceSize()
+            //changeSurfaceSize()
         }
     }
 
@@ -181,34 +180,19 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         layoutParams.height = viewHeight
         surfaceView.setLayoutParams(layoutParams)
         surfaceView.requestLayout()
-
-    }
-
-    //根据视频宽高适配Surfaceview的宽高
-    private fun fitSurfaceSize(videoWidth:Int,videoHeight:Int){
-        val vRatio=videoWidth/videoHeight
-        val sRatio=Utils.getScreenWidth(this)/Utils.getScreenHeight(this)
-        //最终view的宽高
-        var viewWidth:Int
-        var viewHeight:Int
-
-        if (vRatio>sRatio){
-            viewWidth=Utils.getScreenWidth(this)
-            viewHeight=Utils.getScreenHeight(this)*(sRatio/vRatio)
-        }else if (vRatio<sRatio){
-
-        }
     }
 
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-
+        LogUtil.d("Surface的宽高=" + width + "----" + height)
+        eMediaPlayer.surfaceChange(width, height)
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {}
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        //设置播放器的渲染界面
+        //设置播放器的渲染界面,这个surfaceview会传递到NDK底层
         eMediaPlayer.setDisplay(surfaceView.holder)
     }
 
@@ -226,6 +210,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        //改变视频播放进度
         eMediaPlayer.seekTo(mProgress.toFloat())
     }
 
@@ -233,7 +218,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         //播放暂停
         if (v.id == R.id.iv_pause_play) {
             if (eMediaPlayer.isPlaying && !isPlayComplete) { //暂停
-                LogUtil.d("边距="+surfaceView.paddingTop)
                 eMediaPlayer.pause()
                 iv_pause_play.setImageResource(R.drawable.ic_player_play)
             } else if (!isPlayComplete) { //播放

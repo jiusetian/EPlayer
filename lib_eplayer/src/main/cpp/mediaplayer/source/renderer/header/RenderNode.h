@@ -57,6 +57,9 @@ public:
     RenderNodeType getNodeType() const;
 
     bool hasFrameBuffer() const;
+
+    //Surface的大小发生改变
+    void surfaceChanged(int width, int height);
 public:
     // 前继结点
     RenderNode *prevNode;

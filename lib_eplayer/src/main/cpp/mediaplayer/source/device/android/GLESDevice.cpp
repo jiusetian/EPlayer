@@ -27,6 +27,13 @@ GLESDevice::~GLESDevice() {
     mMutex.unlock();
 }
 
+void GLESDevice::surfaceChanged(int width, int height) {
+    LOGD("执行3");
+    if(mRenderNode!=NULL){
+        mRenderNode->surfaceChanged(width,height);
+    }
+}
+
 void GLESDevice::surfaceCreated(ANativeWindow *window) {
     mMutex.lock();
     if (mWindow != NULL) {
@@ -40,7 +47,7 @@ void GLESDevice::surfaceCreated(ANativeWindow *window) {
         //渲染区域的宽高
         mSurfaceWidth = ANativeWindow_getWidth(mWindow);
         mSurfaceHeight = ANativeWindow_getHeight(mWindow);
-        //LOGE("c++的宽高%d，%d", mSurfaceWidth, mSurfaceHeight);
+        //LOGD("c++的宽高%d，%d", mSurfaceWidth, mSurfaceHeight);
     }
     mHasSurface = true;
     mMutex.unlock();
@@ -52,6 +59,7 @@ void GLESDevice::terminate() {
 
 void GLESDevice::terminate(bool releaseContext) {
     if (eglSurface != EGL_NO_SURFACE) {
+        LOGD("销毁surface");
         eglHelper->destroySurface(eglSurface);
         eglSurface = EGL_NO_SURFACE;
         mHaveEGLSurface = false;
@@ -101,7 +109,6 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     if (eglSurface == EGL_NO_SURFACE && mWindow != NULL) {
         //如果已经有Surface但是还没有eglSurface，则创建之
         if (mHasSurface && !mHaveEGLSurface) {
-            LOGE("创建EGLSurface=%d,%d", ANativeWindow_getWidth(mWindow), ANativeWindow_getHeight(mWindow));
             eglSurface = eglHelper->createSurface(mWindow);
             if (eglSurface != EGL_NO_SURFACE) {
                 mHaveEGLSurface = true;
@@ -117,13 +124,13 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
 
     // 计算帧的宽高，如果不相等，则需要重新计算缓冲区的大小
     if (mWindow != NULL && mSurfaceWidth != 0 && mSurfaceHeight != 0) {
-        // 宽高比例不一致时，需要调整缓冲区的大小，这里是以宽度为基准
+        // 当视频宽高比和窗口宽高比例不一致时，调整缓冲区的大小
         if ((mSurfaceWidth / mSurfaceHeight) != (width / height)) {
-            //渲染区域的宽度不变，根据视频帧的宽高调整渲染区的高度
-            mSurfaceHeight = mSurfaceWidth * height / width;
+            //让视口的宽高比适应视频的宽高比
+            //mSurfaceHeight = mSurfaceWidth * height / width; //这个不注释会有问题
             int windowFormat = ANativeWindow_getFormat(mWindow);
-            //把width和height设置成你要显示的图片的宽和高
-            ANativeWindow_setBuffersGeometry(mWindow, mSurfaceWidth, mSurfaceHeight, windowFormat);
+            //设置缓冲区参数，把width和height设置成你要显示的图片的宽和高
+            ANativeWindow_setBuffersGeometry(mWindow, 0, 0, windowFormat);
         }
     }
 
@@ -134,6 +141,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     mVideoTexture->frameHeight = height;
     //纹理高度
     mVideoTexture->height = height;
+    mVideoTexture->width=width;
     mVideoTexture->format = format;
     mVideoTexture->blendMode = blendMode;
     mVideoTexture->direction = FLIP_NONE;
@@ -144,6 +152,8 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         mRenderNode = new InputRenderNode();
         if (mRenderNode != NULL) {
             mRenderNode->initFilter(mVideoTexture);
+            //设置视口的宽高
+            mRenderNode->surfaceChanged(mSurfaceWidth,mSurfaceHeight);
         }
     }
     mMutex.unlock();
@@ -197,7 +207,7 @@ int GLESDevice::onUpdateARGB(uint8_t *rgba, int pitch) {
         eglHelper->makeCurrent(eglSurface);
         mRenderNode->uploadTexture(mVideoTexture);
     }
-    //LOGE("纹理的宽度%d",pitch/4)
+    // LOGE("纹理的宽度%d",pitch/4);
     // 设置像素实际的宽度，即linesize的值，因为BGRA_8888中一个像素为4个字节，所以这里像素长度等于字节长度除以4
     mVideoTexture->width = pitch / 4;
     mMutex.unlock();
@@ -214,7 +224,6 @@ int GLESDevice::onRequestRender(bool flip) {
     if (mRenderNode != NULL && eglSurface != EGL_NO_SURFACE) {
         eglHelper->makeCurrent(eglSurface);
         if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
-            //LOGE("请求渲染的宽高=%d，%d",mSurfaceWidth,mSurfaceHeight);
             mRenderNode->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
             //LOGE("window的宽高=%d，%d",ANativeWindow_getWidth(mWindow),ANativeWindow_getHeight(mWindow));
         }

@@ -27,12 +27,14 @@ void InputRenderNode::initFilter(Texture *texture) {
             } else {
                 glFilter = new GLInputFilter();
             }
+            //设置纹理宽高
+            setTextureSize(texture->width, texture->height);
             init();
         }
     }
-    if (texture) {
-        setTextureSize(texture->width, texture->height);
-    }
+//    if (texture) {
+//        setTextureSize(texture->width, texture->height);
+//    }
 }
 
 bool InputRenderNode::uploadTexture(Texture *texture) {
@@ -51,7 +53,7 @@ bool InputRenderNode::drawFrame(Texture *texture) {
 }
 
 int InputRenderNode::drawFrameBuffer(Texture *texture) {
-    // FrameBuffer 没有 或者是 滤镜还没初始化，则直接返回输入的纹理
+    // FrameBuffer 没有或者是滤镜还没初始化，则直接返回输入的纹理
     if (!frameBuffer || !frameBuffer->isInitialized() || !glFilter || !glFilter->isInitialized()) {
         return -1;
     }

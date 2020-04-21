@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+
 import com.eplayer.annotations.AccessedByNative;
 
 import java.io.FileDescriptor;
@@ -817,6 +818,13 @@ public class EasyMediaPlayer implements IMediaPlayer {
     }
 
     private native void _setMute(boolean mute);
+
+    @Override
+    public void surfaceChange(int width, int height) {
+        _surfaceChange(width, height);
+    }
+
+    private native void _surfaceChange(int width, int height);
 
     /**
      * Sets speed on this player.

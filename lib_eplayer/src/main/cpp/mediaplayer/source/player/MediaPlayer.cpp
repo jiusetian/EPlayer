@@ -821,9 +821,7 @@ int MediaPlayer::readAvPackets() {
             eof = 0;
             // 定位完成回调通知
             if (playerState->messageQueue) {
-                playerState->messageQueue->postMessage(MSG_SEEK_COMPLETE,
-                                                       (int) av_rescale(seek_target, 1000,
-                                                                        AV_TIME_BASE), ret);
+                playerState->messageQueue->postMessage(MSG_SEEK_COMPLETE,(int) av_rescale(seek_target, 1000,AV_TIME_BASE), ret);
             }
         }
 

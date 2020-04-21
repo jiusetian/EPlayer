@@ -36,8 +36,11 @@ set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
 #工具库（大部分库都需要这个库的支持）
 
 #定位头文件位置
-include_directories(common
-        include)
+include_directories(
+        common
+        include
+        glm
+)
 
 #av工具类库
 add_library(
@@ -111,6 +114,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/metadata)
 
 #mediaplayer库为子库
 add_subdirectory(${CMAKE_SOURCE_DIR}/mediaplayer)
+
 
 #当前的目录关系为，当前CMake文件有两个子目录，分别是metadata的CMake和mediaplayer的CMake，而mediaplayer的子目录为soundtouch
 #的CMake

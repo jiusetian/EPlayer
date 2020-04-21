@@ -15,6 +15,13 @@ void RenderNode::init() {
     }
 }
 
+void RenderNode::surfaceChanged(int width, int height) {
+    LOGD("执行4");
+    if (glFilter!= nullptr) {
+        glFilter->nativeSurfaceChanged(width, height);
+    }
+}
+
 void RenderNode::destroy() {
     // 释放filter的shader program
     if (glFilter != nullptr) {

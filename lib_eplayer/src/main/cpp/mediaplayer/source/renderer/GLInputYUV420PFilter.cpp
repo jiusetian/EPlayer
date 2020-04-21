@@ -28,7 +28,7 @@ GLInputYUV420PFilter::GLInputYUV420PFilter() {
     //yuv是3种数据
     for (int i = 0; i < GLES_MAX_PLANE; ++i) {
         inputTextureHandle[i] = 0;
-        textures[i] = 0;
+        textures[i] = 0; //初始化纹理句柄
     }
 }
 
@@ -69,17 +69,20 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
         glUseProgram(programHandle);
 
         //创建纹理对象句柄
-        if (textures[0] == 0) {
+        if (textures[0] == 0) { //==0代表还没创建纹理句柄
             //glGenTextures就是用来产生你要操作的纹理对象的索引的，第一个参数是产生的纹理索引数量，第二个是保存纹理索引的
+            //创建3个纹理对象句柄，分别是1、2、3
             glGenTextures(3, textures);
-            //LOGD("纹理句柄%d,%d,%d", textures[0], textures[1], textures[2]);
+            LOGD("纹理句柄%d,%d,%d", textures[0], textures[1], textures[2]);
         }
 
         //分别对Y U V三个纹理对象进行相关设定，使用3个纹理单元
         for (int i = 0; i < 3; ++i) {
             //激活i号纹理单元并绑定纹理textures[i]，默认情况下0号纹理单元是激活的
+            //激活指定纹理单元
             glActiveTexture(GL_TEXTURE0 + i);
             //glBindTexture实际上是改变了OpenGL的这个状态，它告诉OpenGL下面对纹理的任何操作都是对它所绑定的纹理对象的
+            //绑定纹理对象句柄到纹理单元，一个纹理单元可以绑定多个纹理对象，只要绑定纹理对象的类型不同，比如1D、2D、3D
             glBindTexture(GL_TEXTURE_2D, textures[i]);
             // 设置纹理过滤模式
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -90,7 +93,8 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             //纹理对象和对应的采样器地址进行绑定，该函数用于将纹理对象传入着色器中，第一个参数为采样器句柄，第二个参数为纹理索引
             //其与函数glActiveTexture(GLenum texture)中的参数相对应，即第二个参数等于texture
-            glUniform1i(inputTextureHandle[i], i);
+            //将激活的纹理单元传递到着色器里面，这样片元着色器的纹理句柄就可以通过纹理单元来操作对应的纹理对象了
+            glUniform1i(inputTextureHandle[i], i); //函数的全称应该是glUniformLocationint，其实就是给着色器中的Uniform变量赋值的意思
         }
         setInitialized(true);
     } else {

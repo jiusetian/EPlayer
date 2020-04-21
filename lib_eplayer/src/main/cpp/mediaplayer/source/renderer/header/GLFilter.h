@@ -7,13 +7,17 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2platform.h>
-
 #endif
 
+#include "glm.hpp"
+#include <gtc/type_ptr.inl>
+#include <gtx/rotate_vector.hpp>
 #include <string>
 #include "FrameBuffer.h"
 #include "macros.h"
 #include "Shader.h"
+
+
 using namespace std;
 
 // OpenGLES 2.0 最大支持32个纹理
@@ -24,15 +28,17 @@ using namespace std;
  */
 const std::string kDefaultVertexShader = SHADER_TO_STRING(
         precision mediump float; //默认精度
-        //顶点坐标，顶点坐标一般用vec3表示的，因为3D坐标有x、y、z三个值
+        //顶点坐标，x、y、z、w四个值
         attribute highp vec4 aPosition;
         //纹理坐标
         attribute highp vec2 aTextureCoord;
         //纹理坐标传递到片元着色器的变量，通过varying通道传递
         varying vec2 textureCoordinate;
+        //正交矩阵
+        uniform mat4 uMatrix;
 
         void main() {
-            gl_Position  = aPosition;
+            gl_Position = uMatrix * vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
             textureCoordinate = aTextureCoord.xy;
         }
 );
@@ -57,89 +63,99 @@ const std::string kDefaultFragmentShader = SHADER_TO_STRING(
  * 素描、纹理、像素化、渲染、艺术效果、其他等12个滤镜
  */
 class GLFilter {
-        public:
-        GLFilter();
+public:
+    GLFilter();
 
-        virtual ~GLFilter();
+    virtual ~GLFilter();
 
-        // 初始化program
-        virtual void initProgram();
+    // 初始化program
+    virtual void initProgram();
 
-        // 初始化program
-        virtual void initProgram(const char *vertexShader, const char *fragmentShader);
+    // 初始化program
+    virtual void initProgram(const char *vertexShader, const char *fragmentShader);
 
-        // 销毁program
-        virtual void destroyProgram();
+    // 销毁program
+    virtual void destroyProgram();
 
-        // 更新viewport值
-        void updateViewPort();
+    // 更新viewport值
+    void updateViewPort();
 
-        // 直接绘制纹理
-        virtual void drawTexture(GLuint texture, const float *vertices, const float *textureVertices, bool viewPortUpdate = true);
+    // 直接绘制纹理
+    virtual void
+    drawTexture(GLuint texture, const float *vertices, const float *textureVertices, bool viewPortUpdate = true);
 
-        // 将纹理绘制到FBO中，实际上就是RenderNode中创建的FrameBuffer。这个FBO可以不跟随GLFilter释放，单独维护
-        virtual void drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices,
-        const float *textureVertices);
+    // 将纹理绘制到FBO中，实际上就是RenderNode中创建的FrameBuffer。这个FBO可以不跟随GLFilter释放，单独维护
+    virtual void
+    drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices, const float *textureVertices);
 
-        // 设置纹理大小
-        virtual void setTextureSize(int width, int height);
+    // 设置纹理大小
+    virtual void setTextureSize(int width, int height);
 
-        // 设置输出大小
-        virtual void setDisplaySize(int width, int height);
+    // 设置输出大小
+    virtual void setDisplaySize(int width, int height);
 
-        // 设置时间戳
-        virtual void setTimeStamp(double timeStamp);
+    // 设置时间戳
+    virtual void setTimeStamp(double timeStamp);
 
-        // 设置强度
-        virtual void setIntensity(float intensity);
+    // 设置强度
+    virtual void setIntensity(float intensity);
 
-        // 设置是否初始化
-        virtual void setInitialized(bool initialized);
+    // 设置是否初始化
+    virtual void setInitialized(bool initialized);
 
-        // 是否已经初始化
-        virtual bool isInitialized();
+    // 是否已经初始化
+    virtual bool isInitialized();
 
-        protected:
+    //Surface的大小发生改变
+    void nativeSurfaceChanged(int width, int height);
 
-        // 绑定attribute属性
-        virtual void bindAttributes(const float *vertices, const float *textureVertices);
 
-        // 绑定纹理
-        virtual void bindTexture(GLuint texture);
+protected:
+    // 绑定attribute属性
+    virtual void bindAttributes(const float *vertices, const float *textureVertices);
 
-        // 绘制之前处理
-        virtual void onDrawBegin();
+    //绑定uniform属性
+    virtual void bindUniforms();
 
-        // 绘制之后处理
-        virtual void onDrawAfter();
+    // 绑定纹理
+    virtual void bindTexture(GLuint texture);
 
-        // 绘制方法
-        virtual void onDrawFrame();
+    // 绘制之前处理
+    virtual void onDrawBegin();
 
-        // 解绑attribute属性
-        virtual void unbindAttributes();
+    // 绘制之后处理
+    virtual void onDrawAfter();
 
-        // 解绑纹理
-        virtual void unbindTextures();
+    // 绘制方法
+    virtual void onDrawFrame();
 
-        // 绑定的纹理类型，默认为GL_TEXTURE_2D
-        virtual GLenum getTextureType();
+    // 解绑attribute属性
+    virtual void unbindAttributes();
 
-        protected:
-        bool initialized;       // shader program 初始化标志
-        int programHandle;      // 程序句柄
-        int positionHandle;     // 顶点坐标句柄
-        int texCoordinateHandle;// 纹理坐标句柄
-        int inputTextureHandle[MAX_TEXTURES]; // 纹理句柄列表
-        int nb_textures;        // 纹理数量
-        int vertexCount = 4;    // 绘制的顶点个数，默认为4
-        double timeStamp;       // 时间戳
-        float intensity;        // 强度 0.0 ~ 1.0，默认为1.0
-        int textureWidth;       // 纹理宽度
-        int textureHeight;      // 纹理高度
-        int displayWidth;       // 显示输出宽度
-        int displayHeight;      // 显示输出高度
+    // 解绑纹理
+    virtual void unbindTextures();
 
+    // 绑定的纹理类型，默认为GL_TEXTURE_2D
+    virtual GLenum getTextureType();
+
+protected:
+    bool initialized;       // shader program 初始化标志
+    int programHandle;      // 程序句柄
+    int positionHandle;     // 顶点坐标句柄
+    int texCoordinateHandle;// 纹理坐标句柄
+    int inputTextureHandle[MAX_TEXTURES]; // 纹理句柄列表
+    int matrixHandle;       // 顶点坐标的矩阵句柄
+    int nb_textures;        // 纹理数量
+    int vertexCount = 4;    // 绘制的顶点个数，默认为4
+    double timeStamp;       // 时间戳
+    float intensity;        // 强度 0.0 ~ 1.0，默认为1.0
+    int textureWidth;       // 纹理宽度
+    int textureHeight;      // 纹理高度
+    int displayWidth;       // 显示输出宽度
+    int displayHeight;      // 显示输出高度
+    glm::mat4 v_mat4 = glm::mat4(1.0f);       //顶点的矩阵
+    int surfaceWidth;       // surface的宽度
+    int surfaceHeight;      // Surface的高度
 };
 
 #endif //EPLAYER_GLFILTER_H

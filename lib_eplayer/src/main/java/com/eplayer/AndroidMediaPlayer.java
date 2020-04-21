@@ -309,6 +309,13 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
+    public void surfaceChange(int width, int height) {
+        if (mMediaPlayer!=null){
+            mMediaPlayer.surfaceChange(width,height);
+        }
+    }
+
+    @Override
     public void setRate(float rate) {
         // do nothing
     }

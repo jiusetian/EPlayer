@@ -366,6 +366,13 @@ public interface IMediaPlayer {
     public void setMute(boolean mute);
 
     /**
+     * surface size change
+     * @param width
+     * @param height
+     */
+    public void surfaceChange(int width,int height);
+
+    /**
      * Sets speed on this player.
      * @param rate
      */

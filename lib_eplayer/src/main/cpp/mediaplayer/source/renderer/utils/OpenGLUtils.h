@@ -2,15 +2,18 @@
 
 #ifndef EPLAYER_OPENGLUTILS_H
 #define EPLAYER_OPENGLUTILS_H
-#if defined(__ANDROID__)
 
+#if defined(__ANDROID__)
 #include <stdio.h>
 #include <stdlib.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2platform.h>
-
 #endif
+
+#include "glm.hpp"
+#include <gtc/matrix_transform.hpp>
+#include <string>
 
 class OpenGLUtils {
 public:
@@ -46,6 +49,11 @@ public:
 
     // 绑定纹理，指定纹理类型
     static void bindTexture(int location, int texture, int index, int textureType);
+
+    //计算屏幕适配的矩阵
+    static glm::mat4 caculateVideoFitMat4(int videoWidth,int videoHeight,int surfaceWidth,int surfaceHeight);
+    //从资源文件中读取shader代码
+    static std::string *readShaderFromAsset(const char *fileName);
 
 private:
     OpenGLUtils() = default;

@@ -7,7 +7,7 @@ public class ETimedText {
     private Rect mTextBounds = null;
     private String mTextChars = null;
     //注释
-    public ETimedText(Rect bounds, String text) {
+   public ETimedText(Rect bounds, String text) {
         mTextBounds = bounds;
         mTextChars = text;
     }

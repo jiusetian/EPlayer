@@ -3,7 +3,6 @@
 #include "AndroidLog.h"
 #include "EglHelper.h"
 
-
 EPlayerEGLContext *EPlayerEGLContext::instance;
 //std::mutex 是C++11 中最基本的互斥量
 std::mutex EPlayerEGLContext::mutex;

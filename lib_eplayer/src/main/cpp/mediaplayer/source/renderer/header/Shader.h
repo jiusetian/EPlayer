@@ -6,7 +6,6 @@
 #define EPLAYER_SHADER_H
 
 //#include <glad/glad.h>
-
 #include <string>
 #include <iostream>
 #include <fstream>
