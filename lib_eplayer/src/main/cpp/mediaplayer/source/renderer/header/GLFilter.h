@@ -109,6 +109,12 @@ public:
     //Surface的大小发生改变
     void nativeSurfaceChanged(int width, int height);
 
+    //设置滤镜类型
+    virtual void setFilterType(GLint filterType);
+
+    //设置滤镜颜色
+    virtual void setFilterColor(GLfloat *filterColor);
+
 
 protected:
     // 绑定attribute属性
@@ -156,6 +162,8 @@ protected:
     glm::mat4 v_mat4 = glm::mat4(1.0f);       //顶点的矩阵
     int surfaceWidth;       // surface的宽度
     int surfaceHeight;      // Surface的高度
+    GLint mFilterType;      //滤镜类型
+    GLfloat mFilterColor[3];//滤镜颜色
 };
 
 #endif //EPLAYER_GLFILTER_H

@@ -16,9 +16,22 @@ void RenderNode::init() {
 }
 
 void RenderNode::surfaceChanged(int width, int height) {
-    LOGD("执行4");
     if (glFilter!= nullptr) {
         glFilter->nativeSurfaceChanged(width, height);
+    }
+}
+
+
+void RenderNode::setFilterType(GLint filterType) {
+    if (glFilter!= nullptr) {
+        glFilter->setFilterType(filterType);
+    }
+}
+
+void RenderNode::setFilterColor(GLfloat *filterColor) {
+    //设置纹理渲染滤镜颜色
+    if (glFilter!= nullptr) {
+        glFilter->setFilterColor(filterColor);
     }
 }
 

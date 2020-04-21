@@ -18,6 +18,12 @@ public:
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
 
+    //设置滤镜类型
+    void setFilterType(GLint filterType);
+
+    //设置滤镜颜色
+    void setFilterColor(GLfloat *filterColor);
+
     void terminate() override;
 
     void terminate(bool releaseContext);

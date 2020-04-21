@@ -96,9 +96,21 @@ status_t EMediaPlayer::getMetadata(bool update_only, bool apply_filter, AVDictio
 }
 
 void EMediaPlayer::surfaceChanged(int width, int height) {
-    LOGD("执行2");
-    if (videoDevice!=nullptr){
-        videoDevice->surfaceChanged(width,height);
+    if (videoDevice != nullptr) {
+        videoDevice->surfaceChanged(width, height);
+    }
+}
+
+void EMediaPlayer::setFilterType(GLint filterType) {
+    if (videoDevice != nullptr) {
+        videoDevice->setFilterType(filterType);
+    }
+}
+
+void EMediaPlayer::setFilterColor(GLfloat *filterColor) {
+    //设置纹理渲染滤镜颜色
+    if (videoDevice != nullptr) {
+        videoDevice->setFilterColor(filterColor);
     }
 }
 

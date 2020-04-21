@@ -26,11 +26,6 @@ public:
 private:
     GLint mFilterTypeLoc;
     GLint mFilterColorLoc;
-    //滤镜类型
-    GLint mFilterType;
-    //滤镜颜色
-    GLfloat mFilterColor[3];
-
 
 };
 

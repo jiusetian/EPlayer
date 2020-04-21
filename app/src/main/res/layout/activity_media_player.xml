@@ -9,14 +9,14 @@
     <FrameLayout
             android:id="@+id/fl_video"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             >
 
 <!--        视频渲染界面-->
         <SurfaceView
                 android:id="@+id/surfaceView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
 
 <!--        视频控制界面-->
         <LinearLayout

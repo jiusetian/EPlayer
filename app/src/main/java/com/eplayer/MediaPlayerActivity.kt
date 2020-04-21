@@ -7,10 +7,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
-import android.view.MotionEvent
-import android.view.SurfaceHolder
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.activity_media_player.*
 
@@ -32,10 +29,10 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_player)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-        }
-        supportActionBar!!.hide()
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+//        }
+        //supportActionBar!!.hide()
         path = intent.getStringExtra(PATH)
         initPlayer()
         initView()
@@ -155,41 +152,16 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         if (newConfig.orientation != screenOrientation) {
             screenOrientation = newConfig.orientation
             iv_orientation.setImageResource(if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) R.mipmap.iv_land else R.mipmap.iv_port)
-            //changeSurfaceSize()
         }
     }
-
-    //横竖屏切换，改变Surfaceview的大小
-    private fun changeSurfaceSize() {
-        //默认Surfaceview的宽等于屏幕的宽，高按视频帧的宽高比适配
-        val viewWidth = Utils.getScreenWidth(this)
-        var viewHeight: Int
-
-        if (eMediaPlayer.getRotate() % 180 !== 0) {
-            viewHeight =
-                if (eMediaPlayer.videoHeight == 0) viewWidth / 2 else viewWidth * eMediaPlayer.getVideoWidth() / eMediaPlayer.getVideoHeight()
-        } else {
-            viewHeight =
-                if (eMediaPlayer.videoWidth == 0) viewWidth / 2 else viewWidth * eMediaPlayer.getVideoHeight() / eMediaPlayer.getVideoWidth()
-        }
-        LogUtil.d("视频的宽高=" + eMediaPlayer.videoWidth + "--" + eMediaPlayer.videoHeight)
-        LogUtil.d("surface的宽高=" + viewWidth + "--" + viewHeight)
-        LogUtil.d("屏幕的宽高=" + Utils.getScreenWidth(this) + "--" + Utils.getScreenHeight(this))
-        val layoutParams = surfaceView.getLayoutParams()
-        layoutParams.width = viewWidth
-        layoutParams.height = viewHeight
-        surfaceView.setLayoutParams(layoutParams)
-        surfaceView.requestLayout()
-    }
-
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         LogUtil.d("Surface的宽高=" + width + "----" + height)
+        LogUtil.d("屏幕宽高="+Utils.getScreenWidth(this)+"---"+Utils.getScreenHeight(this))
         eMediaPlayer.surfaceChange(width, height)
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
-    }
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {}
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         //设置播放器的渲染界面,这个surfaceview会传递到NDK底层
@@ -205,13 +177,15 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
-    override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-    }
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
         //改变视频播放进度
         eMediaPlayer.seekTo(mProgress.toFloat())
+        if (isPlayComplete){
+            iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+            isPlayComplete = false
+        }
     }
 
     override fun onClick(v: View) {
@@ -237,4 +211,32 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                 else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_egl, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        var filter: Filter = Filter.NONE
+        when (item.itemId) {
+            R.id.action_original -> filter = Filter.NONE
+            R.id.action_blackwhite -> filter = Filter.GRAY
+            R.id.action_cooltone -> filter = Filter.COOL
+            R.id.action_dim -> filter = Filter.BLUR
+            R.id.action_warmtone -> filter = Filter.WARM
+        }
+        eMediaPlayer.setFilter(filter.mType, filter.mData)
+        return true
+    }
+
+    //滤镜类型
+    enum class Filter(val mType: Int, val mData: FloatArray) {
+        NONE(0, floatArrayOf(0.0f, 0.0f, 0.0f)),
+        GRAY(1, floatArrayOf(0.299f, 0.587f, 0.114f)),
+        COOL(2, floatArrayOf(0.0f, 0.0f, 0.1f)),
+        WARM(2, floatArrayOf(0.1f, 0.1f, 0.0f)),
+        BLUR(3, floatArrayOf(0.006f, 0.004f, 0.002f));
+    }
+
 }

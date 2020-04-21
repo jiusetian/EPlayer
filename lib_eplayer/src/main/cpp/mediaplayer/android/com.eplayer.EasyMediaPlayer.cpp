@@ -554,8 +554,24 @@ void EMediaPlayer_surfaceChange(JNIEnv *env, jobject thiz,jint width, jint heigh
         jniThrowException(env, "java/lang/IllegalStateException");
         return;
     }
-    LOGD("执行1");
+
     mp->surfaceChanged(width,height);
+}
+
+//设置滤镜类型和颜色
+void EMediaPlayer_setFilter(JNIEnv *env, jobject thiz,jint filterType,
+                                        jfloatArray filterColor_){
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+    jfloat *filterColor = env->GetFloatArrayElements(filterColor_, NULL);
+
+    mp->setFilterType(filterType);
+    mp->setFilterColor(filterColor);
+
+    env->ReleaseFloatArrayElements(filterColor_, filterColor, 0);
 }
 
 
@@ -595,11 +611,8 @@ void EMediaPlayer_setOptionLong(JNIEnv *env, jobject thiz, int category, jstring
 
 static const JNINativeMethod gMethods[] = {
         {"_setDataSource",      "(Ljava/lang/String;)V",                    (void *) EMediaPlayer_setDataSource},
-        {
-         "_setDataSource",
-                                "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
-                                                                            (void *) EMediaPlayer_setDataSourceAndHeaders
-        },
+        {"_setDataSource",      "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+                                                                            (void *) EMediaPlayer_setDataSourceAndHeaders},
         {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",            (void *) EMediaPlayer_setDataSourceFD},
         {"_setVideoSurface",    "(Landroid/view/Surface;)V",                (void *) EMediaPlayer_setVideoSurface},
         {"_prepare",            "()V",                                      (void *) EMediaPlayer_prepare},
@@ -628,7 +641,8 @@ static const JNINativeMethod gMethods[] = {
         {"native_finalize",     "()V",                                      (void *) EMediaPlayer_finalize},
         {"_setOption",          "(ILjava/lang/String;Ljava/lang/String;)V", (void *) EMediaPlayer_setOption},
         {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong},
-        {"_surfaceChange",      "(II)V",                                   (void *) EMediaPlayer_surfaceChange}
+        {"_surfaceChange",      "(II)V",                                    (void *) EMediaPlayer_surfaceChange},
+        {"_setFilter",          "(I[F)V",                                   (void *) EMediaPlayer_setFilter}
 };
 
 // 注册EMediaPlayer的Native方法

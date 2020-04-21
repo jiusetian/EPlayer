@@ -28,9 +28,21 @@ GLESDevice::~GLESDevice() {
 }
 
 void GLESDevice::surfaceChanged(int width, int height) {
-    LOGD("执行3");
-    if(mRenderNode!=NULL){
-        mRenderNode->surfaceChanged(width,height);
+    if (mRenderNode != NULL) {
+        mRenderNode->surfaceChanged(width, height);
+    }
+}
+
+void GLESDevice::setFilterType(GLint filterType) {
+    if (mRenderNode != NULL) {
+        mRenderNode->setFilterType(filterType);
+    }
+}
+
+void GLESDevice::setFilterColor(GLfloat *filterColor) {
+    //设置纹理渲染滤镜颜色
+    if (mRenderNode != NULL) {
+        mRenderNode->setFilterColor(filterColor);
     }
 }
 
@@ -141,7 +153,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     mVideoTexture->frameHeight = height;
     //纹理高度
     mVideoTexture->height = height;
-    mVideoTexture->width=width;
+    mVideoTexture->width = width;
     mVideoTexture->format = format;
     mVideoTexture->blendMode = blendMode;
     mVideoTexture->direction = FLIP_NONE;
@@ -153,7 +165,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         if (mRenderNode != NULL) {
             mRenderNode->initFilter(mVideoTexture);
             //设置视口的宽高
-            mRenderNode->surfaceChanged(mSurfaceWidth,mSurfaceHeight);
+            mRenderNode->surfaceChanged(mSurfaceWidth, mSurfaceHeight);
         }
     }
     mMutex.unlock();
@@ -169,7 +181,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
  * @param vPitch
  * @return
  */
-int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPitch, uint8_t *vData,int vPitch) {
+int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPitch, uint8_t *vData, int vPitch) {
     if (!mHaveEGlContext) {
         return -1;
     }

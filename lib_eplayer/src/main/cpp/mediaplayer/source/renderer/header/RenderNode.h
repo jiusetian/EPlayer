@@ -1,6 +1,7 @@
 
 #ifndef EPLAYER_RENDERNODE_H
 #define EPLAYER_RENDERNODE_H
+
 #include <string>
 
 #include "FrameBuffer.h"
@@ -60,6 +61,13 @@ public:
 
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
+
+    //设置滤镜类型
+    void setFilterType(GLint filterType);
+
+    //设置滤镜颜色
+    void setFilterColor(GLfloat *filterColor);
+
 public:
     // 前继结点
     RenderNode *prevNode;
@@ -78,4 +86,5 @@ protected:
     // FrameBuffer 对象
     FrameBuffer *frameBuffer;
 };
+
 #endif //EPLAYER_RENDERNODE_H

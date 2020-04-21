@@ -316,6 +316,13 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
+    public void setFilter(int filterType, float[] filterColor) {
+        if (mMediaPlayer!=null){
+            mMediaPlayer.setFilter(filterType,filterColor);
+        }
+    }
+
+    @Override
     public void setRate(float rate) {
         // do nothing
     }

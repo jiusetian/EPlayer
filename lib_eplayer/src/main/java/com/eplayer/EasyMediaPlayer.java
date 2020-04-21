@@ -826,6 +826,12 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _surfaceChange(int width, int height);
 
+    @Override
+    public void setFilter(int filterType, float[] filterColor) {
+        _setFilter(filterType,filterColor);
+    }
+    private native void _setFilter(int filterType, float[] filterColor);
+
     /**
      * Sets speed on this player.
      *

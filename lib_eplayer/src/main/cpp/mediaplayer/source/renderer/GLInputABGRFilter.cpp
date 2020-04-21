@@ -78,12 +78,16 @@ void GLInputABGRFilter::initProgram() {
 
 void GLInputABGRFilter::bindUniforms() {
     GLFilter::bindUniforms();
+    glUniform1i(mFilterTypeLoc, mFilterType);
+    glUniform3fv(mFilterColorLoc, 1, mFilterColor);
 }
 
 void GLInputABGRFilter::initProgram(const char *vertexShader, const char *fragmentShader) {
     GLFilter::initProgram(vertexShader, fragmentShader);
+
     if (isInitialized()) {
         mFilterTypeLoc = glGetUniformLocation(programHandle, "iFilterType");
+        mFilterColorLoc = glGetUniformLocation(programHandle, "vFilterColor");
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glUseProgram(programHandle);
         //设置各纹理对象的参数

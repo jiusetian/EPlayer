@@ -73,6 +73,15 @@ bool GLFilter::isInitialized() {
     return initialized;
 }
 
+void GLFilter::setFilterType(GLint filterType) {
+    mFilterType = filterType;
+}
+
+void GLFilter::setFilterColor(GLfloat *filterColor) {
+    //设置纹理渲染滤镜颜色
+    memcpy(mFilterColor, filterColor, sizeof(mFilterColor));
+}
+
 void GLFilter::setTextureSize(int width, int height) {
     this->textureWidth = width;
     this->textureHeight = height;

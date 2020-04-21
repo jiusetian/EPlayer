@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.byteflow.openglcamera2.MainActivity">
+    <item
+        android:id="@+id/action_original"
+        android:title="原色"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_blackwhite"
+        android:title="黑白"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_dim"
+        android:title="模糊"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_cooltone"
+        android:title="冷色调"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_warmtone"
+        android:title="暖色调"
+        app:showAsAction="never" />
+
+
+</menu>
