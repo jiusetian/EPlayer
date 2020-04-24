@@ -566,12 +566,23 @@ void EMediaPlayer_setFilter(JNIEnv *env, jobject thiz,jint filterType,
         jniThrowException(env, "java/lang/IllegalStateException");
         return;
     }
+
     jfloat *filterColor = env->GetFloatArrayElements(filterColor_, NULL);
 
     mp->setFilterType(filterType);
     mp->setFilterColor(filterColor);
 
     env->ReleaseFloatArrayElements(filterColor_, filterColor, 0);
+}
+
+//设置是否双屏
+void EMediaPlayer_setTwoScreen(JNIEnv *env, jobject thiz,jboolean isTwo){
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+    mp->setTwoScreen(isTwo);
 }
 
 
@@ -642,7 +653,8 @@ static const JNINativeMethod gMethods[] = {
         {"_setOption",          "(ILjava/lang/String;Ljava/lang/String;)V", (void *) EMediaPlayer_setOption},
         {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong},
         {"_surfaceChange",      "(II)V",                                    (void *) EMediaPlayer_surfaceChange},
-        {"_setFilter",          "(I[F)V",                                   (void *) EMediaPlayer_setFilter}
+        {"_setFilter",          "(I[F)V",                                   (void *) EMediaPlayer_setFilter},
+        {"_setTwoScreen",       "(Z)V",                                     (void *) EMediaPlayer_setTwoScreen}
 };
 
 // 注册EMediaPlayer的Native方法

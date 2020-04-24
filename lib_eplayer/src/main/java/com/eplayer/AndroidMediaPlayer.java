@@ -274,6 +274,13 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
+    public void setTwoScreen(boolean twoScreen) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setTwoScreen(twoScreen);
+        }
+    }
+
+    @Override
     public boolean isLooping() {
         if (mMediaPlayer != null) {
             return mMediaPlayer.isLooping();

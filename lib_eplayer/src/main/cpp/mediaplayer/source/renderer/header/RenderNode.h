@@ -62,11 +62,8 @@ public:
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
 
-    //设置滤镜类型
-    void setFilterType(GLint filterType);
-
-    //设置滤镜颜色
-    void setFilterColor(GLfloat *filterColor);
+    //设置是否双屏
+    void setTwoScreen(bool isTwoScreen);
 
 public:
     // 前继结点
@@ -75,14 +72,14 @@ public:
     RenderNode *nextNode;
     // 渲染结点的类型
     RenderNodeType nodeType;
+    // 滤镜
+    GLFilter *glFilter;
 
 protected:
     // 纹理宽高
     int textureWidth, textureHeight;
     // 显示宽高
     int displayWidth, displayHeight;
-    // 滤镜
-    GLFilter *glFilter;
     // FrameBuffer 对象
     FrameBuffer *frameBuffer;
 };

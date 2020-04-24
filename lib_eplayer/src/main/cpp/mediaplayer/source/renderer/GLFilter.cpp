@@ -21,9 +21,13 @@ GLFilter::~GLFilter() {
 void GLFilter::nativeSurfaceChanged(int width, int height) {
     surfaceWidth = width;
     surfaceHeight = height;
+    displayWidth=width;
+    displayHeight=height;
     //如果视频宽高不为0，则改变矩阵
     if (textureWidth != 0 && textureHeight != 0) {
-        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, surfaceWidth, surfaceHeight);
+        //根据是否双屏来适配播放宽高比
+        setTwoScreen(isTwoScreen);
+       // v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 }
 
@@ -54,7 +58,7 @@ void GLFilter::initProgram(const char *vertexShader, const char *fragmentShader)
     }
     //如果视频和Surface都不为0，则初始化矩阵
     if (textureWidth != 0 && textureHeight != 0 && surfaceWidth != 0 && surfaceHeight != 0) {
-        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, surfaceWidth, surfaceHeight);
+        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 }
 
@@ -73,13 +77,19 @@ bool GLFilter::isInitialized() {
     return initialized;
 }
 
-void GLFilter::setFilterType(GLint filterType) {
-    mFilterType = filterType;
+void GLFilter::setFilterState(FilterState *fs) {
+    filterState=fs;
 }
 
-void GLFilter::setFilterColor(GLfloat *filterColor) {
-    //设置纹理渲染滤镜颜色
-    memcpy(mFilterColor, filterColor, sizeof(mFilterColor));
+// 是否双屏播放
+void GLFilter::setTwoScreen(bool twoScreen) {
+    isTwoScreen=twoScreen;
+    //重新计算适配播放屏幕的矩阵
+    if (isTwoScreen){
+        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth,textureHeight,displayWidth,displayHeight/2);
+    } else{
+        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
+    }
 }
 
 void GLFilter::setTextureSize(int width, int height) {
@@ -159,12 +169,13 @@ void GLFilter::bindUniforms() {
 }
 
 void GLFilter::bindAttributes(const float *vertices, const float *textureVertices) {
-    glEnableVertexAttribArray(positionHandle);
-    glEnableVertexAttribArray(texCoordinateHandle);
     // 告诉GPU怎么解析顶点数据
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     // 告诉GPU怎么解析纹理坐标数据
     glVertexAttribPointer(texCoordinateHandle, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);
+
+    glEnableVertexAttribArray(positionHandle);
+    glEnableVertexAttribArray(texCoordinateHandle);
 }
 
 void GLFilter::bindTexture(GLuint texture) {
@@ -175,8 +186,6 @@ void GLFilter::bindTexture(GLuint texture) {
 }
 
 void GLFilter::onDrawBegin() {
-    // do nothing
-    glViewport(0, 0, surfaceWidth, surfaceHeight);
 }
 
 void GLFilter::onDrawAfter() {
@@ -184,9 +193,20 @@ void GLFilter::onDrawAfter() {
 }
 
 void GLFilter::onDrawFrame() {
-    //GL_TRIANGLE_STRIP表示顺序在每三个顶点之间均绘制三角形，这个方法可以保证从相同的方向上所有三角形均被绘制
-    //以V0V1V2,V1V2V3,V2V3V4……的形式绘制三角形
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
+    if (isTwoScreen){ //是否双屏
+
+        glViewport(0,0,displayWidth,displayHeight/2);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
+
+        glViewport(0,displayHeight/2,displayWidth,displayHeight/2);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
+    } else{
+        glViewport(0, 0, displayWidth, displayHeight);
+        //GL_TRIANGLE_STRIP表示顺序在每三个顶点之间均绘制三角形，这个方法可以保证从相同的方向上所有三角形均被绘制
+        //以V0V1V2,V1V2V3,V2V3V4……的形式绘制三角形
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
+    }
+
 }
 
 void GLFilter::unbindAttributes() {

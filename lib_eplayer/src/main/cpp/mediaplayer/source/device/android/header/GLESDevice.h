@@ -6,6 +6,7 @@
 #include <android/native_window_jni.h>
 #include "EglHelper.h"
 #include "InputRenderNode.h"
+#include "FilterState.h"
 
 class GLESDevice : public VideoDevice {
 public:
@@ -18,11 +19,8 @@ public:
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
 
-    //设置滤镜类型
-    void setFilterType(GLint filterType);
-
-    //设置滤镜颜色
-    void setFilterColor(GLfloat *filterColor);
+    //设置是否双屏
+    void setTwoScreen(bool isTwoScreen);
 
     void terminate() override;
 
@@ -37,6 +35,9 @@ public:
     int onUpdateARGB(uint8_t *rgba, int pitch) override;
 
     int onRequestRender(bool flip) override;
+
+    //设置滤镜状态
+    void setFilterState(FilterState *fs);
 
 private:
     void resetVertices();
@@ -61,5 +62,7 @@ private:
     InputRenderNode *mRenderNode;       // 输入渲染结点
     float vertices[8];                  // 顶点坐标
     float textureVertices[8];           // 纹理坐标
+
+    FilterState *filterState;
 };
 #endif //EPLAYER_GLESDEVICE_H

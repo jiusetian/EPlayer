@@ -740,6 +740,12 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _setLooping(boolean looping);
 
+    @Override
+    public void setTwoScreen(boolean twoScreen) {
+        _setTwoScreen(twoScreen);
+    }
+    private native void _setTwoScreen(boolean twoScreen);
+
     /**
      * Checks whether the MediaPlayer is looping or non-looping.
      *

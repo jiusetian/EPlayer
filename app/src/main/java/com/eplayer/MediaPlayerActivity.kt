@@ -2,6 +2,8 @@ package com.eplayer
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -9,7 +11,10 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.*
 import android.widget.SeekBar
+import com.eplayer.common.LogUtil
+import com.eplayer.common.StringUtils
 import kotlinx.android.synthetic.main.activity_media_player.*
+import kotlinx.android.synthetic.main.activity_media_player.view.*
 
 
 class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener,
@@ -29,10 +34,10 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_player)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-//        }
-        //supportActionBar!!.hide()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+        }
+        supportActionBar!!.hide()
         path = intent.getStringExtra(PATH)
         initPlayer()
         initView()
@@ -113,13 +118,12 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     //初始化view
     private fun initView() {
+        //初始化点击事件
+        initClicker()
         screenOrientation = resources.configuration.orientation
-        iv_pause_play.setOnClickListener(this)
         seekbar.setOnSeekBarChangeListener(this)
         //横竖屏切换
         iv_orientation.setImageResource(if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) R.mipmap.iv_land else R.mipmap.iv_port)
-        iv_orientation.setOnClickListener(this)
-
         surfaceView.holder.addCallback(this)
         surfaceView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
@@ -127,6 +131,13 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                     if (layout_operation.visibility == View.VISIBLE) View.GONE else View.VISIBLE
             }
             true
+        }
+    }
+
+    private fun initClicker(){
+        arrayOf(iv_pause_play,iv_orientation,action_original,action_blackwhite,action_dim,action_cooltone,action_warmtone,
+        action_twoscreen).forEach {
+            it.setOnClickListener(this)
         }
     }
 
@@ -157,7 +168,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         LogUtil.d("Surface的宽高=" + width + "----" + height)
-        LogUtil.d("屏幕宽高="+Utils.getScreenWidth(this)+"---"+Utils.getScreenHeight(this))
         eMediaPlayer.surfaceChange(width, height)
     }
 
@@ -188,46 +198,40 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
+    var isTwoScreen=false
     override fun onClick(v: View) {
-        //播放暂停
-        if (v.id == R.id.iv_pause_play) {
-            if (eMediaPlayer.isPlaying && !isPlayComplete) { //暂停
-                eMediaPlayer.pause()
-                iv_pause_play.setImageResource(R.drawable.ic_player_play)
-            } else if (!isPlayComplete) { //播放
-                eMediaPlayer.resume()
-                iv_pause_play.setImageResource(R.drawable.ic_player_pause)
-            } else if (isPlayComplete) { //重播
-                eMediaPlayer.seekTo(0f)
-                isPlayComplete = false
-                iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+        when(v.id){
+            //播放暂停
+            R.id.iv_pause_play->{
+                if (eMediaPlayer.isPlaying && !isPlayComplete) { //暂停
+                    eMediaPlayer.pause()
+                    iv_pause_play.setImageResource(R.drawable.ic_player_play)
+                } else if (!isPlayComplete) { //播放
+                    eMediaPlayer.resume()
+                    iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+                } else if (isPlayComplete) { //重播
+                    eMediaPlayer.seekTo(0f)
+                    isPlayComplete = false
+                    iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+
+                }
+            }
+            //横竖屏切换
+            R.id.iv_orientation-> requestedOrientation = if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+            //滤镜效果
+            R.id.action_original ->eMediaPlayer.setFilter(Filter.NONE.mType, Filter.NONE.mData)
+            R.id.action_blackwhite ->eMediaPlayer.setFilter(Filter.GRAY.mType, Filter.GRAY.mData)
+            R.id.action_cooltone ->eMediaPlayer.setFilter(Filter.COOL.mType, Filter.COOL.mData)
+            R.id.action_dim ->eMediaPlayer.setFilter(Filter.BLUR.mType, Filter.BLUR.mData)
+            R.id.action_warmtone ->eMediaPlayer.setFilter(Filter.WARM.mType, Filter.WARM.mData)
+
+            //双屏
+            R.id.action_twoscreen->{
+                isTwoScreen=!isTwoScreen
+                eMediaPlayer.setTwoScreen(isTwoScreen)
             }
         }
-
-        //横竖屏切换
-        if (v.id == R.id.iv_orientation) {
-            requestedOrientation =
-                if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_egl, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        var filter: Filter = Filter.NONE
-        when (item.itemId) {
-            R.id.action_original -> filter = Filter.NONE
-            R.id.action_blackwhite -> filter = Filter.GRAY
-            R.id.action_cooltone -> filter = Filter.COOL
-            R.id.action_dim -> filter = Filter.BLUR
-            R.id.action_warmtone -> filter = Filter.WARM
-        }
-        eMediaPlayer.setFilter(filter.mType, filter.mData)
-        return true
     }
 
     //滤镜类型

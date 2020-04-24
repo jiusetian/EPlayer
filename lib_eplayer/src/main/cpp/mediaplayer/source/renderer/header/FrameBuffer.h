@@ -73,7 +73,7 @@ private:
     int width, height;
     bool initialized;
     GLuint texture;
-    GLuint framebuffer;
+    GLuint framebuffer; //FBO缓冲区
     TextureAttributes textureAttributes;
 
 private:

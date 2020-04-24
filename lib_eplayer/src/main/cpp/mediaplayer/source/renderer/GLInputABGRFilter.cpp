@@ -78,8 +78,8 @@ void GLInputABGRFilter::initProgram() {
 
 void GLInputABGRFilter::bindUniforms() {
     GLFilter::bindUniforms();
-    glUniform1i(mFilterTypeLoc, mFilterType);
-    glUniform3fv(mFilterColorLoc, 1, mFilterColor);
+    glUniform1i(mFilterTypeLoc, filterState->getFilterType());
+    glUniform3fv(mFilterColorLoc, 1, filterState->getFilterColor());
 }
 
 void GLInputABGRFilter::initProgram(const char *vertexShader, const char *fragmentShader) {

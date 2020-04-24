@@ -32,6 +32,7 @@ void EMediaPlayer::init() {
     if (videoDevice == nullptr) {
         LOGD("设备初始化");
         videoDevice = new GLESDevice();
+        videoDevice->setFilterState(&filterState);
     }
 
     //消息分发的线程
@@ -102,16 +103,17 @@ void EMediaPlayer::surfaceChanged(int width, int height) {
 }
 
 void EMediaPlayer::setFilterType(GLint filterType) {
-    if (videoDevice != nullptr) {
-        videoDevice->setFilterType(filterType);
-    }
+    filterState.setFilterType(filterType);
 }
 
 void EMediaPlayer::setFilterColor(GLfloat *filterColor) {
-    //设置纹理渲染滤镜颜色
-    if (videoDevice != nullptr) {
-        videoDevice->setFilterColor(filterColor);
-    }
+    //设置纹理渲染的滤镜颜色
+    filterState.setFilterColor(filterColor);
+}
+
+void EMediaPlayer::setTwoScreen(bool isTwoScreen) {
+    if (videoDevice!= nullptr)
+        videoDevice->setTwoScreen(isTwoScreen);
 }
 
 status_t EMediaPlayer::setVideoSurface(ANativeWindow *native_window) {

@@ -21,17 +21,9 @@ void RenderNode::surfaceChanged(int width, int height) {
     }
 }
 
-
-void RenderNode::setFilterType(GLint filterType) {
+void RenderNode::setTwoScreen(bool isTwoScreen) {
     if (glFilter!= nullptr) {
-        glFilter->setFilterType(filterType);
-    }
-}
-
-void RenderNode::setFilterColor(GLfloat *filterColor) {
-    //设置纹理渲染滤镜颜色
-    if (glFilter!= nullptr) {
-        glFilter->setFilterColor(filterColor);
+        glFilter->setTwoScreen(isTwoScreen);
     }
 }
 

@@ -247,22 +247,22 @@ void OpenGLUtils::bindTexture(int location, int texture, int index, int textureT
     glUniform1i(location, index);
 }
 
-glm::mat4 OpenGLUtils::caculateVideoFitMat4(int videoWidth, int videoHeight, int surfaceWidth, int surfaceHeight) {
+glm::mat4 OpenGLUtils::caculateVideoFitMat4(int videoWidth, int videoHeight, int displayWidth, int displayHeight) {
     glm::mat4 v_mat4;//创建单位矩阵
     float v_ratio = (float) videoWidth / videoHeight;
-    float s_ratio = (float) surfaceWidth / surfaceHeight;
+    float s_ratio = (float) displayWidth / displayHeight;
     //1280, 720, 1536, 2048
     float left = -1.0f;
     float right = 1.0f;
     float top = 1.0f;
     float bottom = -1.0f;
 
-    if ((surfaceWidth > surfaceHeight && v_ratio > s_ratio) || (surfaceWidth < surfaceHeight && v_ratio > s_ratio)) {
+    if ((displayWidth > displayHeight && v_ratio > s_ratio) || (displayWidth < displayHeight && v_ratio > s_ratio)) {
         //缩放高度
         top = v_ratio / s_ratio;
         bottom = -(v_ratio / s_ratio);
-    } else if ((surfaceWidth > surfaceHeight && v_ratio < s_ratio) ||
-               (surfaceWidth < surfaceHeight && v_ratio < s_ratio)) {
+    } else if ((displayWidth > displayHeight && v_ratio < s_ratio) ||
+               (displayWidth < displayHeight && v_ratio < s_ratio)) {
 
         //缩放宽度
         right = s_ratio / v_ratio;
@@ -271,6 +271,7 @@ glm::mat4 OpenGLUtils::caculateVideoFitMat4(int videoWidth, int videoHeight, int
     //矩阵运算
     //v_mat4=glm::ortho(-1.0f,1.0f, -1.0f, 1.0f);
     //v_mat4 = glm::ortho(left, right, -2.37037037f, 2.37037037f);
+    LOGD("左右上下%f,%f,%f,%f",left,right,top,bottom);
     v_mat4 = glm::ortho(left, right, bottom, top);
     return v_mat4;
 }

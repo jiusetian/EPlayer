@@ -9,6 +9,9 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.*
 import android.widget.SeekBar
+import com.eplayer.common.LogUtil
+import com.eplayer.common.StringUtils
+import com.eplayer.common.Utils
 import com.live.LiveConfig
 import com.live.MediaPublisher
 import com.live.simplertmp.RtmpHandler

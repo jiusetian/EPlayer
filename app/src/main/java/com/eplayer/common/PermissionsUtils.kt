@@ -1,4 +1,4 @@
-package com.eplayer
+package com.eplayer.common
 
 import android.app.Activity
 import android.content.Context
@@ -23,7 +23,11 @@ object PermissionsUtils {
      * 返回未授权的权限
      */
     fun checkManyPermissions(context: Context, permissions: Array<String>): List<String> {
-        return permissions.filter { !checkPermission(context, it) }
+        return permissions.filter { !checkPermission(
+            context,
+            it
+        )
+        }
     }
 
     /**
@@ -64,8 +68,13 @@ object PermissionsUtils {
      * 检测并请求多个权限
      */
     fun checkAndRequestManyPermissions(context: Context, permissions: Array<String>, requestCode: Int) {
-        val permissionList = checkManyPermissions(context, permissions)
-        requestManyPermissions(context, permissionList.toTypedArray(), requestCode)
+        val permissionList =
+            checkManyPermissions(context, permissions)
+        requestManyPermissions(
+            context,
+            permissionList.toTypedArray(),
+            requestCode
+        )
     }
 
     /**

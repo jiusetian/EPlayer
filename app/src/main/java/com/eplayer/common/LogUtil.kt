@@ -1,4 +1,4 @@
-package com.eplayer
+package com.eplayer.common
 
 import android.util.Log
 
@@ -31,32 +31,57 @@ object LogUtil {
 
     fun d(vararg s: String) {
         if (debugEnabled)
-            d(LOGTAG, getDebugInfo()+ getLogInfoByArray(s as Array<String>))
+            d(
+                LOGTAG,
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
+            )
     }
 
     fun v(vararg s: String) {
         if (debugEnabled)
-            v(LOGTAG, getDebugInfo()+ getLogInfoByArray(s as Array<String>))
+            v(
+                LOGTAG,
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
+            )
     }
 
     fun w(vararg s: String) {
         if (debugEnabled)
-            w(LOGTAG,getDebugInfo()+  getLogInfoByArray(s as Array<String>))
+            w(
+                LOGTAG,
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
+            )
     }
 
     fun e(vararg s: String?) {
         if (debugEnabled)
-            e(LOGTAG, getDebugInfo()+ getLogInfoByArray(s as Array<String>))
+            e(
+                LOGTAG,
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
+            )
     }
 
     fun i(vararg s: String) {
         if (debugEnabled)
-            i(LOGTAG, getDebugInfo()+ getLogInfoByArray(s as Array<String>))
+            i(
+                LOGTAG,
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
+            )
     }
 
     fun e(tr: Throwable) {
         if (debugEnabled)
-            Log.e(LOGTAG, getDebugInfo()+ getDebugInfo(), tr)
+            Log.e(LOGTAG, getDebugInfo() + getDebugInfo(), tr)
     }
 
 

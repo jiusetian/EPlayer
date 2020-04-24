@@ -51,7 +51,7 @@ public:
     static void bindTexture(int location, int texture, int index, int textureType);
 
     //计算屏幕适配的矩阵
-    static glm::mat4 caculateVideoFitMat4(int videoWidth,int videoHeight,int surfaceWidth,int surfaceHeight);
+    static glm::mat4 caculateVideoFitMat4(int videoWidth, int videoHeight, int displayWidth, int displayHeight);
     //从资源文件中读取shader代码
     static std::string *readShaderFromAsset(const char *fileName);
 

@@ -57,7 +57,6 @@ int InputRenderNode::drawFrameBuffer(Texture *texture) {
     if (!frameBuffer || !frameBuffer->isInitialized() || !glFilter || !glFilter->isInitialized()) {
         return -1;
     }
-
     frameBuffer->bindBuffer();
     cropTexVertices(texture);
     ((GLInputFilter *) glFilter)->renderTexture(texture, vertices, textureVertices);

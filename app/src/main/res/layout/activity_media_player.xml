@@ -9,7 +9,8 @@
     <FrameLayout
             android:id="@+id/fl_video"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             >
 
 <!--        视频渲染界面-->
@@ -83,10 +84,57 @@
         </LinearLayout>
     </FrameLayout>
 
+    <com.eplayer.common.FlowLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+        <Button
+                android:id="@+id/action_original"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="原色"
+                />
+        <Button
+                android:id="@+id/action_blackwhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="黑白"
+                />
+        <Button
+                android:id="@+id/action_dim"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模糊"
+                />
+        <Button
+                android:id="@+id/action_cooltone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="冷色调"
+                />
+        <Button
+                android:id="@+id/action_warmtone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="暖色调"
+                />
+
+        <Button
+                android:id="@+id/action_twoscreen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="双屏"
+                />
+
+    </com.eplayer.common.FlowLayout>
+
 <!--    视频信息界面-->
     <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            >
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

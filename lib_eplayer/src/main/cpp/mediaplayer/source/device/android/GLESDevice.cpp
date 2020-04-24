@@ -33,17 +33,12 @@ void GLESDevice::surfaceChanged(int width, int height) {
     }
 }
 
-void GLESDevice::setFilterType(GLint filterType) {
+void GLESDevice::setTwoScreen(bool isTwoScreen) {
     if (mRenderNode != NULL) {
-        mRenderNode->setFilterType(filterType);
+        mRenderNode->setTwoScreen(isTwoScreen);
     }
-}
-
-void GLESDevice::setFilterColor(GLfloat *filterColor) {
-    //设置纹理渲染滤镜颜色
-    if (mRenderNode != NULL) {
-        mRenderNode->setFilterColor(filterColor);
-    }
+    //重置Surface
+    mSurfaceReset=true;
 }
 
 void GLESDevice::surfaceCreated(ANativeWindow *window) {
@@ -51,7 +46,7 @@ void GLESDevice::surfaceCreated(ANativeWindow *window) {
     if (mWindow != NULL) {
         ANativeWindow_release(mWindow);
         mWindow = NULL;
-        //重新设置Surface
+        //重置window则需要重置Surface
         mSurfaceReset = true;
     }
     mWindow = window;
@@ -59,7 +54,6 @@ void GLESDevice::surfaceCreated(ANativeWindow *window) {
         //渲染区域的宽高
         mSurfaceWidth = ANativeWindow_getWidth(mWindow);
         mSurfaceHeight = ANativeWindow_getHeight(mWindow);
-        //LOGD("c++的宽高%d，%d", mSurfaceWidth, mSurfaceHeight);
     }
     mHasSurface = true;
     mMutex.unlock();
@@ -70,13 +64,14 @@ void GLESDevice::terminate() {
 }
 
 void GLESDevice::terminate(bool releaseContext) {
+    //销毁Surface
     if (eglSurface != EGL_NO_SURFACE) {
-        LOGD("销毁surface");
         eglHelper->destroySurface(eglSurface);
         eglSurface = EGL_NO_SURFACE;
         mHaveEGLSurface = false;
     }
 
+    //销毁egl上下文
     if (eglHelper->getEglContext() != EGL_NO_CONTEXT && releaseContext) {
         if (mRenderNode) {
             mRenderNode->destroy();
@@ -111,13 +106,12 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         return;
     }
     // 重新设置Surface，兼容SurfaceHolder处理
-    //Android端的Surface是否已经传递进来了，同时Surface要reset
     if (mHasSurface && mSurfaceReset) {
         terminate(false);
         mSurfaceReset = false;
     }
 
-    // 创建/释放EGLSurface
+    // 创建EGLSurface
     if (eglSurface == EGL_NO_SURFACE && mWindow != NULL) {
         //如果已经有Surface但是还没有eglSurface，则创建之
         if (mHasSurface && !mHaveEGLSurface) {
@@ -127,7 +121,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
                 LOGD("mHaveEGLSurface = %d", mHaveEGLSurface);
             }
         }
-    } else if (eglSurface != EGL_NO_SURFACE && mHaveEGLSurface) {
+    }else if (eglSurface != EGL_NO_SURFACE && mHaveEGLSurface) {
         // 处于SurfaceDestroyed状态，释放EGLSurface
         if (!mHasSurface) {
             terminate(false);
@@ -164,11 +158,17 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         mRenderNode = new InputRenderNode();
         if (mRenderNode != NULL) {
             mRenderNode->initFilter(mVideoTexture);
+            //设置滤镜状态的指针
+            mRenderNode->glFilter->setFilterState(filterState);
             //设置视口的宽高
             mRenderNode->surfaceChanged(mSurfaceWidth, mSurfaceHeight);
         }
     }
     mMutex.unlock();
+}
+
+void GLESDevice::setFilterState(FilterState *fs) {
+    filterState=fs;
 }
 
 /**

@@ -16,6 +16,7 @@
 #include "FrameBuffer.h"
 #include "macros.h"
 #include "Shader.h"
+#include "FilterState.h"
 
 
 using namespace std;
@@ -85,8 +86,7 @@ public:
     drawTexture(GLuint texture, const float *vertices, const float *textureVertices, bool viewPortUpdate = true);
 
     // 将纹理绘制到FBO中，实际上就是RenderNode中创建的FrameBuffer。这个FBO可以不跟随GLFilter释放，单独维护
-    virtual void
-    drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices, const float *textureVertices);
+    virtual void drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices, const float *textureVertices);
 
     // 设置纹理大小
     virtual void setTextureSize(int width, int height);
@@ -109,11 +109,11 @@ public:
     //Surface的大小发生改变
     void nativeSurfaceChanged(int width, int height);
 
-    //设置滤镜类型
-    virtual void setFilterType(GLint filterType);
+    //设置滤镜状态
+    virtual void setFilterState(FilterState *fs);
 
-    //设置滤镜颜色
-    virtual void setFilterColor(GLfloat *filterColor);
+    //设置是否双屏
+    void setTwoScreen(bool isTwoScreen);
 
 
 protected:
@@ -162,8 +162,8 @@ protected:
     glm::mat4 v_mat4 = glm::mat4(1.0f);       //顶点的矩阵
     int surfaceWidth;       // surface的宽度
     int surfaceHeight;      // Surface的高度
-    GLint mFilterType;      //滤镜类型
-    GLfloat mFilterColor[3];//滤镜颜色
+    FilterState *filterState; //滤镜状态
+    bool isTwoScreen;        //是否双屏
 };
 
 #endif //EPLAYER_GLFILTER_H

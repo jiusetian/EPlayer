@@ -1,4 +1,4 @@
-package com.eplayer;
+package com.eplayer.common;
 
 import android.text.TextPaint;
 

@@ -312,6 +312,8 @@ public interface IMediaPlayer {
      */
     public void setLooping(boolean looping);
 
+    public void setTwoScreen(boolean twoScreen);
+
     /**
      * Checks whether the MediaPlayer is looping or non-looping.
      *

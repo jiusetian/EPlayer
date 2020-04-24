@@ -10,6 +10,7 @@
 #include <libavutil/dict.h>
 #include <GLESDevice.h>
 #include <MediaPlayer.h>
+#include "FilterState.h"
 
 enum media_event_type {
     MEDIA_NOP = 0, // interface test message
@@ -110,6 +111,9 @@ public:
     //设置滤镜颜色
     void setFilterColor(GLfloat *filterColor);
 
+    //是否双屏
+    void setTwoScreen(bool isTwoScreen);
+
     status_t setListener(MediaPlayerListener *listener);
 
     status_t prepare();
@@ -185,6 +189,9 @@ private:
     bool mPrepareSync;
     status_t mPrepareStatus;
     int mAudioSessionId;
+
+    //滤镜状态
+    FilterState filterState;
 };
 
 
