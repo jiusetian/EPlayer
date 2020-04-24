@@ -69,6 +69,7 @@ void SLESDevice::stop() {
     if (audioThread) {
         audioThread->join();
         delete audioThread;
+        LOGD("删除音频设备线程");
         audioThread = NULL;
     }
 }

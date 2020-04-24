@@ -63,6 +63,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
         // 设置准备监听
         eMediaPlayer.setOnPreparedListener {
+            LogUtil.d("开始播放")
             // 开始播放
             eMediaPlayer.start()
             // UI线程执行
@@ -79,7 +80,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
         // 设置错误监听
         eMediaPlayer.setOnErrorListener { mp, what, extra ->
-            Log.d("tag", "发生错误：$what,$extra")
+            LogUtil.d("tag", "发生错误：$what,$extra")
             false
         }
 

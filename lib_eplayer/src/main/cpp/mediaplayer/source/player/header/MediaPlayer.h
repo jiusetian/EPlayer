@@ -84,11 +84,23 @@ protected:
 
 private:
 
-    int demuxAndPrepareDecoder();
+    // 通知出错
+    void notifyErrorMsg(const char* msg);
 
-    int startDecodeAndSync();
+    // 解封装
+    int demux();
 
-    int readAvPackets();
+    // 准备解码器
+    int prepareDecoder();
+
+    // 开始解码
+    void startDecode();
+
+    // 打开多媒体设备
+    int openMediaDevice();
+
+    // 获取AV数据
+    int getAvPackets();
 
     int startPlayer();
 

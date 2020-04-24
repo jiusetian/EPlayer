@@ -20,7 +20,7 @@ EMediaPlayer::~EMediaPlayer() {
 
 }
 
-//对应于java层的mediaplayer创建对象的时候调用，即在构造函数中被调用
+// 对应于java层的mediaplayer创建对象的时候调用，即在构造函数中被调用
 void EMediaPlayer::init() {
     mMutex.lock();
     abortRequest = false;
@@ -28,34 +28,36 @@ void EMediaPlayer::init() {
     mMutex.unlock();
 
     mMutex.lock();
-    //视频播放设备
+    // 视频播放设备
     if (videoDevice == nullptr) {
         videoDevice = new GLESDevice();
         videoDevice->setFilterState(&filterState);
     }
 
-    //消息分发的线程
+    // 消息分发的线程
     if (msgThread == nullptr) {
-        //this就是runnable
+        // this就是runnable
         msgThread = new Thread(this);
         msgThread->start();
     }
     mMutex.unlock();
 }
 
-//java层对应mediaplayer的release方法的时候被调用
+// java层对应mediaplayer的release方法的时候被调用
 void EMediaPlayer::disconnect() {
 
     mMutex.lock();
     abortRequest = true;
     mCondition.signal();
     mMutex.unlock();
-    //重置
+    // 重置
     reset();
-
+    LOGD("调用disconnect");
     if (msgThread != nullptr) {
+        LOGD("开始删除消息通知线程");
         msgThread->join();
         delete msgThread;
+        LOGD("删除消息通知线程");
         msgThread = nullptr;
     }
 
@@ -106,7 +108,7 @@ void EMediaPlayer::setFilterType(GLint filterType) {
 }
 
 void EMediaPlayer::setFilterColor(GLfloat *filterColor) {
-    //设置纹理渲染的滤镜颜色
+    // 设置纹理渲染的滤镜颜色
     filterState.setFilterColor(filterColor);
 }
 
@@ -370,7 +372,7 @@ void EMediaPlayer::run() {
             }
 
             case MSG_ERROR: {
-                LOGD("EMediaPlayer occurs error: %d\n", msg.arg1);
+                LOGE("EMediaPlayer occurs error: %d,%s\n", msg.arg1,msg.obj);
                 if (mPrepareSync) {
                     mPrepareSync = false;
                     mPrepareStatus = msg.arg1;

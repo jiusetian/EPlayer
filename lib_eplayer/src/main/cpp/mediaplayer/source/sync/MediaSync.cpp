@@ -59,6 +59,7 @@ void MediaSync::start(VideoDecoder *videoDecoder, AudioDecoder *audioDecoder) {
     mCondition.signal();
     mMutex.unlock();
     if (videoDecoder && !syncThread) {
+        LOGD("开启同步线程");
         syncThread = new Thread(this);
         syncThread->start();
     }
@@ -78,6 +79,7 @@ void MediaSync::stop() {
     if (syncThread) {
         syncThread->join();
         delete syncThread;
+        LOGD("删除同步线程");
         syncThread = NULL;
     }
 }

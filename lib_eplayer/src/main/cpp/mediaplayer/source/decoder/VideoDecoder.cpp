@@ -35,7 +35,7 @@ void VideoDecoder::setMasterClock(MediaClock *masterClock) {
     this->masterClock = masterClock;
 }
 
-//开始视频的解码
+// 开始视频的解码
 void VideoDecoder::start() {
     MediaDecoder::start();
 
@@ -43,8 +43,9 @@ void VideoDecoder::start() {
         frameQueue->start();
     }
 
-    //解码线程
+    // 解码线程
     if (!decodeThread) {
+        LOGD("开启视频解码线程");
         decodeThread = new Thread(this);
         decodeThread->start();
         mExit = false;
@@ -65,6 +66,7 @@ void VideoDecoder::stop() {
     if (decodeThread) {
         decodeThread->join();
         delete decodeThread;
+        LOGD("删除视频解码线程");
         decodeThread = NULL;
     }
 }
@@ -140,6 +142,7 @@ int VideoDecoder::decodeVideo() {
         if (playerState->seekRequest) {
             continue;
         }
+        /*取数据，如果没有数据会阻塞*/
         //取得数据包，如果没有数据的时候会阻塞，是一个生产者消费者模式
         if (packetQueue->getPacket(packet) < 0) {
             ret = -1;

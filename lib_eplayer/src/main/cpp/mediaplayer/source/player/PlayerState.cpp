@@ -56,6 +56,7 @@ void PlayerState::reset() {
     }
     offset = 0;
     abortRequest = 1;
+    LOGD("设置暂停标志");
     pauseRequest = 1;
     seekByBytes = 0;
     syncType = AV_SYNC_AUDIO; //以音频时钟为准
