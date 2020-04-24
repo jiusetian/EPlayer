@@ -28,7 +28,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     private lateinit var eMediaPlayer: EasyMediaPlayer
     private var mProgress = 0
     private var screenOrientation: Int = Configuration.ORIENTATION_UNDEFINED
-    private var isPlayComplete = false //播放是否完成
+    private var isPlayComplete = false // 播放是否完成
+    private var isTwoScreen=false // 是否双屏播放
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,32 +45,29 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
 
-    //初始化播放器
+    // 初始化播放器
     private fun initPlayer() {
-
         if (TextUtils.isEmpty(path)) return
 
         eMediaPlayer = EasyMediaPlayer()
-        //设置播放源路径
+        // 设置播放源路径
         try {
             eMediaPlayer.setDataSource(path)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        //监听尺寸的改变
+        // 监听尺寸的改变
         eMediaPlayer.setOnVideoSizeChangedListener { mediaPlayer, width, height ->
             LogUtil.d("视频size改变=" + width + "--" + height)
         }
 
-        //设置准备监听
+        // 设置准备监听
         eMediaPlayer.setOnPreparedListener {
-            //开始播放
+            // 开始播放
             eMediaPlayer.start()
-            //UI线程执行
+            // UI线程执行
             runOnUiThread {
-                //改变Surfaceview的宽高
-                //changeSurfaceSize()
-                //播放进度相关
+                // 播放进度相关
                 tv_current_position.setText(
                     StringUtils.generateStandardTime(Math.max(eMediaPlayer.getCurrentPosition(), 0))
                 )
@@ -77,36 +75,35 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                 seekbar.setMax(Math.max(eMediaPlayer.getDuration(), 0).toInt())
                 seekbar.setProgress(Math.max(eMediaPlayer.getCurrentPosition(), 0).toInt())
             }
-
         }
 
-        //设置错误监听
+        // 设置错误监听
         eMediaPlayer.setOnErrorListener { mp, what, extra ->
             Log.d("tag", "发生错误：$what,$extra")
             false
         }
 
-        //完成监听
+        // 完成监听
         eMediaPlayer.setOnCompletionListener {
             isPlayComplete = true
             iv_pause_play.setImageResource(R.mipmap.iv_replay)
         }
 
-        //播放进度监听
+        // 播放进度监听
         eMediaPlayer.setOnCurrentPositionListener { current, duration ->
             runOnUiThread {
                 if (eMediaPlayer.isPlaying) {
-                    //设置当前播放时间
+                    // 设置当前播放时间
                     tv_current_position.setText(StringUtils.generateStandardTime(current))
-                    //播放进度
+                    // 播放进度
                     seekbar.setProgress(current.toInt())
                 }
             }
         }
 
-        //准备播放
+        // 准备播放
         try {
-            //设置播放器参数，指定视频解码器名称为h264_mediacodec
+            // 设置播放器参数，指定视频解码器名称为h264_mediacodec
             eMediaPlayer.setOption(EasyMediaPlayer.OPT_CATEGORY_PLAYER, "vcodec", "h264_mediacodec")
             eMediaPlayer.prepareAsync()
 
@@ -116,19 +113,18 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     }
 
-    //初始化view
+    // 初始化view
     private fun initView() {
-        //初始化点击事件
+        // 初始化点击事件
         initClicker()
         screenOrientation = resources.configuration.orientation
         seekbar.setOnSeekBarChangeListener(this)
-        //横竖屏切换
+        // 横竖屏切换图标
         iv_orientation.setImageResource(if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) R.mipmap.iv_land else R.mipmap.iv_port)
         surfaceView.holder.addCallback(this)
         surfaceView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
-                layout_operation.visibility =
-                    if (layout_operation.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                layout_operation.visibility = if (layout_operation.visibility == View.VISIBLE) View.GONE else View.VISIBLE
             }
             true
         }
@@ -159,7 +155,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        //屏幕方向变化
+        // 屏幕方向变化
         if (newConfig.orientation != screenOrientation) {
             screenOrientation = newConfig.orientation
             iv_orientation.setImageResource(if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) R.mipmap.iv_land else R.mipmap.iv_port)
@@ -174,7 +170,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     override fun surfaceDestroyed(holder: SurfaceHolder?) {}
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        //设置播放器的渲染界面,这个surfaceview会传递到NDK底层
+        // 设置播放器的渲染界面,这个surfaceview会传递到NDK底层
         eMediaPlayer.setDisplay(surfaceView.holder)
     }
 
@@ -182,7 +178,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         if (fromUser) {
             mProgress = progress
             seekBar.setProgress(progress)
-            //设置当前播放时间
+            // 设置当前播放时间
             tv_current_position.setText(StringUtils.generateStandardTime(mProgress.toLong()))
         }
     }
@@ -190,7 +186,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        //改变视频播放进度
+        // 改变视频播放进度
         eMediaPlayer.seekTo(mProgress.toFloat())
         if (isPlayComplete){
             iv_pause_play.setImageResource(R.drawable.ic_player_pause)
@@ -198,35 +194,33 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
-    var isTwoScreen=false
     override fun onClick(v: View) {
         when(v.id){
-            //播放暂停
+            // 播放暂停
             R.id.iv_pause_play->{
-                if (eMediaPlayer.isPlaying && !isPlayComplete) { //暂停
+                if (eMediaPlayer.isPlaying && !isPlayComplete) { // 暂停
                     eMediaPlayer.pause()
                     iv_pause_play.setImageResource(R.drawable.ic_player_play)
-                } else if (!isPlayComplete) { //播放
+                } else if (!isPlayComplete) { // 播放
                     eMediaPlayer.resume()
                     iv_pause_play.setImageResource(R.drawable.ic_player_pause)
-                } else if (isPlayComplete) { //重播
+                } else if (isPlayComplete) { // 重播
                     eMediaPlayer.seekTo(0f)
                     isPlayComplete = false
                     iv_pause_play.setImageResource(R.drawable.ic_player_pause)
-
                 }
             }
-            //横竖屏切换
+            // 横竖屏切换
             R.id.iv_orientation-> requestedOrientation = if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
                 else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
-            //滤镜效果
+            // 滤镜效果
             R.id.action_original ->eMediaPlayer.setFilter(Filter.NONE.mType, Filter.NONE.mData)
             R.id.action_blackwhite ->eMediaPlayer.setFilter(Filter.GRAY.mType, Filter.GRAY.mData)
             R.id.action_cooltone ->eMediaPlayer.setFilter(Filter.COOL.mType, Filter.COOL.mData)
             R.id.action_dim ->eMediaPlayer.setFilter(Filter.BLUR.mType, Filter.BLUR.mData)
             R.id.action_warmtone ->eMediaPlayer.setFilter(Filter.WARM.mType, Filter.WARM.mData)
 
-            //双屏
+            // 双屏播放
             R.id.action_twoscreen->{
                 isTwoScreen=!isTwoScreen
                 eMediaPlayer.setTwoScreen(isTwoScreen)
@@ -234,7 +228,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
-    //滤镜类型
+    // 滤镜类型
     enum class Filter(val mType: Int, val mData: FloatArray) {
         NONE(0, floatArrayOf(0.0f, 0.0f, 0.0f)),
         GRAY(1, floatArrayOf(0.299f, 0.587f, 0.114f)),

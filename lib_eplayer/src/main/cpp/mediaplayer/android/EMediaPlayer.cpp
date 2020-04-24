@@ -30,7 +30,6 @@ void EMediaPlayer::init() {
     mMutex.lock();
     //视频播放设备
     if (videoDevice == nullptr) {
-        LOGD("设备初始化");
         videoDevice = new GLESDevice();
         videoDevice->setFilterState(&filterState);
     }
@@ -361,7 +360,6 @@ void EMediaPlayer::run() {
             LOGE("getMessage error");
             break;
         }
-
         assert(retval > 0);
 
         switch (msg.what) {

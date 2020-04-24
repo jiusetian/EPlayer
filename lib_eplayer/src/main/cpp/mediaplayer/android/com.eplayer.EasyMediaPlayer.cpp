@@ -566,7 +566,6 @@ void EMediaPlayer_setFilter(JNIEnv *env, jobject thiz,jint filterType,
         jniThrowException(env, "java/lang/IllegalStateException");
         return;
     }
-
     jfloat *filterColor = env->GetFloatArrayElements(filterColor_, NULL);
 
     mp->setFilterType(filterType);

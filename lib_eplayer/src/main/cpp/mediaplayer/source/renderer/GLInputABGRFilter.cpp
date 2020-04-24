@@ -79,7 +79,7 @@ void GLInputABGRFilter::initProgram() {
 void GLInputABGRFilter::bindUniforms() {
     GLFilter::bindUniforms();
     glUniform1i(mFilterTypeLoc, filterState->getFilterType());
-    glUniform3fv(mFilterColorLoc, 1, filterState->getFilterColor());
+    glUniform3fv(mFilterColorLoc, 1, filterState->getFilterColor()); // 3fv代表float类型的3单位向量
 }
 
 void GLInputABGRFilter::initProgram(const char *vertexShader, const char *fragmentShader) {
@@ -96,6 +96,7 @@ void GLInputABGRFilter::initProgram(const char *vertexShader, const char *fragme
             for (int i = 0; i < 1; ++i) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, textures[i]);
+                // 纹理参数
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

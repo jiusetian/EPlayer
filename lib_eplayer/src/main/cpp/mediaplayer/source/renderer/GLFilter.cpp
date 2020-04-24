@@ -27,7 +27,6 @@ void GLFilter::nativeSurfaceChanged(int width, int height) {
     if (textureWidth != 0 && textureHeight != 0) {
         //根据是否双屏来适配播放宽高比
         setTwoScreen(isTwoScreen);
-       // v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 }
 
@@ -194,7 +193,6 @@ void GLFilter::onDrawAfter() {
 
 void GLFilter::onDrawFrame() {
     if (isTwoScreen){ //是否双屏
-
         glViewport(0,0,displayWidth,displayHeight/2);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
 

@@ -139,6 +139,7 @@ status_t MediaPlayer::prepare() {
         return BAD_VALUE;
     }
     playerState->abortRequest = 0;
+    //开启读数据线程准备
     if (!readThread) {
         readThread = new Thread(this); //因为当前类继承了runnable
         readThread->start();
@@ -153,7 +154,7 @@ status_t MediaPlayer::prepareAsync() {
     }
     // 发送消息
     if (playerState->messageQueue) {
-        //异步的意思就是在工作线程中去准备，这里首先发送一个MSG_REQUEST_PREPARE出去，在CainMediaPlayer类处理消息的线程中收到消息以后，
+        //异步的意思就是在工作线程中去准备，这里首先发送一个MSG_REQUEST_PREPARE出去，在EMediaPlayer类处理消息的线程中收到消息以后，
         //再调用prepare方法，这样就实现了在接收消息的工作线程中去执行prepare方法
         playerState->messageQueue->postMessage(MSG_REQUEST_PREPARE);
     }
@@ -165,7 +166,7 @@ void MediaPlayer::start() {
     playerState->abortRequest = 0;
     playerState->pauseRequest = 0;
     mExit = false;
-    mCondition.signal();
+    mCondition.signal(); //通知
 }
 
 void MediaPlayer::pause() {
@@ -185,11 +186,13 @@ void MediaPlayer::stop() {
     playerState->abortRequest = 1;
     mCondition.signal();
     mMutex.unlock();
+
     mMutex.lock();
     while (!mExit) {
         mCondition.wait(mMutex);
     }
     mMutex.unlock();
+
     if (readThread != NULL) {
         readThread->join();
         delete readThread;
