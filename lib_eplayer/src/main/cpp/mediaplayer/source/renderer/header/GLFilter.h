@@ -163,7 +163,7 @@ protected:
     int surfaceWidth;       // surface的宽度
     int surfaceHeight;      // Surface的高度
     FilterState *filterState; //滤镜状态
-    bool isTwoScreen;        //是否双屏
+    bool isTwoScreen= false;        //是否双屏
 };
 
 #endif //EPLAYER_GLFILTER_H

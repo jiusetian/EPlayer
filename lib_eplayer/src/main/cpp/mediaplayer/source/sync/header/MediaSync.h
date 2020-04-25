@@ -52,6 +52,8 @@ public:
 
     MediaClock *getExternalClock();
 
+    long getCurrentPosition();
+
 private:
     void refreshVideo(double *remaining_time);
 

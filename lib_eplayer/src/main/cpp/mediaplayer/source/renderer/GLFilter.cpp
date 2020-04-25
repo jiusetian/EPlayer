@@ -21,8 +21,8 @@ GLFilter::~GLFilter() {
 void GLFilter::nativeSurfaceChanged(int width, int height) {
     surfaceWidth = width;
     surfaceHeight = height;
-    displayWidth=width;
-    displayHeight=height;
+    displayWidth = width;
+    displayHeight = height;
     //如果视频宽高不为0，则改变矩阵
     if (textureWidth != 0 && textureHeight != 0) {
         //根据是否双屏来适配播放宽高比
@@ -77,16 +77,16 @@ bool GLFilter::isInitialized() {
 }
 
 void GLFilter::setFilterState(FilterState *fs) {
-    filterState=fs;
+    filterState = fs;
 }
 
 // 是否双屏播放
 void GLFilter::setTwoScreen(bool twoScreen) {
-    isTwoScreen=twoScreen;
+    isTwoScreen = twoScreen;
     //重新计算适配播放屏幕的矩阵
-    if (isTwoScreen){
-        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth,textureHeight,displayWidth,displayHeight/2);
-    } else{
+    if (isTwoScreen) {
+        v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight / 2);
+    } else {
         v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 }
@@ -192,13 +192,14 @@ void GLFilter::onDrawAfter() {
 }
 
 void GLFilter::onDrawFrame() {
-    if (isTwoScreen){ //是否双屏
-        glViewport(0,0,displayWidth,displayHeight/2);
+    if (isTwoScreen) { //是否双屏
+        LOGD("双屏绘制");
+        glViewport(0, 0, displayWidth, displayHeight / 2);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
 
-        glViewport(0,displayHeight/2,displayWidth,displayHeight/2);
+        glViewport(0, displayHeight / 2, displayWidth, displayHeight / 2);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
-    } else{
+    } else {
         glViewport(0, 0, displayWidth, displayHeight);
         //GL_TRIANGLE_STRIP表示顺序在每三个顶点之间均绘制三角形，这个方法可以保证从相同的方向上所有三角形均被绘制
         //以V0V1V2,V1V2V3,V2V3V4……的形式绘制三角形

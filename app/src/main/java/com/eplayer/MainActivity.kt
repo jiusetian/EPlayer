@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import com.eplayer.common.LogUtil
+import com.eplayer.common.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -40,6 +41,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             else
                 requestPerms(*perms)
         }
+
+        LogUtil.d("返回媒体信息："+Utils.getList(this).get(0))
 
         //播放器播放
         btn_play.setOnClickListener {

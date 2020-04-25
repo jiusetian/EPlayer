@@ -244,6 +244,7 @@ void slBufferPCMCallBack(SLAndroidSimpleBufferQueueItf bf, void *context) {
  * @return
  */
 int SLESDevice::open(const AudioDeviceSpec *desired, AudioDeviceSpec *obtained) {
+    LOGD("打开音频");
     SLresult result;
     // 创建引擎engineObject
     result = slCreateEngine(&slObject, 0, NULL, 0, NULL, NULL);

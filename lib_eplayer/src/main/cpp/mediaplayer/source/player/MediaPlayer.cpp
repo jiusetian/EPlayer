@@ -82,6 +82,7 @@ MediaPlayer::~MediaPlayer() {
 }
 
 status_t MediaPlayer::reset() {
+    //先停止
     stop();
     if (mediaSync) {
         mediaSync->reset();
@@ -374,7 +375,7 @@ void MediaPlayer::run() {
     startPlayer();
 }
 
-void MediaPlayer::notifyErrorMsg(const char* msg){
+void MediaPlayer::notifyErrorMsg(const char *msg) {
     if (playerState->messageQueue) {
         playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) msg,
                                                sizeof(msg) / msg[0]);
@@ -427,7 +428,7 @@ int MediaPlayer::startPlayer() {
     }
 
     // 停止消息队列
-    if (playerState->messageQueue && ret != AVERROR_EOF) { // 正常播放完毕不停止消息线程
+    if (playerState->messageQueue) {
         playerState->messageQueue->stop();
     }
 
@@ -449,9 +450,10 @@ int MediaPlayer::demux() {
 
     do {
         // 解封装功能结构体
-        if (pFormatCtx==NULL){
-            pFormatCtx = avformat_alloc_context();
-        }
+        //  if (pFormatCtx == NULL){
+        pFormatCtx = avformat_alloc_context();
+        //  }
+
         if (!pFormatCtx) {
             av_log(NULL, AV_LOG_FATAL, "Could not allocate context.\n");
             ret = AVERROR(ENOMEM); //内存不足错误
@@ -620,7 +622,7 @@ int MediaPlayer::demux() {
  * @return
  */
 int MediaPlayer::prepareDecoder() {
-    int ret=0;
+    int ret = 0;
     mMutex.lock();
     // 查找媒体流索引
     int audioIndex = -1;
@@ -736,6 +738,7 @@ int MediaPlayer::openMediaDevice() {
     int ret = 0;
     // 打开音频输出设备
     if (audioDecoder != NULL) {
+        LOGD("打开音频设备");
         AVCodecContext *avctx = audioDecoder->getCodecContext(); // 解码上下文
         // 打开音频设备
         ret = openAudioDevice(avctx->channel_layout, avctx->channels, avctx->sample_rate);
@@ -869,7 +872,8 @@ int MediaPlayer::getAvPackets() {
             eof = 0;
             // 定位完成回调通知
             if (playerState->messageQueue) {
-                playerState->messageQueue->postMessage(MSG_SEEK_COMPLETE,(int) av_rescale(seek_target, 1000,AV_TIME_BASE), ret);
+                playerState->messageQueue->postMessage(MSG_SEEK_COMPLETE,
+                                                       (int) av_rescale(seek_target, 1000, AV_TIME_BASE), ret);
             }
         }
 
@@ -902,7 +906,7 @@ int MediaPlayer::getAvPackets() {
             continue;
         }
 
-         /*读取数据包*/
+        /*读取数据包*/
         if (!waitToSeek) { // 没有等待定位
             ret = av_read_frame(pFormatCtx, pkt); //返回0即为OK，小于0就是出错了或者读到了文件的结尾
         } else {
@@ -1115,14 +1119,14 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
         /*根据解码器类型，创建对应的解码器*/
         switch (avctx->codec_type) {
             case AVMEDIA_TYPE_AUDIO: {
-                if (audioDecoder==NULL){
+                if (audioDecoder == NULL) {
                     audioDecoder = new AudioDecoder(avctx, pFormatCtx->streams[streamIndex], streamIndex, playerState);
                 }
                 break;
             }
 
             case AVMEDIA_TYPE_VIDEO: {
-                if(videoDecoder==NULL){
+                if (videoDecoder == NULL) {
                     videoDecoder = new VideoDecoder(pFormatCtx, avctx, pFormatCtx->streams[streamIndex], streamIndex,
                                                     playerState);
                 }
@@ -1147,7 +1151,6 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
     }
     // 释放参数
     av_dict_free(&opts);
-
     return ret;
 }
 

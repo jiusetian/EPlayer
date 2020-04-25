@@ -355,6 +355,7 @@ void EMediaPlayer_finalize(JNIEnv *env, jobject thiz) {
     if (mp != NULL) {
         LOGW("MediaPlayer finalized without being released");
     }
+    LOGD("调用完成");
     EMediaPlayer_release(env, thiz);
 }
 

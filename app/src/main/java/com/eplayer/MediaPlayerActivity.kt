@@ -2,19 +2,19 @@ package com.eplayer
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
-import android.util.Log
 import android.view.*
 import android.widget.SeekBar
+import android.widget.Toast
 import com.eplayer.common.LogUtil
 import com.eplayer.common.StringUtils
+import com.eplayer.common.Utils
 import kotlinx.android.synthetic.main.activity_media_player.*
-import kotlinx.android.synthetic.main.activity_media_player.view.*
+import java.io.File
 
 
 class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener,
@@ -24,12 +24,14 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         private const val PATH = "path"
     }
 
-    private lateinit var path: String
-    private lateinit var eMediaPlayer: EasyMediaPlayer
+    //private lateinit var path: String
+    private lateinit var paths: List<String>
+    private var index = 0
+    private lateinit var mediaPlayer: EasyMediaPlayer
     private var mProgress = 0
     private var screenOrientation: Int = Configuration.ORIENTATION_UNDEFINED
     private var isPlayComplete = false // 播放是否完成
-    private var isTwoScreen=false // 是否双屏播放
+    private var isTwoScreen = false // 是否双屏播放
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,61 +41,62 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         }
         supportActionBar!!.hide()
-        path = intent.getStringExtra(PATH)
-        initPlayer()
+        paths = Utils.getList(this)
+        //path = intent.getStringExtra(PATH)
+        initPlayer(paths.get(index))
         initView()
     }
 
 
     // 初始化播放器
-    private fun initPlayer() {
+    private fun initPlayer(path: String) {
         if (TextUtils.isEmpty(path)) return
 
-        eMediaPlayer = EasyMediaPlayer()
+        mediaPlayer = EasyMediaPlayer()
         // 设置播放源路径
         try {
-            eMediaPlayer.setDataSource(path)
+            mediaPlayer.setDataSource(path)
         } catch (e: Exception) {
             e.printStackTrace()
         }
         // 监听尺寸的改变
-        eMediaPlayer.setOnVideoSizeChangedListener { mediaPlayer, width, height ->
+        mediaPlayer.setOnVideoSizeChangedListener { mediaPlayer, width, height ->
             LogUtil.d("视频size改变=" + width + "--" + height)
         }
 
         // 设置准备监听
-        eMediaPlayer.setOnPreparedListener {
+        mediaPlayer.setOnPreparedListener {
             LogUtil.d("开始播放")
             // 开始播放
-            eMediaPlayer.start()
+            mediaPlayer.start()
             // UI线程执行
             runOnUiThread {
                 // 播放进度相关
                 tv_current_position.setText(
-                    StringUtils.generateStandardTime(Math.max(eMediaPlayer.getCurrentPosition(), 0))
+                    StringUtils.generateStandardTime(Math.max(mediaPlayer.getCurrentPosition(), 0))
                 )
-                tv_duration.setText(StringUtils.generateStandardTime(Math.max(eMediaPlayer.getDuration(), 0)))
-                seekbar.setMax(Math.max(eMediaPlayer.getDuration(), 0).toInt())
-                seekbar.setProgress(Math.max(eMediaPlayer.getCurrentPosition(), 0).toInt())
+                tv_duration.setText(StringUtils.generateStandardTime(Math.max(mediaPlayer.getDuration(), 0)))
+                seekbar.setMax(Math.max(mediaPlayer.getDuration(), 0).toInt())
+                seekbar.setProgress(Math.max(mediaPlayer.getCurrentPosition(), 0).toInt())
             }
         }
 
         // 设置错误监听
-        eMediaPlayer.setOnErrorListener { mp, what, extra ->
+        mediaPlayer.setOnErrorListener { mp, what, extra ->
             LogUtil.d("tag", "发生错误：$what,$extra")
             false
         }
 
         // 完成监听
-        eMediaPlayer.setOnCompletionListener {
+        mediaPlayer.setOnCompletionListener {
             isPlayComplete = true
             iv_pause_play.setImageResource(R.mipmap.iv_replay)
         }
 
         // 播放进度监听
-        eMediaPlayer.setOnCurrentPositionListener { current, duration ->
+        mediaPlayer.setOnCurrentPositionListener { current, duration ->
             runOnUiThread {
-                if (eMediaPlayer.isPlaying) {
+                if (mediaPlayer.isPlaying) {
                     // 设置当前播放时间
                     tv_current_position.setText(StringUtils.generateStandardTime(current))
                     // 播放进度
@@ -105,8 +108,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         // 准备播放
         try {
             // 设置播放器参数，指定视频解码器名称为h264_mediacodec
-            eMediaPlayer.setOption(EasyMediaPlayer.OPT_CATEGORY_PLAYER, "vcodec", "h264_mediacodec")
-            eMediaPlayer.prepareAsync()
+            mediaPlayer.setOption(EasyMediaPlayer.OPT_CATEGORY_PLAYER, "vcodec", "h264_mediacodec")
+            mediaPlayer.prepareAsync()
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -125,33 +128,43 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         surfaceView.holder.addCallback(this)
         surfaceView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
-                layout_operation.visibility = if (layout_operation.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                layout_operation.visibility =
+                    if (layout_operation.visibility == View.VISIBLE) View.GONE else View.VISIBLE
             }
             true
         }
     }
 
-    private fun initClicker(){
-        arrayOf(iv_pause_play,iv_orientation,action_original,action_blackwhite,action_dim,action_cooltone,action_warmtone,
-        action_twoscreen).forEach {
+    private fun initClicker() {
+        arrayOf(
+            iv_pause_play,
+            iv_orientation,
+            action_original,
+            action_blackwhite,
+            action_dim,
+            action_cooltone,
+            action_warmtone,
+            action_twoscreen,
+            action_next
+        ).forEach {
             it.setOnClickListener(this)
         }
     }
 
     override fun onPause() {
         super.onPause()
-        eMediaPlayer.pause()
+        mediaPlayer.pause()
     }
 
     override fun onResume() {
         super.onResume()
-        eMediaPlayer.resume()
+        mediaPlayer.resume()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        eMediaPlayer.stop()
-        eMediaPlayer.release()
+        mediaPlayer.stop()
+        mediaPlayer.release()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -165,14 +178,14 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         LogUtil.d("Surface的宽高=" + width + "----" + height)
-        eMediaPlayer.surfaceChange(width, height)
+        mediaPlayer.surfaceChange(width, height)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {}
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         // 设置播放器的渲染界面,这个surfaceview会传递到NDK底层
-        eMediaPlayer.setDisplay(surfaceView.holder)
+        mediaPlayer.setDisplay(surfaceView.holder)
     }
 
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -188,44 +201,66 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
         // 改变视频播放进度
-        eMediaPlayer.seekTo(mProgress.toFloat())
-        if (isPlayComplete){
+        mediaPlayer.seekTo(mProgress.toFloat())
+        if (isPlayComplete) {
             iv_pause_play.setImageResource(R.drawable.ic_player_pause)
             isPlayComplete = false
         }
     }
 
+    //播放
+    private fun play(path: String) {
+        mediaPlayer.reset()
+        initPlayer(path)
+        mediaPlayer.setDisplay(surfaceView.holder)
+    }
+
     override fun onClick(v: View) {
-        when(v.id){
+        when (v.id) {
             // 播放暂停
-            R.id.iv_pause_play->{
-                if (eMediaPlayer.isPlaying && !isPlayComplete) { // 暂停
-                    eMediaPlayer.pause()
+            R.id.iv_pause_play -> {
+                if (mediaPlayer.isPlaying && !isPlayComplete) { // 暂停
+                    mediaPlayer.pause()
                     iv_pause_play.setImageResource(R.drawable.ic_player_play)
                 } else if (!isPlayComplete) { // 播放
-                    eMediaPlayer.resume()
+                    mediaPlayer.resume()
                     iv_pause_play.setImageResource(R.drawable.ic_player_pause)
                 } else if (isPlayComplete) { // 重播
-                    eMediaPlayer.seekTo(0f)
+                    mediaPlayer.seekTo(0f)
                     isPlayComplete = false
                     iv_pause_play.setImageResource(R.drawable.ic_player_pause)
                 }
             }
             // 横竖屏切换
-            R.id.iv_orientation-> requestedOrientation = if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+            R.id.iv_orientation -> requestedOrientation =
+                if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
                 else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
             // 滤镜效果
-            R.id.action_original ->eMediaPlayer.setFilter(Filter.NONE.mType, Filter.NONE.mData)
-            R.id.action_blackwhite ->eMediaPlayer.setFilter(Filter.GRAY.mType, Filter.GRAY.mData)
-            R.id.action_cooltone ->eMediaPlayer.setFilter(Filter.COOL.mType, Filter.COOL.mData)
-            R.id.action_dim ->eMediaPlayer.setFilter(Filter.BLUR.mType, Filter.BLUR.mData)
-            R.id.action_warmtone ->eMediaPlayer.setFilter(Filter.WARM.mType, Filter.WARM.mData)
+            R.id.action_original -> mediaPlayer.setFilter(Filter.NONE.mType, Filter.NONE.mData)
+            R.id.action_blackwhite -> mediaPlayer.setFilter(Filter.GRAY.mType, Filter.GRAY.mData)
+            R.id.action_cooltone -> mediaPlayer.setFilter(Filter.COOL.mType, Filter.COOL.mData)
+            R.id.action_dim -> mediaPlayer.setFilter(Filter.BLUR.mType, Filter.BLUR.mData)
+            R.id.action_warmtone -> mediaPlayer.setFilter(Filter.WARM.mType, Filter.WARM.mData)
 
             // 双屏播放
-            R.id.action_twoscreen->{
-                isTwoScreen=!isTwoScreen
-                eMediaPlayer.setTwoScreen(isTwoScreen)
+            R.id.action_twoscreen -> {
+                isTwoScreen = !isTwoScreen
+                mediaPlayer.setTwoScreen(isTwoScreen)
             }
+
+            //播放下一个
+            R.id.action_next -> {
+                if (index == paths.size-1) {
+                    Toast.makeText(this, "没有更多视频了", Toast.LENGTH_SHORT).show()
+                    return
+                } else {
+                    play(paths.get(++index))
+                    LogUtil.d("播放地址="+paths.get(index))
+                }
+                isPlayComplete = false
+                iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+            }
+
         }
     }
 
