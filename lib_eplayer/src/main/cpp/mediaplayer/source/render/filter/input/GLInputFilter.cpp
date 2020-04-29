@@ -1,6 +1,6 @@
 
 #include <AndroidLog.h>
-#include "OpenGLUtils.h"
+#include "render/common/header/OpenGLUtils.h"
 #include "GLInputFilter.h"
 
 GLInputFilter::GLInputFilter() {

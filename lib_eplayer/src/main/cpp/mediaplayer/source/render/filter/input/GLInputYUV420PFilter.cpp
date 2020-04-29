@@ -1,7 +1,7 @@
 
 #include <AndroidLog.h>
 #include "GLInputYUV420PFilter.h"
-#include "OpenGLUtils.h"
+#include "render/common/header/OpenGLUtils.h"
 
 // std::string是标准C++的字符串实现。为了让程序好移植，要用std::string
 const std::string kYUV420PFragmentShader = SHADER_TO_STRING(

@@ -1,6 +1,6 @@
 
 
-#include <OpenGLUtils.h>
+#include <render/common/header/OpenGLUtils.h>
 #include "GL512LookupTableFilter.h"
 
 const std::string k512LutFragmentShader = SHADER_TO_STRING(

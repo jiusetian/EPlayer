@@ -28,7 +28,7 @@ include_directories(
         source/queue/header
         # 渲染包render的header
         source/render/header
-        source/render/common
+        source/render/common/header
         source/render/filter/header
         source/render/filter/input/header
         source/render/filter/adjust/header

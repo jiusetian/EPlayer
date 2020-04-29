@@ -1,5 +1,5 @@
 
-#include "EglHelper.h"
+#include "render/common/header/EglHelper.h"
 #include "AndroidLog.h"
 #include "EPlayerEGLContext.h"
 

@@ -1,7 +1,7 @@
 
 #include <AndroidLog.h>
 #include "GLInputABGRFilter.h"
-#include "OpenGLUtils.h"
+#include "render/common/header/OpenGLUtils.h"
 
 const std::string kABGRFragmentShader = SHADER_TO_STRING(
         precision mediump float;

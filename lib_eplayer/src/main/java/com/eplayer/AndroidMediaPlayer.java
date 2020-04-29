@@ -300,6 +300,12 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
+    public void changeBackground(String name) {
+        if (mMediaPlayer!=null)
+            mMediaPlayer.changeBackground(name);
+    }
+
+    @Override
     public boolean isLooping() {
         if (mMediaPlayer != null) {
             return mMediaPlayer.isLooping();

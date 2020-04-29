@@ -4,7 +4,7 @@
 
 #include <mutex>
 #include <GLFilter.h>
-#include <NodeType.h>
+#include <render/common/header/NodeType.h>
 
 /**
  * 滤镜对象信息

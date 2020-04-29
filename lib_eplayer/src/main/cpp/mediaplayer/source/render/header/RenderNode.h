@@ -6,7 +6,7 @@
 
 #include "FrameBuffer.h"
 
-#include "NodeType.h"
+#include "render/common/header/NodeType.h"
 #include "GLOutFilter.h"
 
 /**

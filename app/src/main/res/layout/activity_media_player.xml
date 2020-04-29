@@ -107,6 +107,37 @@
                 />
 
         <Button
+                android:id="@+id/action_original"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="原色"
+                />
+        <Button
+                android:id="@+id/action_blackwhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="黑白"
+                />
+        <Button
+                android:id="@+id/action_dim"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模糊"
+                />
+        <Button
+                android:id="@+id/action_cooltone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="冷色调"
+                />
+        <Button
+                android:id="@+id/action_warmtone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="暖色调"
+                />
+
+        <Button
                 android:id="@+id/action_soul"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -180,42 +211,12 @@
                 android:layout_height="wrap_content"
                 android:text="九屏"
                 />
-        <Button
-                android:id="@+id/action_original"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="原色"
-                />
-        <Button
-                android:id="@+id/action_blackwhite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="黑白"
-                />
-        <Button
-                android:id="@+id/action_dim"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="模糊"
-                />
-        <Button
-                android:id="@+id/action_cooltone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="冷色调"
-                />
-        <Button
-                android:id="@+id/action_warmtone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="暖色调"
-                />
 
         <Button
                 android:id="@+id/action_twoscreen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="双屏"
+                android:text="双屏播放"
                 />
 
     </com.eplayer.common.FlowLayout>

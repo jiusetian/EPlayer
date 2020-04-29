@@ -1,5 +1,5 @@
 
-#include <OpenGLUtils.h>
+#include <render/common/header/OpenGLUtils.h>
 #include "GLBeautyAdjustFilter.h"
 
 const std::string kBeautyAdjustFragmentShader = SHADER_TO_STRING(

@@ -336,6 +336,11 @@ public interface IMediaPlayer {
      */
     void changeEffect(int id);
 
+    /**
+     * change background color
+     * @param name
+     */
+    public void changeBackground(String name);
 
     /**
      * Checks whether the MediaPlayer is looping or non-looping.

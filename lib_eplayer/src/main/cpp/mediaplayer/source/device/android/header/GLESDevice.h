@@ -6,7 +6,7 @@
 #include <android/native_window_jni.h>
 #include <Filter.h>
 #include <RenderNodeList.h>
-#include "EglHelper.h"
+#include "render/common/header/EglHelper.h"
 #include "InputRenderNode.h"
 #include "FilterState.h"
 

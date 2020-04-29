@@ -1,6 +1,7 @@
 
 
 #include <cstring>
+#include <render/filter/beauty/header/GLBackGroundFilter.h>
 #include "FilterManager.h"
 #include "Filter.h"
 
@@ -19,7 +20,7 @@ FilterManager *FilterManager::getInstance() {
     if (!instance) {
         std::unique_lock<std::mutex> lock(mutex);
         if (!instance) {
-            instance = new (std::nothrow) FilterManager();
+            instance = new(std::nothrow) FilterManager();
         }
     }
     return instance;
@@ -46,6 +47,35 @@ GLFilter *FilterManager::getFilter(FilterInfo *filterInfo) {
 }
 
 GLFilter *FilterManager::getFilter(const char *name) {
+
+    // 背景颜色
+    if (!strcmp("原色", name)) {
+        GLint type = 0;
+        GLfloat colors[3] = {0.0f, 0.0f, 0.0f};
+        return new GLBackGroundFilter(type, colors);
+    }
+    if (!strcmp("黑白", name)) {
+        GLint type = 1;
+        GLfloat colors[3] = {0.299f, 0.587f, 0.114f};
+        return new GLBackGroundFilter(type, colors);
+    }
+    if (!strcmp("暖色调", name)) {
+        GLint type = 2;
+        GLfloat colors[3] = {0.1f, 0.1f, 0.0f};
+        return new GLBackGroundFilter(type, colors);
+    }
+    if (!strcmp("冷色调", name)) {
+        GLint type = 2;
+        GLfloat colors[3] = {0.0f, 0.0f, 0.1f};
+        return new GLBackGroundFilter(type, colors);
+    }
+    if (!strcmp("模糊", name)) {
+        GLint type = 3;
+        GLfloat colors[3] = {0.006f, 0.004f, 0.002f};
+        return new GLBackGroundFilter(type, colors);
+    }
+
+
     // 滤镜特效
     if (!strcmp("灵魂出窍", name)) {
         return new GLEffectSoulStuffFilter();
@@ -82,7 +112,7 @@ GLFilter *FilterManager::getFilter(const char *name) {
     if (!strcmp("六屏", name)) {
         return new GLFrameSixFilter();
     }
-    if (!strcmp("九屏", name)){
+    if (!strcmp("九屏", name)) {
         return new GLFrameNineFilter();
     }
     return nullptr;
@@ -107,11 +137,11 @@ GLFilter *FilterManager::getFilter(const int id) {
             return new GLEffectGlitterWhiteFilter();
         }
 
-        // 分屏特效
+            // 分屏特效
         case 0x200: { // 模糊分屏特效
             return new GLFrameBlurFilter();
         }
-        case 0x201:{ // 黑白三屏特效
+        case 0x201: { // 黑白三屏特效
             return new GLFrameBlackWhiteThreeFilter();
         }
         case 0x202: { // 两屏特效

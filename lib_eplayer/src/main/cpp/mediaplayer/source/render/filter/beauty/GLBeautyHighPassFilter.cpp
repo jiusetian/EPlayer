@@ -1,5 +1,5 @@
 
-#include <OpenGLUtils.h>
+#include <render/common/header/OpenGLUtils.h>
 #include "GLBeautyHighPassFilter.h"
 
 const std::string kHighPassFragmentShader = SHADER_TO_STRING(

@@ -158,9 +158,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_four,
             action_six,
             action_nine
-        ).forEach {
-            it.setOnClickListener(this)
-        }
+        ).forEach { it.setOnClickListener(this) }
     }
 
     override fun onPause() {
@@ -248,12 +246,17 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             R.id.iv_orientation -> requestedOrientation =
                 if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
                 else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
-            // 滤镜效果
-            R.id.action_original -> mediaPlayer.setFilter(EFilter.NONE.mType, EFilter.NONE.mData)
-            R.id.action_blackwhite -> mediaPlayer.setFilter(EFilter.GRAY.mType, EFilter.GRAY.mData)
-            R.id.action_cooltone -> mediaPlayer.setFilter(EFilter.COOL.mType, EFilter.COOL.mData)
-            R.id.action_dim -> mediaPlayer.setFilter(EFilter.BLUR.mType, EFilter.BLUR.mData)
-            R.id.action_warmtone -> mediaPlayer.setFilter(EFilter.WARM.mType, EFilter.WARM.mData)
+
+            // 原色
+            R.id.action_original -> mediaPlayer.changeBackground(Background.NONE.bgName)
+            // 黑白
+            R.id.action_blackwhite -> mediaPlayer.changeBackground(Background.GRAY.bgName)
+            // 冷色调
+            R.id.action_cooltone -> mediaPlayer.changeBackground(Background.COOL.bgName)
+            // 模糊
+            R.id.action_dim -> mediaPlayer.changeBackground(Background.BLUR.bgName)
+            // 暖色调
+            R.id.action_warmtone -> mediaPlayer.changeBackground(Background.WARM.bgName)
 
             // 双屏播放
             R.id.action_twoscreen -> {
@@ -305,13 +308,13 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
-    // 滤镜类型
-    enum class EFilter(val mType: Int, val mData: FloatArray) {
-        NONE(0, floatArrayOf(0.0f, 0.0f, 0.0f)),
-        GRAY(1, floatArrayOf(0.299f, 0.587f, 0.114f)),
-        COOL(2, floatArrayOf(0.0f, 0.0f, 0.1f)),
-        WARM(2, floatArrayOf(0.1f, 0.1f, 0.0f)),
-        BLUR(3, floatArrayOf(0.006f, 0.004f, 0.002f));
+    // 背景颜色
+    enum class Background(val bgName: String) {
+        NONE("原色"),
+        GRAY("黑白"),
+        COOL("冷色调"),
+        WARM("暖色调"),
+        BLUR("模糊");
     }
 
     // 滤镜类型

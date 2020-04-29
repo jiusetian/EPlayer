@@ -1,5 +1,5 @@
 
-#include <OpenGLUtils.h>
+#include <render/common/header/OpenGLUtils.h>
 #include "GLFrameBlurMixFilter.h"
 
 const std::string kFrameBlurMixFragmentShader = SHADER_TO_STRING(

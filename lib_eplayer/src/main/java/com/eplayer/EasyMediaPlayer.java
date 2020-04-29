@@ -880,6 +880,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * change effect
+     *
      * @param name effect name
      */
     @Override
@@ -889,11 +890,17 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     /**
      * change effect
+     *
      * @param id effect id
      */
     @Override
     public void changeEffect(int id) {
         _changeFilter(NODE_EFFECT, id);
+    }
+
+    @Override
+    public void changeBackground(String name) {
+        _changeFilter(NODE_FACE, name);
     }
 
     private native void _changeFilter(int type, String name);

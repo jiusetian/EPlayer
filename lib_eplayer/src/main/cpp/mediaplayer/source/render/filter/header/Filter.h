@@ -3,15 +3,15 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include "macros.h"
+#include "render/common/header/macros.h"
 
 #include "FrameBuffer.h"
 #include "FilterManager.h"
 
-#include "EglHelper.h"
-#include "OpenGLUtils.h"
-#include "vecmath.h"
-#include "CoordinateUtils.h"
+#include "render/common/header/EglHelper.h"
+#include "render/common/header/OpenGLUtils.h"
+#include "render/common/header/vecmath.h"
+#include "render/common/header/CoordinateUtils.h"
 
 // 基础滤镜
 #include "GLGaussianBlurFilter.h"

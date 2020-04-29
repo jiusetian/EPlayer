@@ -15,4 +15,5 @@ void FilterState::setFilterType(GLint filterType) {
 void FilterState::setFilterColor(GLfloat *filterColor) {
     //设置纹理渲染滤镜颜色
     memcpy(mFilterColor, filterColor, sizeof(mFilterColor));
+
 }

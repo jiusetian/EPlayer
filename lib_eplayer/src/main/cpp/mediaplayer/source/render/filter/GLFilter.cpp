@@ -1,7 +1,7 @@
 
 #include <cstdlib>
 #include "GLFilter.h"
-#include "OpenGLUtils.h"
+#include "render/common/header/OpenGLUtils.h"
 #include <AndroidLog.h>
 
 GLFilter::GLFilter() : initialized(false), programHandle(-1), positionHandle(-1), texCoordinateHandle(-1),
