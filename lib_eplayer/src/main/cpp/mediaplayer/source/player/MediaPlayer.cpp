@@ -130,6 +130,7 @@ void MediaPlayer::setDataSource(const char *url, int64_t offset, const char *hea
     }
 }
 
+
 void MediaPlayer::setVideoDevice(VideoDevice *videoDevice) {
     Mutex::Autolock lock(mMutex);
     mediaSync->setVideoDevice(videoDevice);
@@ -1146,7 +1147,6 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
             const char errorMsg[] = "failed to open stream!";
             playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
         }
-
         avcodec_free_context(&avctx);
     }
     // 释放参数

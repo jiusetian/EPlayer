@@ -312,7 +312,30 @@ public interface IMediaPlayer {
      */
     public void setLooping(boolean looping);
 
-    public void setTwoScreen(boolean twoScreen);
+    /**
+     * change filter by name
+     * @param name
+     */
+    void changeFilter(String name);
+
+    /**
+     * change filter by id
+     * @param id
+     */
+    void changeFilter(int id);
+
+    /**
+     * change Effect by name
+     * @param name
+     */
+    void changeEffect(String name);
+
+    /**
+     * change Effect by id
+     * @param id
+     */
+    void changeEffect(int id);
+
 
     /**
      * Checks whether the MediaPlayer is looping or non-looping.

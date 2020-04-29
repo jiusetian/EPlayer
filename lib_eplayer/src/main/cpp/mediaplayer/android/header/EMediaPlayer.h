@@ -111,8 +111,11 @@ public:
     //设置滤镜颜色
     void setFilterColor(GLfloat *filterColor);
 
-    //是否双屏
-    void setTwoScreen(bool isTwoScreen);
+    // 改变滤镜
+    void changeFilter(int type, const char *name);
+
+    // 改变滤镜
+    void changeFilter(int type, const int id);
 
     status_t setListener(MediaPlayerListener *listener);
 

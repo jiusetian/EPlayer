@@ -1,8 +1,10 @@
 
 #ifndef EPLAYER_VIDEODEVICE_H
 #define EPLAYER_VIDEODEVICE_H
+
+#include <render/filter/input/header/GLInputFilter.h>
 #include "PlayerState.h"
-#include "GLInputFilter.h"
+
 
 class VideoDevice {
 public:
@@ -11,6 +13,9 @@ public:
     virtual ~VideoDevice();
 
     virtual void terminate();
+
+    // 设置时间戳
+    virtual void setTimeStamp(double timeStamp);
 
     // 初始化视频纹理宽高
     virtual void onInitTexture(int width, int height, TextureFormat format, BlendMode blendMode, int rotate = 0);

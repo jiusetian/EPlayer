@@ -93,12 +93,93 @@
             >
 
         <Button
+                android:id="@+id/action_prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="播放上一个"
+                />
+
+        <Button
                 android:id="@+id/action_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="播放下一个"
                 />
 
+        <Button
+                android:id="@+id/action_soul"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="灵魂出窍"
+                />
+
+        <Button
+                android:id="@+id/action_shake"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="抖动"
+                />
+        <Button
+                android:id="@+id/action_illusion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="幻觉"
+                />
+        <Button
+                android:id="@+id/action_scale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="缩放"
+                />
+        <Button
+                android:id="@+id/action_clitterwihte"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="闪白"
+                />
+
+        <Button
+                android:id="@+id/action_blursplit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模糊分屏"
+                />
+        <Button
+                android:id="@+id/action_blackwhitethree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="黑白三屏"
+                />
+        <Button
+                android:id="@+id/action_two"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="两屏"
+                />
+        <Button
+                android:id="@+id/action_three"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="三屏"
+                />
+        <Button
+                android:id="@+id/action_four"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="四屏"
+                />
+        <Button
+                android:id="@+id/action_six"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="六屏"
+                />
+        <Button
+                android:id="@+id/action_nine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="九屏"
+                />
         <Button
                 android:id="@+id/action_original"
                 android:layout_width="wrap_content"

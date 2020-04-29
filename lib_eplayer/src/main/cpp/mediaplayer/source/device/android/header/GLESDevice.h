@@ -4,6 +4,8 @@
 #include "VideoDevice.h"
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <Filter.h>
+#include <RenderNodeList.h>
 #include "EglHelper.h"
 #include "InputRenderNode.h"
 #include "FilterState.h"
@@ -19,8 +21,7 @@ public:
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
 
-    //设置是否双屏
-    void setTwoScreen(bool isTwoScreen);
+    void setTimeStamp(double timeStamp) override;
 
     void terminate() override;
 
@@ -36,8 +37,14 @@ public:
 
     int onRequestRender(bool flip) override;
 
-    //设置滤镜状态
+    // 设置滤镜状态
     void setFilterState(FilterState *fs);
+
+    // 改变滤镜
+    void changeFilter(RenderNodeType type, const char *filterName);
+
+    // 改变滤镜
+    void changeFilter(RenderNodeType type, const int id);
 
 private:
     void resetVertices();
@@ -62,6 +69,10 @@ private:
     InputRenderNode *mRenderNode;       // 输入渲染结点
     float vertices[8];                  // 顶点坐标
     float textureVertices[8];           // 纹理坐标
+
+    RenderNodeList *nodeList;           // 滤镜链
+    FilterInfo filterInfo;              // 滤镜信息
+    bool filterChange;                  // 切换滤镜
 
     FilterState *filterState;
 };

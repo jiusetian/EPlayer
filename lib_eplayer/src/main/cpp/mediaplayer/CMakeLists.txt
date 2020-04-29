@@ -26,8 +26,14 @@ include_directories(
         source/device/android/header
         source/player/header
         source/queue/header
-        source/renderer/header
-        source/renderer/utils
+        # 渲染包render的header
+        source/render/header
+        source/render/common
+        source/render/filter/header
+        source/render/filter/input/header
+        source/render/filter/adjust/header
+        source/render/filter/beauty/header
+        source/render/filter/effect/header
         source/sync/header
         android/header
         ${soundtouch_dir})
@@ -40,8 +46,13 @@ file(GLOB my_source
         source/device/*.cpp
         source/device/android/*.cpp
         source/queue/*.cpp
-        source/renderer/*.cpp
-        source/renderer/utils/*.cpp
+        source/render/*.cpp
+        source/render/common/*.cpp
+        source/render/filter/*.cpp
+        source/render/filter/input/*.cpp
+        source/render/filter/adjust/*.cpp
+        source/render/filter/beauty/*.cpp
+        source/render/filter/effect/*.cpp
         source/sync/*.cpp
         source/player/*.cpp
         android/*.cpp

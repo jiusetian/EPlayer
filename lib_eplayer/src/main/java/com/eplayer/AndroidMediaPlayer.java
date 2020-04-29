@@ -274,10 +274,29 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
-    public void setTwoScreen(boolean twoScreen) {
+    public void changeFilter(String name) {
         if (mMediaPlayer != null) {
-            mMediaPlayer.setTwoScreen(twoScreen);
+            mMediaPlayer.changeFilter(name);
         }
+    }
+
+    @Override
+    public void changeFilter(int id) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.changeFilter(id);
+        }
+    }
+
+    @Override
+    public void changeEffect(String name) {
+        if (mMediaPlayer!=null)
+            mMediaPlayer.changeEffect(name);
+    }
+
+    @Override
+    public void changeEffect(int id) {
+        if (mMediaPlayer!=null)
+            mMediaPlayer.changeEffect(id);
     }
 
     @Override
@@ -317,15 +336,15 @@ public class AndroidMediaPlayer implements IMediaPlayer {
 
     @Override
     public void surfaceChange(int width, int height) {
-        if (mMediaPlayer!=null){
-            mMediaPlayer.surfaceChange(width,height);
+        if (mMediaPlayer != null) {
+            mMediaPlayer.surfaceChange(width, height);
         }
     }
 
     @Override
     public void setFilter(int filterType, float[] filterColor) {
-        if (mMediaPlayer!=null){
-            mMediaPlayer.setFilter(filterType,filterColor);
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setFilter(filterType, filterColor);
         }
     }
 

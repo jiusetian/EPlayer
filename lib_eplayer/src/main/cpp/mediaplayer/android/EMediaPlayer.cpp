@@ -43,6 +43,20 @@ void EMediaPlayer::init() {
     mMutex.unlock();
 }
 
+void EMediaPlayer::changeFilter(int type, const char *name) {
+    if (videoDevice != nullptr) {
+        videoDevice->changeFilter((RenderNodeType)type, name);
+    }
+}
+
+void EMediaPlayer::changeFilter(int type, const int id) {
+    if (videoDevice != nullptr) {
+        videoDevice->changeFilter((RenderNodeType)type, id);
+    }
+}
+
+
+
 // java层对应mediaplayer的release方法的时候被调用
 void EMediaPlayer::disconnect() {
 
@@ -112,10 +126,6 @@ void EMediaPlayer::setFilterColor(GLfloat *filterColor) {
     filterState.setFilterColor(filterColor);
 }
 
-void EMediaPlayer::setTwoScreen(bool isTwoScreen) {
-    if (videoDevice!= nullptr)
-        videoDevice->setTwoScreen(isTwoScreen);
-}
 
 status_t EMediaPlayer::setVideoSurface(ANativeWindow *native_window) {
     if (mediaPlayer == nullptr) {
@@ -372,7 +382,7 @@ void EMediaPlayer::run() {
             }
 
             case MSG_ERROR: {
-                LOGE("EMediaPlayer occurs error: %d,%s\n", msg.arg1,msg.obj);
+                LOGE("EMediaPlayer occurs error: %d,%s\n", msg.arg1, msg.obj);
                 if (mPrepareSync) {
                     mPrepareSync = false;
                     mPrepareStatus = msg.arg1;

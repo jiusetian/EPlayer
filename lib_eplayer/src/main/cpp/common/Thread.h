@@ -113,7 +113,7 @@ inline void Thread::start() {
     }
     // wait thread to run
     mMutex.lock();
-    //当线程执行函数还没有运行的时候，会释放锁并等待，
+    //当线程执行函数还没有运行的时候，会释放锁并等待
     while (!mRunning) {
         mCondition.wait(mMutex);
     }
@@ -145,18 +145,19 @@ inline bool Thread::isActive() const {
     return mRunning;
 }
 
+// 线程的执行函数
 inline void* Thread::threadEntry(void *arg) {
     Thread *thread = (Thread *) arg;
 
     if (thread != NULL) {
-        thread->mRunning = true;
+        thread->mRunning = true; // 线程运行起来了
         thread->mCondition.signal();
 
         thread->schedPriority(thread->mPriority);
 
         // when runnable is exit，run runnable else run()
         if (thread->mRunnable) {
-            thread->mRunnable->run();
+            thread->mRunnable->run(); // 线程任务的执行
         } else {
             thread->run();
         }
@@ -164,7 +165,7 @@ inline void* Thread::threadEntry(void *arg) {
         thread->mRunning = false;
         thread->mCondition.signal();
     }
-
+    // 线程退出
     pthread_exit(NULL);
 
     return NULL;

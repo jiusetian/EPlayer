@@ -44,6 +44,7 @@ public:
 
     double getMasterClock();
 
+
     void run() override;
 
     MediaClock *getAudioClock();
@@ -54,6 +55,8 @@ public:
 
     long getCurrentPosition();
 
+    void renderVideo();
+
 private:
     void refreshVideo(double *remaining_time);
 
@@ -63,7 +66,6 @@ private:
 
     double calculateDuration(Frame *vp, Frame *nextvp);
 
-    void renderVideo();
 
 private:
     PlayerState *playerState;               // 播放器状态

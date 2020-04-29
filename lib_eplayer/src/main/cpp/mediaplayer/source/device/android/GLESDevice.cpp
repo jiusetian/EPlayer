@@ -1,6 +1,7 @@
 
 #include <AndroidLog.h>
-#include <CoordinateUtils.h>
+#include "CoordinateUtils.h"
+#include "DisplayRenderNode.h"
 #include "GLESDevice.h"
 
 GLESDevice::GLESDevice() {
@@ -17,6 +18,15 @@ GLESDevice::GLESDevice() {
     mVideoTexture = (Texture *) malloc(sizeof(Texture));
     memset(mVideoTexture, 0, sizeof(Texture));
     mRenderNode = NULL;
+
+    nodeList = new RenderNodeList();
+    nodeList->addNode(new DisplayRenderNode());     // 添加显示渲染的结点
+    memset(&filterInfo, 0, sizeof(FilterInfo));
+    filterInfo.type = NODE_NONE;
+    filterInfo.name = nullptr;
+    filterInfo.id = -1;
+    filterChange = true;
+
     resetVertices();
     resetTexVertices();
 }
@@ -28,17 +38,18 @@ GLESDevice::~GLESDevice() {
 }
 
 void GLESDevice::surfaceChanged(int width, int height) {
-    if (mRenderNode != NULL) {
-        mRenderNode->surfaceChanged(width, height);
+    if (nodeList != nullptr && nodeList->findNode(NODE_DISPLAY) != nullptr) {
+        GLOutFilter *glOutFilter = (GLOutFilter *) nodeList->findNode(NODE_DISPLAY)->glFilter;
+        glOutFilter->nativeSurfaceChanged(width, height);
     }
 }
 
-void GLESDevice::setTwoScreen(bool isTwoScreen) {
-    if (mRenderNode != NULL) {
-        mRenderNode->setTwoScreen(isTwoScreen);
+void GLESDevice::setTimeStamp(double timeStamp) {
+    mMutex.lock();
+    if (nodeList) {
+        nodeList->setTimeStamp(timeStamp);
     }
-    //重置Surface
-    mSurfaceReset=true;
+    mMutex.unlock();
 }
 
 void GLESDevice::surfaceCreated(ANativeWindow *window) {
@@ -46,12 +57,12 @@ void GLESDevice::surfaceCreated(ANativeWindow *window) {
     if (mWindow != NULL) {
         ANativeWindow_release(mWindow);
         mWindow = NULL;
-        //重置window则需要重置Surface
+        // 重置window则需要重置Surface
         mSurfaceReset = true;
     }
     mWindow = window;
     if (mWindow != NULL) {
-        //渲染区域的宽高
+        // 渲染区域的宽高
         mSurfaceWidth = ANativeWindow_getWidth(mWindow);
         mSurfaceHeight = ANativeWindow_getHeight(mWindow);
     }
@@ -64,14 +75,14 @@ void GLESDevice::terminate() {
 }
 
 void GLESDevice::terminate(bool releaseContext) {
-    //销毁Surface
+    // 销毁Surface
     if (eglSurface != EGL_NO_SURFACE) {
         eglHelper->destroySurface(eglSurface);
         eglSurface = EGL_NO_SURFACE;
         mHaveEGLSurface = false;
     }
 
-    //销毁egl上下文
+    // 销毁egl上下文
     if (eglHelper->getEglContext() != EGL_NO_CONTEXT && releaseContext) {
         if (mRenderNode) {
             mRenderNode->destroy();
@@ -80,6 +91,30 @@ void GLESDevice::terminate(bool releaseContext) {
         eglHelper->release();
         mHaveEGlContext = false;
     }
+}
+
+void GLESDevice::changeFilter(RenderNodeType type, const char *filterName) {
+    mMutex.lock();
+
+    filterInfo.type = type;
+    filterInfo.name = av_strdup(filterName);
+    filterInfo.id = -1;
+    filterChange = true;
+    mMutex.unlock();
+}
+
+void GLESDevice::changeFilter(RenderNodeType type, const int id) {
+
+    mMutex.lock();
+    filterInfo.type = type;
+    if (filterInfo.name) {
+        av_freep(&filterInfo.name);
+        filterInfo.name = nullptr;
+    }
+    filterInfo.name = nullptr;
+    filterInfo.id = id;
+    filterChange = true;
+    mMutex.unlock();
 }
 
 /**
@@ -97,7 +132,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
 
     // 创建EGLContext
     if (!mHaveEGlContext) {
-        //在这个init方法中会调用到egl中的相关初始化操作，包括创建和初始化EGLDisplay、初始化图形上下文EGLContext
+        // 在这个init方法中会调用到egl中的相关初始化操作，包括创建和初始化EGLDisplay、初始化图形上下文EGLContext
         mHaveEGlContext = eglHelper->init(FLAG_TRY_GLES3);
         LOGD("mHaveEGlContext = %d", mHaveEGlContext);
     }
@@ -105,7 +140,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     if (!mHaveEGlContext) {
         return;
     }
-    // 重新设置Surface，兼容SurfaceHolder处理
+    // 是否需要重置Surface，兼容SurfaceHolder处理
     if (mHasSurface && mSurfaceReset) {
         terminate(false);
         mSurfaceReset = false;
@@ -113,7 +148,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
 
     // 创建EGLSurface
     if (eglSurface == EGL_NO_SURFACE && mWindow != NULL) {
-        //如果已经有Surface但是还没有eglSurface，则创建之
+        // 如果已经有Surface但是还没有eglSurface，则创建之
         if (mHasSurface && !mHaveEGLSurface) {
             eglSurface = eglHelper->createSurface(mWindow);
             if (eglSurface != EGL_NO_SURFACE) {
@@ -121,7 +156,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
                 LOGD("mHaveEGLSurface = %d", mHaveEGLSurface);
             }
         }
-    }else if (eglSurface != EGL_NO_SURFACE && mHaveEGLSurface) {
+    } else if (eglSurface != EGL_NO_SURFACE && mHaveEGLSurface) {
         // 处于SurfaceDestroyed状态，释放EGLSurface
         if (!mHasSurface) {
             terminate(false);
@@ -130,49 +165,79 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
 
     // 计算帧的宽高，如果不相等，则需要重新计算缓冲区的大小
     if (mWindow != NULL && mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+
         // 当视频宽高比和窗口宽高比例不一致时，调整缓冲区的大小
         if ((mSurfaceWidth / mSurfaceHeight) != (width / height)) {
-            //让视口的宽高比适应视频的宽高比
-            //mSurfaceHeight = mSurfaceWidth * height / width; //这个不注释会有问题
+            // 让视口的宽高比适应视频的宽高比
+            // mSurfaceHeight = mSurfaceWidth * height / width; // 这个不注释会有问题
             int windowFormat = ANativeWindow_getFormat(mWindow);
-            //设置缓冲区参数，把width和height设置成你要显示的图片的宽和高
+            // 设置缓冲区参数，把width和height设置成你要显示的图片的宽和高
             ANativeWindow_setBuffersGeometry(mWindow, 0, 0, windowFormat);
+            // ANativeWindow_setBuffersGeometry(mWindow, mSurfaceWidth, mSurfaceHeight, windowFormat);
         }
     }
 
     mVideoTexture->rotate = rotate;
-    //LOGE("帧的宽度%d",width)
-    //视频帧的宽高
+    // LOGE("帧的宽度%d",width)
+    // 视频帧的宽高
     mVideoTexture->frameWidth = width;
     mVideoTexture->frameHeight = height;
-    //纹理高度
+    // 纹理高度
     mVideoTexture->height = height;
     mVideoTexture->width = width;
     mVideoTexture->format = format;
     mVideoTexture->blendMode = blendMode;
     mVideoTexture->direction = FLIP_NONE;
-    //关联egl上下文
+    // 关联egl上下文
     eglHelper->makeCurrent(eglSurface);
-    //第一次会初始化，这个初始化主要作用是，创建对应的着色器程序和对应的纹理对象
+    // 第一次会初始化，这个初始化主要作用是，创建对应的着色器程序和对应的纹理对象
     if (mRenderNode == NULL) {
         mRenderNode = new InputRenderNode();
         if (mRenderNode != NULL) {
+            // 输入节点的初始化
             mRenderNode->initFilter(mVideoTexture);
-            //设置滤镜状态的指针
+
+            // 创建一个FBO给渲染节点
+            FrameBuffer *frameBuffer = new FrameBuffer(width, height);
+            // 初始化主要是创建一个帧缓冲区FBO并挂载一个颜色纹理
+            frameBuffer->init();
+            mRenderNode->setFrameBuffer(frameBuffer);
+
+            // 设置滤镜状态的指针
             mRenderNode->glFilter->setFilterState(filterState);
-            //设置视口的宽高
-            mRenderNode->surfaceChanged(mSurfaceWidth, mSurfaceHeight);
+            // 设置视口的宽高
+            // mRenderNode->surfaceChanged(mSurfaceWidth, mSurfaceHeight);
+
+            // 设置所有节点的视口大小
+            if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+                nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
+            }
         }
     }
+    // 如果改变了滤镜效果的渲染，则在节点链表中增加或更改为当前的滤镜
+    if (filterChange) {
+        // 改变滤镜效果
+        nodeList->changeFilter(filterInfo.type, FilterManager::getInstance()->getFilter(&filterInfo));
+        filterChange = false;
+        // 节点的视口大小
+        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+            nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
+        }
+        // 设置纹理大小
+        nodeList->setTextureSize(width, height);
+        // 所有节点初始化
+        nodeList->init();
+    }
+
     mMutex.unlock();
 }
 
 void GLESDevice::setFilterState(FilterState *fs) {
-    filterState=fs;
+    filterState = fs;
 }
 
 /**
- * 更新YUV数据，这里主要分别更新了YUV三个纹理对象的数据，数据分别有YUV的data数据和各自的宽度值
+ * 更新YUV数据，分别更新YUV三个纹理对象的数据，数据分别有YUV的data数据和各自的宽度值
  * @param yData
  * @param yPitch
  * @param uData
@@ -186,11 +251,11 @@ int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPit
         return -1;
     }
     mMutex.lock();
-    //分别赋值YUV的宽度
+    // 分别赋值YUV的宽度
     mVideoTexture->pitches[0] = yPitch;
     mVideoTexture->pitches[1] = uPitch;
     mVideoTexture->pitches[2] = vPitch;
-    //分别赋值YUV的像素数据
+    // 分别赋值YUV的像素数据
     mVideoTexture->pixels[0] = yData;
     mVideoTexture->pixels[1] = uData;
     mVideoTexture->pixels[2] = vData;
@@ -199,7 +264,7 @@ int GLESDevice::onUpdateYUV(uint8_t *yData, int yPitch, uint8_t *uData, int uPit
         eglHelper->makeCurrent(eglSurface);
         mRenderNode->uploadTexture(mVideoTexture);
     }
-    //LOGE("纹理的宽度%d",yPitch)
+    // LOGE("纹理的宽度%d",yPitch)
     // 设置像素实际的宽度，即linesize的值
     mVideoTexture->width = yPitch;
     mMutex.unlock();
@@ -211,7 +276,7 @@ int GLESDevice::onUpdateARGB(uint8_t *rgba, int pitch) {
         return -1;
     }
     mMutex.lock();
-    //ARRB模式
+    // ARGB模式
     mVideoTexture->pitches[0] = pitch; //linesize
     mVideoTexture->pixels[0] = rgba; //data
 
@@ -232,14 +297,21 @@ int GLESDevice::onRequestRender(bool flip) {
     }
     mMutex.lock();
     mVideoTexture->direction = flip ? FLIP_VERTICAL : FLIP_NONE;
-    //LOGD("flip ? %d", flip);
+    // LOGD("flip ? %d", flip);
     if (mRenderNode != NULL && eglSurface != EGL_NO_SURFACE) {
         eglHelper->makeCurrent(eglSurface);
-        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
-            mRenderNode->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
-            //LOGE("window的宽高=%d，%d",ANativeWindow_getWidth(mWindow),ANativeWindow_getHeight(mWindow));
-        }
-        mRenderNode->drawFrame(mVideoTexture);
+        // 第一步是输入节点的渲染，mRenderNode就是输入节点，输入节点也有一个FBO，将渲染结果保存到FBO的纹理对象中
+        int texture = mRenderNode->drawFrameBuffer(mVideoTexture);
+
+//        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
+//            // 设置显示窗口的大小
+//            nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
+//            // LOGE("window的宽高=%d，%d",ANativeWindow_getWidth(mWindow),ANativeWindow_getHeight(mWindow));
+//        }
+        // 渲染纹理，这里是直接渲染到系统默认的帧缓冲区，而不是自定义的帧缓冲区FBO
+        // mRenderNode->drawFrame(mVideoTexture);
+        // 从渲染节点链表中的节点依次对纹理数据进行处理，并最后显示
+        nodeList->drawFrame(texture, vertices, textureVertices);
         eglHelper->swapBuffers(eglSurface);
     }
     mMutex.unlock();
@@ -254,6 +326,7 @@ void GLESDevice::resetVertices() {
 }
 
 void GLESDevice::resetTexVertices() {
+    // 这个纹理坐标是FBO的纹理坐标，以左下角为原点
     const float *vertices = CoordinateUtils::getTextureCoordinates(ROTATE_NONE);
     for (int i = 0; i < 8; ++i) {
         textureVertices[i] = vertices[i];

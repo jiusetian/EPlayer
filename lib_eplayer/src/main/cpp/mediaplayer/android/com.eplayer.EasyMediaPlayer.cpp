@@ -222,6 +222,29 @@ void EMediaPlayer_setDataSourceAndHeaders(JNIEnv *env, jobject thiz, jstring pat
     env->ReleaseStringUTFChars(path_, path);
 }
 
+void EMediaPlayer_changeFilter(JNIEnv *env, jobject thiz, int node_type, jstring filterName_) {
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+    const char *name = env->GetStringUTFChars(filterName_, NULL);
+
+    mp->changeFilter(node_type, name);
+
+    env->ReleaseStringUTFChars(filterName_, name);
+}
+
+void EMediaPlayer_changeFilterById(JNIEnv *env, jobject thiz, int node_type, jint filterId) {
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+
+    mp->changeFilter(node_type, filterId);
+}
+
 void EMediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path_) {
     EMediaPlayer_setDataSourceAndHeaders(env, thiz, path_, NULL, NULL);
 }
@@ -575,16 +598,6 @@ void EMediaPlayer_setFilter(JNIEnv *env, jobject thiz,jint filterType,
     env->ReleaseFloatArrayElements(filterColor_, filterColor, 0);
 }
 
-//设置是否双屏
-void EMediaPlayer_setTwoScreen(JNIEnv *env, jobject thiz,jboolean isTwo){
-    EMediaPlayer *mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException");
-        return;
-    }
-    mp->setTwoScreen(isTwo);
-}
-
 
 void EMediaPlayer_setOption(JNIEnv *env, jobject thiz, int category, jstring type_, jstring option_) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
@@ -654,7 +667,8 @@ static const JNINativeMethod gMethods[] = {
         {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong},
         {"_surfaceChange",      "(II)V",                                    (void *) EMediaPlayer_surfaceChange},
         {"_setFilter",          "(I[F)V",                                   (void *) EMediaPlayer_setFilter},
-        {"_setTwoScreen",       "(Z)V",                                     (void *) EMediaPlayer_setTwoScreen}
+        {"_changeFilter",       "(ILjava/lang/String;)V",                   (void *)EMediaPlayer_changeFilter},
+        {"_changeFilter",       "(II)V",                                    (void *)EMediaPlayer_changeFilterById},
 };
 
 // 注册EMediaPlayer的Native方法

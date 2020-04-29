@@ -4,17 +4,14 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.*
 import android.widget.SeekBar
-import android.widget.Toast
 import com.eplayer.common.LogUtil
 import com.eplayer.common.StringUtils
 import com.eplayer.common.Utils
 import kotlinx.android.synthetic.main.activity_media_player.*
-import java.io.File
 
 
 class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener,
@@ -89,6 +86,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
         // 完成监听
         mediaPlayer.setOnCompletionListener {
+            Thread.sleep(1000)
+            // 已经播放完了
             isPlayComplete = true
             iv_pause_play.setImageResource(R.mipmap.iv_replay)
         }
@@ -145,7 +144,20 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_cooltone,
             action_warmtone,
             action_twoscreen,
-            action_next
+            action_next,
+            action_prev,
+            action_soul,
+            action_shake,
+            action_clitterwihte,
+            action_illusion,
+            action_scale,
+            action_blursplit,
+            action_blackwhitethree,
+            action_two,
+            action_three,
+            action_four,
+            action_six,
+            action_nine
         ).forEach {
             it.setOnClickListener(this)
         }
@@ -189,7 +201,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-        if (fromUser) {
+        if (fromUser) { // 是否为用户行为，比如用户拖动seekbar
             mProgress = progress
             seekBar.setProgress(progress)
             // 设置当前播放时间
@@ -208,8 +220,9 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
     }
 
-    //播放
+    // 播放
     private fun play(path: String) {
+        LogUtil.d("播放路径=" + path)
         mediaPlayer.reset()
         initPlayer(path)
         mediaPlayer.setDisplay(surfaceView.holder)
@@ -236,41 +249,89 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                 if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
                 else ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
             // 滤镜效果
-            R.id.action_original -> mediaPlayer.setFilter(Filter.NONE.mType, Filter.NONE.mData)
-            R.id.action_blackwhite -> mediaPlayer.setFilter(Filter.GRAY.mType, Filter.GRAY.mData)
-            R.id.action_cooltone -> mediaPlayer.setFilter(Filter.COOL.mType, Filter.COOL.mData)
-            R.id.action_dim -> mediaPlayer.setFilter(Filter.BLUR.mType, Filter.BLUR.mData)
-            R.id.action_warmtone -> mediaPlayer.setFilter(Filter.WARM.mType, Filter.WARM.mData)
+            R.id.action_original -> mediaPlayer.setFilter(EFilter.NONE.mType, EFilter.NONE.mData)
+            R.id.action_blackwhite -> mediaPlayer.setFilter(EFilter.GRAY.mType, EFilter.GRAY.mData)
+            R.id.action_cooltone -> mediaPlayer.setFilter(EFilter.COOL.mType, EFilter.COOL.mData)
+            R.id.action_dim -> mediaPlayer.setFilter(EFilter.BLUR.mType, EFilter.BLUR.mData)
+            R.id.action_warmtone -> mediaPlayer.setFilter(EFilter.WARM.mType, EFilter.WARM.mData)
 
             // 双屏播放
             R.id.action_twoscreen -> {
-                isTwoScreen = !isTwoScreen
-                mediaPlayer.setTwoScreen(isTwoScreen)
             }
 
-            //播放下一个
-            R.id.action_next -> {
-                if (index == paths.size-1) {
-                    Toast.makeText(this, "没有更多视频了", Toast.LENGTH_SHORT).show()
-                    return
-                } else {
-                    play(paths.get(++index))
-                    LogUtil.d("播放地址="+paths.get(index))
-                }
+            // 播放上一个
+            R.id.action_prev -> {
+                index = if (index == 0) paths.size - 1 else --index
+                play(paths.get(index))
                 isPlayComplete = false
                 iv_pause_play.setImageResource(R.drawable.ic_player_pause)
             }
+
+
+            // 播放下一个
+            R.id.action_next -> {
+                index = if (index == paths.size - 1) 0 else ++index
+                play(paths.get(index))
+                isPlayComplete = false
+                iv_pause_play.setImageResource(R.drawable.ic_player_pause)
+            }
+
+            // 灵魂出窍
+            R.id.action_soul -> mediaPlayer.changeFilter(Filter.SOUL.filterName)
+            // 抖动
+            R.id.action_shake -> mediaPlayer.changeFilter(Filter.SHAKE.filterName)
+            // 幻觉
+            R.id.action_illusion -> mediaPlayer.changeFilter(Filter.ILLUSION.filterName)
+            // 缩放
+            R.id.action_scale -> mediaPlayer.changeFilter(Filter.SCALE.filterName)
+            // 闪白
+            R.id.action_clitterwihte -> mediaPlayer.changeFilter(Filter.GLITTERWHITE.filterName)
+
+            // 模糊分屏
+            R.id.action_blursplit -> mediaPlayer.changeEffect(Effect.BLURSPLIT.effectName)
+            // 黑白三屏
+            R.id.action_blackwhitethree -> mediaPlayer.changeEffect(Effect.BLACKWHITETHREE.effectName)
+            // 两屏
+            R.id.action_two -> mediaPlayer.changeEffect(Effect.TWO.effectName)
+            // 三屏
+            R.id.action_three -> mediaPlayer.changeEffect(Effect.THREE.effectName)
+            // 四屏
+            R.id.action_four -> mediaPlayer.changeEffect(Effect.FOUR.effectName)
+            // 六屏
+            R.id.action_six -> mediaPlayer.changeEffect(Effect.SIX.effectName)
+            // 九屏
+            R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
 
         }
     }
 
     // 滤镜类型
-    enum class Filter(val mType: Int, val mData: FloatArray) {
+    enum class EFilter(val mType: Int, val mData: FloatArray) {
         NONE(0, floatArrayOf(0.0f, 0.0f, 0.0f)),
         GRAY(1, floatArrayOf(0.299f, 0.587f, 0.114f)),
         COOL(2, floatArrayOf(0.0f, 0.0f, 0.1f)),
         WARM(2, floatArrayOf(0.1f, 0.1f, 0.0f)),
         BLUR(3, floatArrayOf(0.006f, 0.004f, 0.002f));
+    }
+
+    // 滤镜类型
+    enum class Filter(val filterName: String) {
+        SOUL("灵魂出窍"),
+        SHAKE("抖动"),
+        ILLUSION("幻觉"),
+        SCALE("缩放"),
+        GLITTERWHITE("闪白"),
+    }
+
+    // 特效类型
+    enum class Effect(val effectName: String) {
+        BLURSPLIT("模糊分屏"),
+        BLACKWHITETHREE("黑白三屏"),
+        TWO("两屏"),
+        THREE("三屏"),
+        FOUR("四屏"),
+        SIX("六屏"),
+        NINE("九屏"),
     }
 
 }

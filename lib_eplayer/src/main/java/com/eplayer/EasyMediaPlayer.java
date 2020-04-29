@@ -740,12 +740,6 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _setLooping(boolean looping);
 
-    @Override
-    public void setTwoScreen(boolean twoScreen) {
-        _setTwoScreen(twoScreen);
-    }
-    private native void _setTwoScreen(boolean twoScreen);
-
     /**
      * Checks whether the MediaPlayer is looping or non-looping.
      *
@@ -834,8 +828,9 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     @Override
     public void setFilter(int filterType, float[] filterColor) {
-        _setFilter(filterType,filterColor);
+        _setFilter(filterType, filterColor);
     }
+
     private native void _setFilter(int filterType, float[] filterColor);
 
     /**
@@ -862,6 +857,48 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _setPitch(float pitch);
 
+    // 渲染结点类型，跟Native层的RenderNodeType数值保持一致。
+    private static final int NODE_NONE = -1;
+    private static final int NODE_INPUT = 0;
+    private static final int NODE_BEAUTY = 1;
+    private static final int NODE_FACE = 2;
+    private static final int NODE_MAKEUP = 3;
+    private static final int NODE_FILTER = 4;
+    private static final int NODE_EFFECT = 5;
+    private static final int NODE_STICKERS = 6; // 贴纸结点
+    private static final int NODE_DISPLAY = 7;
+
+    @Override
+    public void changeFilter(int id) {
+        _changeFilter(NODE_FILTER, id);
+    }
+
+    @Override
+    public void changeFilter(String name) {
+        _changeFilter(NODE_FILTER, name);
+    }
+
+    /**
+     * change effect
+     * @param name effect name
+     */
+    @Override
+    public void changeEffect(String name) {
+        _changeFilter(NODE_EFFECT, name);
+    }
+
+    /**
+     * change effect
+     * @param id effect id
+     */
+    @Override
+    public void changeEffect(int id) {
+        _changeFilter(NODE_EFFECT, id);
+    }
+
+    private native void _changeFilter(int type, String name);
+
+    private native void _changeFilter(int type, int id);
 
     // ---------------------------------------------------------------------------------------------
     // Options
