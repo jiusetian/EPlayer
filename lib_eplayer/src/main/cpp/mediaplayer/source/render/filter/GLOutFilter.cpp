@@ -13,6 +13,7 @@ void GLOutFilter::nativeSurfaceChanged(int width, int height) {
     displayHeight = height;
     // 如果视频宽高不为0，则改变矩阵
     if (textureWidth != 0 && textureHeight != 0) {
+        LOGD("改变矩阵1");
         v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 }
@@ -33,6 +34,7 @@ void GLOutFilter::initProgram(const char *vertexShader, const char *fragmentShad
 
     // 如果视频和Surface都不为0，则初始化屏幕适配矩阵
     if (textureWidth != 0 && textureHeight != 0 && displayWidth != 0 && displayHeight != 0) {
+        LOGD("改变矩阵2");
         v_mat4 = OpenGLUtils::caculateVideoFitMat4(textureWidth, textureHeight, displayWidth, displayHeight);
     }
 

@@ -38,6 +38,8 @@ GLESDevice::~GLESDevice() {
 }
 
 void GLESDevice::surfaceChanged(int width, int height) {
+    mSurfaceWidth = width;
+    mSurfaceHeight = height;
     if (nodeList != nullptr && nodeList->findNode(NODE_DISPLAY) != nullptr) {
         GLOutFilter *glOutFilter = (GLOutFilter *) nodeList->findNode(NODE_DISPLAY)->glFilter;
         glOutFilter->nativeSurfaceChanged(width, height);
@@ -205,8 +207,6 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
 
             // 设置滤镜状态的指针
             mRenderNode->glFilter->setFilterState(filterState);
-            // 设置视口的宽高
-            // mRenderNode->surfaceChanged(mSurfaceWidth, mSurfaceHeight);
 
             // 设置所有节点的视口大小
             if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {

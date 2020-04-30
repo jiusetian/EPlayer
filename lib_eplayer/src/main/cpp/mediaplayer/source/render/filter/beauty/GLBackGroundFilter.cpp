@@ -21,7 +21,7 @@ const std::string backGroundFragmentShader = SHADER_TO_STRING(
             vec4 tmpColor = abgr;
             //tmpColor.r = abgr.b;
             //tmpColor.b = abgr.r;
-            gl_FragColor = tmpColor;
+            //gl_FragColor = tmpColor;
 
             if (iFilterType == 1) { // 灰度图
                 float c = tmpColor.r * vFilterColor.r + tmpColor.g * vFilterColor.g + tmpColor.b * vFilterColor.b;

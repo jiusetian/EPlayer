@@ -83,6 +83,7 @@ void GLFilter::setIntensity(float intensity) {
 
 void GLFilter::updateViewPort() {
     if (displayWidth != 0 && displayHeight != 0) {
+        LOGD("视口宽高%d，%d",displayWidth,displayHeight);
         glViewport(0, 0, displayWidth, displayHeight);
     } else {
         glViewport(0, 0, textureWidth, textureHeight);
