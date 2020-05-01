@@ -8,7 +8,6 @@
 #include <RenderNodeList.h>
 #include "render/common/header/EglHelper.h"
 #include "InputRenderNode.h"
-#include "FilterState.h"
 
 class GLESDevice : public VideoDevice {
 public:
@@ -37,8 +36,6 @@ public:
 
     int onRequestRender(bool flip) override;
 
-    // 设置滤镜状态
-    void setFilterState(FilterState *fs);
 
     // 改变滤镜
     void changeFilter(RenderNodeType type, const char *filterName);
@@ -74,6 +71,5 @@ private:
     FilterInfo filterInfo;              // 滤镜信息
     bool filterChange;                  // 切换滤镜
 
-    FilterState *filterState;
 };
 #endif //EPLAYER_GLESDEVICE_H

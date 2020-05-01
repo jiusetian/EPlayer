@@ -205,9 +205,6 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
             frameBuffer->init();
             mRenderNode->setFrameBuffer(frameBuffer);
 
-            // 设置滤镜状态的指针
-            mRenderNode->glFilter->setFilterState(filterState);
-
             // 设置所有节点的视口大小
             if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
                 nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
@@ -230,10 +227,6 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     }
 
     mMutex.unlock();
-}
-
-void GLESDevice::setFilterState(FilterState *fs) {
-    filterState = fs;
 }
 
 /**

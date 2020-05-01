@@ -101,7 +101,7 @@ private:
     int openMediaDevice();
 
     // 获取AV数据
-    int getAvPackets();
+    int readAvPackets();
 
     int startPlayer();
 

@@ -31,7 +31,6 @@ void EMediaPlayer::init() {
     // 视频播放设备
     if (videoDevice == nullptr) {
         videoDevice = new GLESDevice();
-        videoDevice->setFilterState(&filterState);
     }
 
     // 消息分发的线程
@@ -116,16 +115,6 @@ void EMediaPlayer::surfaceChanged(int width, int height) {
         videoDevice->surfaceChanged(width, height);
     }
 }
-
-void EMediaPlayer::setFilterType(GLint filterType) {
-    filterState.setFilterType(filterType);
-}
-
-void EMediaPlayer::setFilterColor(GLfloat *filterColor) {
-    // 设置纹理渲染的滤镜颜色
-    filterState.setFilterColor(filterColor);
-}
-
 
 status_t EMediaPlayer::setVideoSurface(ANativeWindow *native_window) {
     if (mediaPlayer == nullptr) {

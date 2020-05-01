@@ -38,8 +38,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         }
         supportActionBar!!.hide()
-        paths = Utils.getList(this)
-        //path = intent.getStringExtra(PATH)
+        paths = Utils.getVideoList(this)
+        index=paths.size-2
         initPlayer(paths.get(index))
         initView()
     }

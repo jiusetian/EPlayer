@@ -826,13 +826,6 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _surfaceChange(int width, int height);
 
-    @Override
-    public void setFilter(int filterType, float[] filterColor) {
-        _setFilter(filterType, filterColor);
-    }
-
-    private native void _setFilter(int filterType, float[] filterColor);
-
     /**
      * Sets speed on this player.
      *
@@ -900,7 +893,7 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     @Override
     public void changeBackground(String name) {
-        _changeFilter(NODE_FACE, name);
+        _changeFilter(NODE_BEAUTY, name);
     }
 
     private native void _changeFilter(int type, String name);

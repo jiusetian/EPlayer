@@ -16,7 +16,6 @@
 #include "FrameBuffer.h"
 #include "render/common/header/macros.h"
 #include "Shader.h"
-#include "FilterState.h"
 
 
 using namespace std;
@@ -104,9 +103,6 @@ public:
     // 是否已经初始化
     virtual bool isInitialized();
 
-    //设置滤镜状态
-    virtual void setFilterState(FilterState *fs);
-
 
 protected:
     // 绑定attribute属性
@@ -148,7 +144,6 @@ protected:
     int displayWidth;       // 显示输出宽度
     int displayHeight;      // 显示输出高度
 
-    FilterState *filterState; //滤镜状态
 };
 
 #endif //EPLAYER_GLFILTER_H

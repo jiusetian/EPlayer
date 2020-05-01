@@ -10,7 +10,6 @@
 #include <libavutil/dict.h>
 #include <GLESDevice.h>
 #include <MediaPlayer.h>
-#include "FilterState.h"
 
 enum media_event_type {
     MEDIA_NOP = 0, // interface test message
@@ -105,12 +104,6 @@ public:
     //Surface的大小发生改变
     void surfaceChanged(int width, int height);
 
-    //设置滤镜类型
-    void setFilterType(GLint filterType);
-
-    //设置滤镜颜色
-    void setFilterColor(GLfloat *filterColor);
-
     // 改变滤镜
     void changeFilter(int type, const char *name);
 
@@ -193,8 +186,6 @@ private:
     status_t mPrepareStatus;
     int mAudioSessionId;
 
-    //滤镜状态
-    FilterState filterState;
 };
 
 

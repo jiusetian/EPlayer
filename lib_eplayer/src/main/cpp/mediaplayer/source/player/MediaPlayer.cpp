@@ -46,7 +46,7 @@ static int lockmgrCallback(void **mtx, enum AVLockOp op) {
 MediaPlayer::MediaPlayer() {
     av_register_all();
     avformat_network_init();
-    //主要用来保存播放器的信息
+    // 主要用来保存播放器的信息
     playerState = new PlayerState();
     mDuration = -1;
     audioDecoder = NULL;
@@ -82,7 +82,7 @@ MediaPlayer::~MediaPlayer() {
 }
 
 status_t MediaPlayer::reset() {
-    //先停止
+    // 先停止
     stop();
     if (mediaSync) {
         mediaSync->reset();
@@ -121,7 +121,7 @@ status_t MediaPlayer::reset() {
 }
 
 void MediaPlayer::setDataSource(const char *url, int64_t offset, const char *headers) {
-    //因为Autolock属于一个局部变量，在这里执行了lock上锁操作，当方法执行完，这个局部变量要销毁，会执行析构函数，而在析构函数中会执行解锁操作unlock
+    // 因为Autolock属于一个局部变量，在这里执行了lock上锁操作，当方法执行完，这个局部变量要销毁，会执行析构函数，而在析构函数中会执行解锁操作unlock
     Mutex::Autolock lock(mMutex);
     playerState->url = av_strdup(url); //拷贝字符串
     playerState->offset = offset; //文件偏移量
@@ -143,10 +143,10 @@ status_t MediaPlayer::prepare() {
     }
     playerState->abortRequest = 0;
     LOGD("准备播放1");
-    //开启读数据线程准备
+    // 开启读数据线程准备
     if (!readThread) {
         LOGD("准备播放2");
-        readThread = new Thread(this); //因为当前类继承了runnable
+        readThread = new Thread(this); // 因为当前类继承了runnable
         readThread->start();
     }
     return NO_ERROR;
@@ -159,8 +159,8 @@ status_t MediaPlayer::prepareAsync() {
     }
     // 发送消息
     if (playerState->messageQueue) {
-        //异步的意思就是在工作线程中去准备，这里首先发送一个MSG_REQUEST_PREPARE出去，在EMediaPlayer类处理消息的线程中收到消息以后，
-        //再调用prepare方法，这样就实现了在接收消息的工作线程中去执行prepare方法
+        // 异步的意思就是在工作线程中去准备，这里首先发送一个MSG_REQUEST_PREPARE出去，在EMediaPlayer类处理消息的线程中收到消息以后，
+        // 再调用prepare方法，这样就实现了在接收消息的工作线程中去执行prepare方法
         playerState->messageQueue->postMessage(MSG_REQUEST_PREPARE);
     }
     return NO_ERROR;
@@ -422,7 +422,7 @@ int MediaPlayer::startPlayer() {
     }
 
     /*5、获取packet数据*/
-    ret = getAvPackets();
+    ret = readAvPackets();
     // LOGE("返回值%d", ret);
     if (ret < 0 && ret != AVERROR_EOF) { // 播放出错
         notifyErrorMsg("error when reading packets!");
@@ -446,14 +446,12 @@ int MediaPlayer::demux() {
     AVDictionary **opts;
     int scan_all_pmts_set = 0;
 
-    // 准备解码器
+    // 线程加锁
     mMutex.lock();
 
     do {
         // 解封装功能结构体
-        //  if (pFormatCtx == NULL){
         pFormatCtx = avformat_alloc_context();
-        //  }
 
         if (!pFormatCtx) {
             av_log(NULL, AV_LOG_FATAL, "Could not allocate context.\n");
@@ -513,7 +511,7 @@ int MediaPlayer::demux() {
         if (playerState->messageQueue) {
             playerState->messageQueue->postMessage(MSG_OPEN_INPUT);
         }
-        //又设置为null
+        // 又设置为null
         if (scan_all_pmts_set) {
             av_dict_set(&playerState->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE);
         }
@@ -560,7 +558,7 @@ int MediaPlayer::demux() {
 
         // 判断是否实时流，判断是否需要设置无限缓冲区
         playerState->realTime = isRealTime(pFormatCtx);
-        // 如果是实时流和偏移量<0
+        // 如果是实时流和偏移量 < 0
         if (playerState->infiniteBuffer < 0 && playerState->realTime) {
             playerState->infiniteBuffer = 1;
         }
@@ -647,6 +645,7 @@ int MediaPlayer::prepareDecoder() {
     } else {
         videoIndex = -1;
     }
+
     // 如果不禁止音频流，则查找最合适的音频流索引(与视频流关联的音频流)
     if (!playerState->audioDisable) {
         audioIndex = av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_AUDIO, audioIndex, videoIndex,
@@ -796,7 +795,7 @@ int MediaPlayer::openMediaDevice() {
  * 读取av数据
  * @return
  */
-int MediaPlayer::getAvPackets() {
+int MediaPlayer::readAvPackets() {
     // 读数据包流程
     eof = 0;
     int ret = 0;
@@ -992,7 +991,7 @@ int MediaPlayer::getAvPackets() {
     if (mediaSync) {
         mediaSync->stop();
     }
-    //主要作用是当线程执行完毕，才退出，关键是上面几个stop也执行了
+    // 主要作用是当线程执行完毕，才退出，关键是上面几个stop也执行了
     mExit = true;
     mCondition.signal();
     return ret;
@@ -1064,6 +1063,7 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
             ret = AVERROR(EINVAL);
             break;
         }
+        // 设置解码器id
         avctx->codec_id = codec->id;
 
         // 设置一些播放参数
@@ -1117,12 +1117,14 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
 
         // 根据解码器类型创建解码器
         pFormatCtx->streams[streamIndex]->discard = AVDISCARD_DEFAULT; // 抛弃无用的数据比如像0大小的packet
+
         /*根据解码器类型，创建对应的解码器*/
         switch (avctx->codec_type) {
             case AVMEDIA_TYPE_AUDIO: {
                 if (audioDecoder == NULL) {
                     audioDecoder = new AudioDecoder(avctx, pFormatCtx->streams[streamIndex], streamIndex, playerState);
                 }
+                // 如果已经有解码器了，就重置解码器的参数
                 break;
             }
 
@@ -1147,6 +1149,7 @@ int MediaPlayer::prepareDecoder(int streamIndex) {
             const char errorMsg[] = "failed to open stream!";
             playerState->messageQueue->postMessage(MSG_ERROR, 0, 0, (void *) errorMsg, sizeof(errorMsg) / errorMsg[0]);
         }
+        // 失败了就要释放解码上下文
         avcodec_free_context(&avctx);
     }
     // 释放参数
@@ -1184,7 +1187,7 @@ int MediaPlayer::openAudioDevice(int64_t wanted_channel_layout, int wanted_nb_ch
         wanted_channel_layout = av_get_default_channel_layout(wanted_nb_channels); //获取默认的通道layout
         wanted_channel_layout &= ~AV_CH_LAYOUT_STEREO_DOWNMIX;
     }
-    //期望的声道数
+    // 期望的声道数
     wanted_nb_channels = av_get_channel_layout_nb_channels(wanted_channel_layout);
     wanted_spec.channels = wanted_nb_channels;
     wanted_spec.freq = wanted_sample_rate;
@@ -1194,7 +1197,7 @@ int MediaPlayer::openAudioDevice(int64_t wanted_channel_layout, int wanted_nb_ch
         return -1;
     }
 
-    //找到在next_sample_rates数组中比wanted_spec.freq小的那个采样率的index
+    // 找到在next_sample_rates数组中比wanted_spec.freq小的那个采样率的index
     while (next_sample_rate_idx && next_sample_rates[next_sample_rate_idx] >= wanted_spec.freq) {
         next_sample_rate_idx--;
     }
@@ -1203,7 +1206,7 @@ int MediaPlayer::openAudioDevice(int64_t wanted_channel_layout, int wanted_nb_ch
     wanted_spec.samples = FFMAX(AUDIO_MIN_BUFFER_SIZE,
                                 2 << av_log2(wanted_spec.freq / AUDIO_MAX_CALLBACKS_PER_SEC));
 
-    //设置音频取数据的回调方法
+    // 设置音频取数据的回调方法
     wanted_spec.callback = audioPCMQueueCallback;
     wanted_spec.userdata = this;
 
@@ -1212,10 +1215,10 @@ int MediaPlayer::openAudioDevice(int64_t wanted_channel_layout, int wanted_nb_ch
         av_log(NULL, AV_LOG_WARNING, "Failed to open audio device: (%d channels, %d Hz)!\n",
                wanted_spec.channels,
                wanted_spec.freq);
-        //打开音频设备失败的话，重新设置wanted_spec相关参数
+        // 打开音频设备失败的话，重新设置wanted_spec相关参数
         wanted_spec.channels = next_nb_channels[FFMIN(7, wanted_spec.channels)];
         if (!wanted_spec.channels) {
-            //重新设置采样率
+            // 重新设置采样率
             wanted_spec.freq = next_sample_rates[next_sample_rate_idx--];
             wanted_spec.channels = wanted_nb_channels;
             if (!wanted_spec.freq) {
@@ -1226,13 +1229,13 @@ int MediaPlayer::openAudioDevice(int64_t wanted_channel_layout, int wanted_nb_ch
         wanted_channel_layout = av_get_default_channel_layout(wanted_spec.channels);
     }
 
-    //不支持16bit的采样精度
+    // 不支持16bit的采样精度
     if (spec.format != AV_SAMPLE_FMT_S16) {
         av_log(NULL, AV_LOG_ERROR, "audio format %d is not supported!\n", spec.format);
         return -1;
     }
 
-    //不支持所期望的采样率
+    // 不支持所期望的采样率
     if (spec.channels != wanted_spec.channels) {
         wanted_channel_layout = av_get_default_channel_layout(spec.channels);
         if (!wanted_channel_layout) {

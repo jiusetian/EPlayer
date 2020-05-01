@@ -403,13 +403,6 @@ public interface IMediaPlayer {
     public void surfaceChange(int width,int height);
 
     /**
-     * set the filter
-     * @param filterType
-     * @param filterColor
-     */
-    public void setFilter(int filterType,float[] filterColor);
-
-    /**
      * Sets speed on this player.
      * @param rate
      */

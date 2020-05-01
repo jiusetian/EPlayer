@@ -346,14 +346,6 @@ public class AndroidMediaPlayer implements IMediaPlayer {
             mMediaPlayer.surfaceChange(width, height);
         }
     }
-
-    @Override
-    public void setFilter(int filterType, float[] filterColor) {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.setFilter(filterType, filterColor);
-        }
-    }
-
     @Override
     public void setRate(float rate) {
         // do nothing

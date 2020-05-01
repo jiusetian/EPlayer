@@ -4,6 +4,7 @@
 VideoDecoder::VideoDecoder(AVFormatContext *pFormatCtx, AVCodecContext *avctx,
                            AVStream *stream, int streamIndex, PlayerState *playerState)
         : MediaDecoder(avctx, stream, streamIndex, playerState) {
+
     this->pFormatCtx = pFormatCtx;
     frameQueue = new FrameQueue(VIDEO_QUEUE_SIZE, 1);
     mExit = true;
@@ -124,6 +125,7 @@ int VideoDecoder::decodeVideo() {
         return AVERROR(ENOMEM);
     }
 
+    // 分配未解码数据的内存
     AVPacket *packet = av_packet_alloc();
     if (!packet) {
         mExit = true;
@@ -131,7 +133,7 @@ int VideoDecoder::decodeVideo() {
         return AVERROR(ENOMEM);
     }
 
-    //循环从队列中取出数据包，然后解码最后将得到的视频帧存入帧队列中
+    /*循环从队列中取出未解码的数据，解码成功后将数据结果存入到另一个队列中*/
     for (;;) {
 
         if (abortRequest || playerState->abortRequest) {
@@ -142,33 +144,33 @@ int VideoDecoder::decodeVideo() {
         if (playerState->seekRequest) {
             continue;
         }
-        /*取数据，如果没有数据会阻塞*/
-        //取得数据包，如果没有数据的时候会阻塞，是一个生产者消费者模式
-        if (packetQueue->getPacket(packet) < 0) {
+
+        /*取数据，如果没有数据会阻塞，这是一个生产者消费者模式*/
+        if (packetQueue->getPacket(packet) < 0) { // 可能会被阻塞
             ret = -1;
             break;
         }
-        // 送去解码
+
         playerState->mMutex.lock();
+        // 送去解码
         ret = avcodec_send_packet(pCodecCtx, packet);
         if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
             av_packet_unref(packet);
             playerState->mMutex.unlock();
             continue;
         }
-
         // 得到解码帧
         ret = avcodec_receive_frame(pCodecCtx, frame);
-
         playerState->mMutex.unlock();
+
         if (ret < 0 && ret != AVERROR_EOF) {
             av_frame_unref(frame);
             av_packet_unref(packet);
             continue;
-        } else { //解码正常
+        } else { // 解码正常
             got_picture = 1;
             // 是否重排pts，默认情况下需要重排pts的
-            if (playerState->reorderVideoPts == -1) {
+            if (playerState->reorderVideoPts == 1) {
                 frame->pts = av_frame_get_best_effort_timestamp(frame);
             } else if (!playerState->reorderVideoPts) {
                 frame->pts = frame->pkt_dts;
@@ -181,7 +183,7 @@ int VideoDecoder::decodeVideo() {
                 if (frame->pts != AV_NOPTS_VALUE) {
                     dpts = av_q2d(pStream->time_base) * frame->pts;
                 }
-                // 计算视频帧的长宽比
+                // 计算帧的长宽比
                 frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(pFormatCtx, pStream, frame);
                 // 是否需要做舍帧操作，主要看音视频同步是否差距过大
                 if (playerState->frameDrop > 0 ||
@@ -201,7 +203,7 @@ int VideoDecoder::decodeVideo() {
         if (got_picture) { //解码正常
 
             // 取出frame数组中的可写入元素指针，当frame数组满时，会阻塞等待
-            if (!(vp = frameQueue->peekWritable())) {
+            if (!(vp = frameQueue->peekWritable())) { // 可能会被阻塞
                 ret = -1;
                 break;
             }
@@ -212,9 +214,10 @@ int VideoDecoder::decodeVideo() {
             vp->height = frame->height;
             vp->format = frame->format;
             vp->pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+            // 计算一帧的时长
             vp->duration = frame_rate.num && frame_rate.den ? av_q2d((AVRational) {frame_rate.den, frame_rate.num}) : 0;
             av_frame_move_ref(vp->frame, frame); //移动引用的意思
-            // 入队帧，这是一个生产者消费者模式的队列
+            // 写入数据成功，这是一个生产者消费者模式的队列
             frameQueue->pushFrame();
         }
 
@@ -231,6 +234,7 @@ int VideoDecoder::decodeVideo() {
     av_free(packet);
     packet = NULL;
 
+    // 等待线程结束后再删除线程对象
     mExit = true;
     mCondition.signal();
 

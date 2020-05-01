@@ -81,7 +81,7 @@ void PlayerState::reset() {
     loop = 0;
     mute = 0;
     frameDrop = 1;
-    reorderVideoPts = -1;
+    reorderVideoPts = 1;
     videoDuration = 0;
 }
 

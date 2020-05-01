@@ -24,7 +24,7 @@ object Utils {
         return outMetrics.widthPixels
     }
 
-    fun getScreenHeight(context: Context):Int{
+    fun getScreenHeight(context: Context): Int {
         val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val outMetrics = DisplayMetrics()
@@ -34,9 +34,8 @@ object Utils {
         return outMetrics.heightPixels
     }
 
-    fun getList(context: Context): List<String> {
-        var list: MutableList<String>
-        list = ArrayList()
+    fun getVideoList(context: Context): List<String> {
+        val list = ArrayList<String>()
 
         if (this != null) {
             val cursor: Cursor = context.getContentResolver().query(
@@ -44,54 +43,14 @@ object Utils {
                 null, null
             )
             if (cursor != null) {
-
                 while (cursor.moveToNext()) {
-
-//                    val id: Int = cursor.getInt(
-//                        cursor
-//                            .getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-//                    )
-//                    val title: String = cursor
-//                        .getString(
-//                            cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
-//                        )
-//
-////                    val album: String = cursor.getString(
-////                            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.ALBUM))
-//
-//                    val artist: String = cursor
-//                        .getString(
-//                            cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.ARTIST)
-//                        )
-//                    val displayName: String = cursor
-//                        .getString(
-//                            cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-//                        )
-//                    val mimeType: String = cursor
-//                        .getString(
-//                            cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)
-//                        )
                     val path: String = cursor
-                        .getString(
-                            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
-                        )
-
-//                    val size: Long = cursor
-//                        .getLong(
-//                            cursor
-//                                .getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-//                        )
-
+                        .getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))
                     list.add(path)
                 }
                 cursor.close()
             }
         }
-
         return list
     }
 }

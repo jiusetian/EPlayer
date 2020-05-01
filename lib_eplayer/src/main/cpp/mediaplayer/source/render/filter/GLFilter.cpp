@@ -59,10 +59,6 @@ bool GLFilter::isInitialized() {
     return initialized;
 }
 
-void GLFilter::setFilterState(FilterState *fs) {
-    filterState = fs;
-}
-
 void GLFilter::setTextureSize(int width, int height) {
     this->textureWidth = width;
     this->textureHeight = height;

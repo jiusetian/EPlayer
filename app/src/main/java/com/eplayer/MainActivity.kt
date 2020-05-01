@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 requestPerms(*perms)
         }
 
-        LogUtil.d("返回媒体信息："+Utils.getList(this).get(0))
+        LogUtil.d("返回媒体信息："+Utils.getVideoList(this).get(0))
 
         //播放器播放
         btn_play.setOnClickListener {
