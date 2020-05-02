@@ -442,7 +442,7 @@ void MediaSync::renderVideo() {
                 break;
             }
 
-                // 直接渲染BGRA8888，即一个像素4个字节，对应的是shader->argb格式
+                // 直接渲染BGRA8888，即一个像素4个字节，因为c++数据存储使用的是小端模式，跟大端模式顺序相反，所以BGRA其实就是ARGB
             case AV_PIX_FMT_BGRA: {
                 // LOGE("rgb数据");
                 videoDevice->onInitTexture(vp->frame->width, vp->frame->height,
@@ -456,7 +456,6 @@ void MediaSync::renderVideo() {
 
                 // 其他格式转码成BGRA格式再做渲染
             default: {
-                // LOGE("其他格式%d",vp->frame->format);
 
                 // 首先通过传入的swsContext上下文根据参数去缓存空间里面找，如果有对应的缓存则返回，没有则开辟一个新的上下文空间
                 // 参数说明：

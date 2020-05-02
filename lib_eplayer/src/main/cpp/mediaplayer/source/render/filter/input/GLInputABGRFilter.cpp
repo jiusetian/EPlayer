@@ -10,7 +10,7 @@ const std::string kABGRFragmentShader = SHADER_TO_STRING(
 
         void main() {
             vec4 abgr = texture2D(inputTexture, textureCoordinate);
-            //因为fragColor的格式是argb，而这里是abgr，所以b和r需要交换一下
+            // fragColor指定为RGBA格式，原始数据格式是BGRA，应该第一个和第三个交换，即R和B交换
             gl_FragColor = abgr;
             gl_FragColor.r = abgr.b;
             gl_FragColor.b = abgr.r;
@@ -36,13 +36,9 @@ void GLInputABGRFilter::initProgram(const char *vertexShader, const char *fragme
     GLFilter::initProgram(vertexShader, fragmentShader);
 
     if (isInitialized()) {
-        //mFilterTypeLoc = glGetUniformLocation(programHandle, "iFilterType");
-       // mFilterColorLoc = glGetUniformLocation(programHandle, "vFilterColor");
-        // 顶点矩阵
-        //matrixHandle = glGetUniformLocation(programHandle, "uMatrix");
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glUseProgram(programHandle);
-        //设置各纹理对象的参数
+        // 设置各纹理对象的参数
         if (textures[0] == 0) {
             glGenTextures(1, textures);
             for (int i = 0; i < 1; ++i) {

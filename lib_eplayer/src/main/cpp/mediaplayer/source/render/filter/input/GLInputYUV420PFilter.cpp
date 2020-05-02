@@ -14,6 +14,7 @@ const std::string kYUV420PFragmentShader = SHADER_TO_STRING(
         void main() {
             vec3 yuv;
             vec3 rgb;
+            // 将YUV转为RGB
             yuv.r = texture2D(inputTextureY, textureCoordinate).r - (16.0 / 255.0);
             yuv.g = texture2D(inputTextureU, textureCoordinate).r - 0.5;
             yuv.b = texture2D(inputTextureV, textureCoordinate).r - 0.5;

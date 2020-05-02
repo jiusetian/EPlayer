@@ -17,11 +17,8 @@ const std::string backGroundFragmentShader = SHADER_TO_STRING(
 
         void main() {
             //转换一下格式，texture2D是2.0的函数，3.0要用texture
-            vec4 abgr = texture2D(inputTexture, textureCoordinate);
-            vec4 tmpColor = abgr;
-            //tmpColor.r = abgr.b;
-            //tmpColor.b = abgr.r;
-            //gl_FragColor = tmpColor;
+            vec4 argb = texture2D(inputTexture, textureCoordinate);
+            vec4 tmpColor = argb;
 
             if (iFilterType == 1) { // 灰度图
                 float c = tmpColor.r * vFilterColor.r + tmpColor.g * vFilterColor.g + tmpColor.b * vFilterColor.b;
