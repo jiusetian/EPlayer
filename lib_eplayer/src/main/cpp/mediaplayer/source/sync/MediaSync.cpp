@@ -530,6 +530,7 @@ void MediaSync::renderVideo() {
     }
     // 请求渲染视频
     if (videoDevice != NULL) {
+        // 设置视频播放的时间戳
         videoDevice->setTimeStamp(isnan(vp->pts) ? 0 : vp->pts);
         videoDevice->onRequestRender(vp->frame->linesize[0] < 0);
     }

@@ -79,7 +79,7 @@ void GLFilter::setIntensity(float intensity) {
 
 void GLFilter::updateViewPort() {
     if (displayWidth != 0 && displayHeight != 0) {
-        LOGD("视口宽高%d，%d",displayWidth,displayHeight);
+        //LOGD("视口宽高%d，%d",displayWidth,displayHeight);
         glViewport(0, 0, displayWidth, displayHeight);
     } else {
         glViewport(0, 0, textureWidth, textureHeight);
@@ -131,7 +131,8 @@ GLFilter::drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *ver
 }
 
 void GLFilter::bindAttributes(const float *vertices, const float *textureVertices) {
-    // 告诉GPU怎么解析顶点数据
+    // 告诉GPU怎么解析顶点数据，最后一个参数是顶点数组，OpenGL内部会根据这个顶点数组和指定的规则计算出视口坐标系中每个位置的顶点坐标值
+    // 然后根据对应的纹理坐标计算出每个顶点坐标对应的纹理坐标是什么，这就可以从纹理坐标系中取出对应的纹素值，将其渲染到对应的顶点坐标中
     glVertexAttribPointer(positionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     // 告诉GPU怎么解析纹理坐标数据
     glVertexAttribPointer(texCoordinateHandle, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);

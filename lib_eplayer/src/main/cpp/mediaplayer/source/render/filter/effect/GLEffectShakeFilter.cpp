@@ -56,6 +56,7 @@ void GLEffectShakeFilter::setTimeStamp(double timeStamp) {
     if (offset > 1.0f) {
         offset = 0.0f;
     }
+    // scale的范围是1.0~1.3
     scale = 1.0f + 0.3f * (float)(cos((offset + 1) * PI) / 2.0f + 0.5f);
 }
 
