@@ -76,7 +76,6 @@ void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLi
     } else{
         v_mat4 = glm::translate(v_mat4, glm::vec3(-scale+1, -scale+1, 0.0f));
     }
-    //v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -5.5f, 0.0f));
     v_mat4 = glm::scale(v_mat4, glm::vec3(scale, scale, 0.0f));
 }
 
