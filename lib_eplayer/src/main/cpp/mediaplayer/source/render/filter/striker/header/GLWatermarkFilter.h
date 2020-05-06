@@ -97,7 +97,6 @@ const std::string WatermarkFragmentShader = SHADER_TO_STRING(
             float g = watermark.g + (1.0 - watermark.a) * video.g;
             float b = watermark.b + (1.0 - watermark.a) * video.b;
             gl_FragColor = vec4(r, g, b, 1.0);
-            //gl_FragColor =watermark;
         }
 );
 
