@@ -9,7 +9,7 @@ GLFilter::GLFilter() : initialized(false), programHandle(-1), positionHandle(-1)
                        displayWidth(0), displayHeight(0) {
 
     for (int i = 0; i < MAX_TEXTURES; ++i) {
-        //初始化纹理句柄
+        // 初始化纹理句柄
         inputTextureHandle[i] = -1;
     }
 }
@@ -29,6 +29,7 @@ void GLFilter::initProgram(const char *vertexShader, const char *fragmentShader)
     }
     if (vertexShader && fragmentShader) {
         programHandle = OpenGLUtils::createProgram(vertexShader, fragmentShader);
+        LOGD("着色器程序id：%d",programHandle);
         // OpenGLUtils::checkGLError("createProgram");
         // 获取着色器程序中，指定为attribute类型变量的id
         positionHandle = glGetAttribLocation(programHandle, "aPosition");
@@ -88,43 +89,14 @@ void GLFilter::updateViewPort() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void GLFilter::drawTexture(GLuint texture, const float *vertices, const float *textureVertices,
-                           bool viewPortUpdate) {
-    if (!isInitialized() || texture < 0) {
-        return;
-    }
-
-    if (viewPortUpdate) {
-        updateViewPort();
-    }
-
-    // 绑定program
-    glUseProgram(programHandle);
-    // 绑定纹理
-    bindTexture(texture);
-    // 绑定属性值
-    bindAttributes(vertices, textureVertices);
-    // 绘制前处理
-    onDrawBegin();
-    // 绘制纹理
-    onDrawFrame();
-    // 绘制后处理
-    onDrawAfter();
-    // 解绑属性
-    unbindAttributes();
-    // 解绑纹理
-    unbindTextures();
-    // 解绑program
-    glUseProgram(0);
-}
-
 void
 GLFilter::drawTexture(FrameBuffer *frameBuffer, GLuint texture, const float *vertices, const float *textureVertices) {
+    // 绑定FBO以后，就会把纹理渲染结果保存到FBO缓冲区而不是系统的缓冲区
     if (frameBuffer) {
         frameBuffer->bindBuffer();
     }
     drawTexture(texture, vertices, textureVertices, false);
-    // unbindBuffer相当于返回默认的帧缓冲区
+    // unbindBuffer取消绑定，相当于返回默认的帧缓冲区
     if (frameBuffer) {
         frameBuffer->unbindBuffer();
     }
@@ -160,15 +132,48 @@ void GLFilter::unbindAttributes() {
 }
 
 void GLFilter::bindTexture(GLuint texture) {
-    // 默认绑定0号纹理单元
+    // 激活0号纹理单元
     glActiveTexture(GL_TEXTURE0);
+    // 将纹理对象跟激活的纹理单元绑定
     glBindTexture(getTextureType(), texture);
+    // 将纹理单元跟着色器句柄关联，这样着色器就可以通过纹理单元来操作纹理对象texture了
     glUniform1i(inputTextureHandle[0], 0);
 }
 
 void GLFilter::unbindTextures() {
     // 默认解绑纹理单元0
     glBindTexture(getTextureType(), 0);
+}
+
+void GLFilter::drawTexture(GLuint texture, const float *vertices, const float *textureVertices,
+                           bool viewPortUpdate) {
+    if (!isInitialized() || texture < 0) {
+        return;
+    }
+
+    // 设置视口大小
+    if (viewPortUpdate) {
+        updateViewPort();
+    }
+
+    // 绑定program
+    glUseProgram(programHandle);
+    // 绑定纹理
+    bindTexture(texture);
+    // 绑定属性值
+    bindAttributes(vertices, textureVertices);
+    // 绘制前处理
+    onDrawBegin();
+    // 绘制纹理
+    onDrawFrame();
+    // 绘制后处理
+    onDrawAfter();
+    // 解绑属性
+    unbindAttributes();
+    // 解绑纹理
+    unbindTextures();
+    // 解绑program
+    glUseProgram(0);
 }
 
 GLenum GLFilter::getTextureType() {

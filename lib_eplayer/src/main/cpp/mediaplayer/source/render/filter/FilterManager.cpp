@@ -1,7 +1,8 @@
 
 
 #include <cstring>
-#include <render/filter/beauty/header/GLBackGroundFilter.h>
+#include "GLBackGroundFilter.h"
+#include "GLWatermarkFilter.h"
 #include "FilterManager.h"
 #include "Filter.h"
 

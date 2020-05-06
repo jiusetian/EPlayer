@@ -235,6 +235,23 @@ void EMediaPlayer_changeFilter(JNIEnv *env, jobject thiz, int node_type, jstring
     env->ReleaseStringUTFChars(filterName_, name);
 }
 
+void EMediaPlayer_setWatermark(JNIEnv *env, jobject thiz, jbyteArray data_,
+                               jint dataLen, jint watermarkWidth,
+                               jint watermarkHeight){
+    EMediaPlayer *mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException");
+        return;
+    }
+
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+
+    mp->setWatermark((uint8_t *)data,(size_t) dataLen, watermarkWidth, watermarkHeight);
+
+    env->ReleaseByteArrayElements(data_, data, 0);
+}
+
+
 void EMediaPlayer_changeFilterById(JNIEnv *env, jobject thiz, int node_type, jint filterId) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -651,6 +668,7 @@ static const JNINativeMethod gMethods[] = {
         {"_surfaceChange",      "(II)V",                                    (void *) EMediaPlayer_surfaceChange},
         {"_changeFilter",       "(ILjava/lang/String;)V",                   (void *)EMediaPlayer_changeFilter},
         {"_changeFilter",       "(II)V",                                    (void *)EMediaPlayer_changeFilterById},
+        {"_setWatermark",       "([BIII)V",                                 (void *)EMediaPlayer_setWatermark},
 };
 
 // 注册EMediaPlayer的Native方法

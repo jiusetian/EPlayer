@@ -10,6 +10,7 @@ RenderNode::~RenderNode() {
 }
 
 void RenderNode::init() {
+    // 如果还没有初始化，则初始化
     if (glFilter != nullptr && !glFilter->isInitialized()) {
         glFilter->initProgram(); //初始化程序
     }
@@ -54,7 +55,7 @@ void RenderNode::setDisplaySize(int width, int height) {
 }
 
 void RenderNode::setFrameBuffer(FrameBuffer *buffer) {
-    // 将旧的FBO放入管理器中
+    // 删除旧FBO
     if (this->frameBuffer != nullptr) {
         frameBuffer->destroy();
         delete frameBuffer;
@@ -69,9 +70,11 @@ void RenderNode::changeFilter(GLFilter *filter) {
     }
 
     this->glFilter = filter;
-    if (glFilter && !glFilter->isInitialized()) {
-        glFilter->initProgram();
-    }
+
+    // 如果还没有初始化，则初始化
+//    if (glFilter && !glFilter->isInitialized()) {
+//        glFilter->initProgram();
+//    }
 }
 
 void RenderNode::setTimeStamp(double timeStamp) {
@@ -99,6 +102,7 @@ int RenderNode::drawFrameBuffer(GLuint texture, const float *vertices, const flo
     if (!frameBuffer || !frameBuffer->isInitialized() || !glFilter || !glFilter->isInitialized()) {
         return texture;
     }
+
     glFilter->drawTexture(frameBuffer, texture, vertices, textureVertices);
     return frameBuffer->getTexture();
 }

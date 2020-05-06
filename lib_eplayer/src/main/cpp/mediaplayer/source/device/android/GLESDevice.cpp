@@ -1,8 +1,10 @@
 
 #include <AndroidLog.h>
-#include "render/common/header/CoordinateUtils.h"
+#include "CoordinateUtils.h"
 #include "DisplayRenderNode.h"
 #include "GLESDevice.h"
+#include "GLWatermarkFilter.h"
+
 
 GLESDevice::GLESDevice() {
     mWindow = NULL;
@@ -38,12 +40,14 @@ GLESDevice::~GLESDevice() {
 }
 
 void GLESDevice::surfaceChanged(int width, int height) {
+    mMutex.lock();
     mSurfaceWidth = width;
     mSurfaceHeight = height;
     if (nodeList != nullptr && nodeList->findNode(NODE_DISPLAY) != nullptr) {
         GLOutFilter *glOutFilter = (GLOutFilter *) nodeList->findNode(NODE_DISPLAY)->glFilter;
         glOutFilter->nativeSurfaceChanged(width, height);
     }
+    mMutex.unlock();
 }
 
 void GLESDevice::setTimeStamp(double timeStamp) {
@@ -97,7 +101,6 @@ void GLESDevice::terminate(bool releaseContext) {
 
 void GLESDevice::changeFilter(RenderNodeType type, const char *filterName) {
     mMutex.lock();
-
     filterInfo.type = type;
     filterInfo.name = av_strdup(filterName);
     filterInfo.id = -1;
@@ -119,6 +122,27 @@ void GLESDevice::changeFilter(RenderNodeType type, const int id) {
     mMutex.unlock();
 }
 
+void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height) {
+
+    mMutex.lock();
+    RenderNode *node = nodeList->findNode(NODE_STICKERS);
+    if (!node) {
+        node = new RenderNode(NODE_STICKERS);
+    }
+    // 创建水印滤镜
+    GLWatermarkFilter *watermarkFilter = new GLWatermarkFilter();
+    watermarkFilter->setWatermark(watermarkPixel,length,width,height);
+
+    node->changeFilter(watermarkFilter);
+    nodeList->addNode(node); // 添加水印节点
+    // 要在onInitTexture中初始化水印filter，可能原因是egl属性的创建(比如着色器program，elgsurface等)和使用需要在同一个线程中完成
+    filterInfo.type = NODE_NONE;
+    filterInfo.name = nullptr;
+    filterInfo.id = -1;
+    filterChange = true;
+    mMutex.unlock();
+}
+
 /**
  * 主要作用：初始化纹理相关，如果没有创建egl上下文和纹理渲染区域，就创建它们，并且关联egl上下文
  * 如果没有创建着色器和纹理对象，也要创建它们；还要一些其他数据的初始化
@@ -131,7 +155,6 @@ void GLESDevice::changeFilter(RenderNodeType type, const int id) {
 void GLESDevice::onInitTexture(int width, int height, TextureFormat format, BlendMode blendMode,
                                int rotate) {
     mMutex.lock();
-
     // 创建EGLContext
     if (!mHaveEGlContext) {
         // 在这个init方法中会调用到egl中的相关初始化操作，包括创建和初始化EGLDisplay、初始化图形上下文EGLContext
@@ -192,8 +215,10 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     mVideoTexture->direction = FLIP_NONE;
     // 关联egl上下文
     eglHelper->makeCurrent(eglSurface);
+
     // 第一次会初始化，这个初始化主要作用是，创建对应的着色器程序和对应的纹理对象
     if (mRenderNode == NULL) {
+        // 初始化输入节点
         mRenderNode = new InputRenderNode();
         if (mRenderNode != NULL) {
             // 输入节点的初始化
@@ -220,10 +245,10 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
             nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
         }
-        // 设置纹理大小
+        // 设置纹理大小，根据纹理大小初始化FBO
         nodeList->setTextureSize(width, height);
-        // 所有节点初始化
-        nodeList->init();
+        // 节点初始化，主要是filter的初始化
+        nodeList->init(); //filter初始化了以后才能用
     }
 
     mMutex.unlock();
@@ -293,7 +318,8 @@ int GLESDevice::onRequestRender(bool flip) {
     // LOGD("flip ? %d", flip);
     if (mRenderNode != NULL && eglSurface != EGL_NO_SURFACE) {
         eglHelper->makeCurrent(eglSurface);
-        // 第一步是输入节点的渲染，mRenderNode就是输入节点，输入节点也有一个FBO，将渲染结果保存到FBO的纹理对象中
+
+        // 第一步是输入节点的渲染，mRenderNode就是输入节点，输入节点也有一个FBO，此时将渲染结果保存到FBO中
         int texture = mRenderNode->drawFrameBuffer(mVideoTexture);
 
 //        if (mSurfaceWidth != 0 && mSurfaceHeight != 0) {
@@ -301,7 +327,7 @@ int GLESDevice::onRequestRender(bool flip) {
 //            nodeList->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
 //            // LOGE("window的宽高=%d，%d",ANativeWindow_getWidth(mWindow),ANativeWindow_getHeight(mWindow));
 //        }
-        // 渲染纹理，这里是直接渲染到系统默认的帧缓冲区，而不是自定义的帧缓冲区FBO
+        // 渲染纹理，直接渲染到系统默认的帧缓冲区，而不是自定义的帧缓冲区FBO
         // mRenderNode->drawFrame(mVideoTexture);
         // 从渲染节点链表中的节点依次对纹理数据进行处理，并最后显示
         nodeList->drawFrame(texture, vertices, textureVertices);

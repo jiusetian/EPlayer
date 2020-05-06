@@ -74,7 +74,7 @@ GLboolean GLInputABGRFilter::uploadTexture(Texture *texture) {
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  texture->pixels[0]); // 像素数据
-    // 将纹理单元0传递给着色器的纹理句柄
+    // 将纹理单元0关联着色器的纹理句柄
     glUniform1i(inputTextureHandle[0], 0);
     return GL_TRUE;
 }

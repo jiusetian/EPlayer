@@ -2,16 +2,22 @@ package com.eplayer
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
-import android.view.*
+import android.view.MotionEvent
+import android.view.SurfaceHolder
+import android.view.View
+import android.view.WindowManager
 import android.widget.SeekBar
 import com.eplayer.common.LogUtil
 import com.eplayer.common.StringUtils
 import com.eplayer.common.Utils
 import kotlinx.android.synthetic.main.activity_media_player.*
+import java.nio.ByteBuffer
 
 
 class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener,
@@ -39,7 +45,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         }
         supportActionBar!!.hide()
         paths = Utils.getVideoList(this)
-        index=paths.size-2
+        index = paths.size - 2
         initPlayer(paths.get(index))
         initView()
     }
@@ -157,7 +163,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_three,
             action_four,
             action_six,
-            action_nine
+            action_nine,
+            action_watermark
         ).forEach { it.setOnClickListener(this) }
     }
 
@@ -224,6 +231,24 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         mediaPlayer.reset()
         initPlayer(path)
         mediaPlayer.setDisplay(surfaceView.holder)
+    }
+
+    // 添加水印
+    private fun addImageWatermark() {
+        val options = BitmapFactory.Options()
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888
+        val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher, options)
+        val byteCount = bitmap.byteCount
+        val buffer = ByteBuffer.allocate(byteCount)
+        bitmap.copyPixelsToBuffer(buffer)
+        buffer.position(0)
+
+        val mWatermark = buffer.array()
+        val mWatermarkWidth = bitmap.width
+        val mWatermarkHeight = bitmap.height
+        bitmap.recycle()
+
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight);
     }
 
     override fun onClick(v: View) {
@@ -304,6 +329,9 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             R.id.action_six -> mediaPlayer.changeEffect(Effect.SIX.effectName)
             // 九屏
             R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
+
+            // 水印
+            R.id.action_watermark->addImageWatermark();
 
         }
     }

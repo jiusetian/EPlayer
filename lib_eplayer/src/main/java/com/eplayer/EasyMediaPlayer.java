@@ -861,6 +861,8 @@ public class EasyMediaPlayer implements IMediaPlayer {
     private static final int NODE_STICKERS = 6; // 贴纸结点
     private static final int NODE_DISPLAY = 7;
 
+
+
     @Override
     public void changeFilter(int id) {
         _changeFilter(NODE_FILTER, id);
@@ -899,6 +901,13 @@ public class EasyMediaPlayer implements IMediaPlayer {
     private native void _changeFilter(int type, String name);
 
     private native void _changeFilter(int type, int id);
+
+    @Override
+    public void setWatermark(byte[] data, int dataLen, int width, int height) {
+        _setWatermark(data,dataLen,width,height);
+    }
+
+    private native void _setWatermark(byte[] data, int dataLen, int width, int height);
 
     // ---------------------------------------------------------------------------------------------
     // Options

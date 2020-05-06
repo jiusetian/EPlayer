@@ -1,5 +1,6 @@
 
 #include "FrameBuffer.h"
+#include "AndroidLog.h"
 
 TextureAttributes FrameBuffer::defaultTextureAttributes = {
         .minFilter = GL_LINEAR,

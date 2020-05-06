@@ -91,7 +91,7 @@ protected:
                      const float *textureVertices) override;
 
 protected:
-    // 纹理对象句柄，纹理对象包含纹理映射所需要的数据
+    // 纹理对象，纹理对象包含纹理映射所需要的数据
     GLuint textures[GLES_MAX_PLANE];
 };
 

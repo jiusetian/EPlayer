@@ -69,7 +69,7 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
         // 使用链接好的程序
         glUseProgram(programHandle);
 
-        // 创建纹理对象句柄
+        // 创建纹理对象
         if (textures[0] == 0) { // ==0代表还没创建纹理句柄
             // glGenTextures就是用来产生你要操作的纹理对象的索引的，第一个参数是产生的纹理索引数量，第二个是保存纹理索引的
             // 创建3个纹理对象句柄，分别是1、2、3
@@ -81,10 +81,10 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
         for (int i = 0; i < 3; ++i) {
             // 激活i号纹理单元并绑定纹理对象textures[i]，默认情况下0号纹理单元是激活的
             // 激活指定纹理单元
-            glActiveTexture(GL_TEXTURE0 + i);
+            glActiveTexture(GL_TEXTURE0 + i); //激活纹理单元 0、1、3
             // glBindTexture实际上是改变了OpenGL的这个状态，它告诉OpenGL下面对纹理的任何操作都是对它所绑定的纹理对象的
             // 绑定纹理对象句柄到纹理单元，一个纹理单元可以绑定多个纹理对象，只要绑定纹理对象的类型不同，比如1D、2D、3D
-            glBindTexture(GL_TEXTURE_2D, textures[i]);
+            glBindTexture(GL_TEXTURE_2D, textures[i]); //将纹理对象绑定到纹理单元
             // 设置纹理过滤模式
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -95,6 +95,7 @@ void GLInputYUV420PFilter::initProgram(const char *vertexShader, const char *fra
             // 纹理对象和对应的采样器地址进行绑定，该函数用于将纹理对象传入着色器中，第一个参数为采样器句柄，第二个参数为纹理索引
             // 其与函数glActiveTexture(GLenum texture)中的参数相对应，即第二个参数等于texture
             // 将激活的纹理单元传递到着色器里面，这样片元着色器的纹理句柄就可以通过纹理单元来操作对应的纹理对象了
+            // 将纹理单元传递给着色器句柄
             glUniform1i(inputTextureHandle[i], i); // 函数的全称应该是glUniformLocationint，其实就是给着色器中的Uniform变量赋值的意思
         }
         setInitialized(true);
@@ -120,10 +121,12 @@ GLboolean GLInputYUV420PFilter::uploadTexture(Texture *texture) {
     // 更新绑定纹理的数据，Y的高度等于图片的高度，U和V的高度等于图片高度的1/2
     const GLsizei heights[3] = {texture->height, texture->height / 2, texture->height / 2};
 
+    // 给纹理对象上载纹理数据
     for (int i = 0; i < 3; ++i) {
         // 激活纹理单元，这里分别激活Y、U、V三个纹理单元，即0,1,2
         glActiveTexture(GL_TEXTURE0 + i);
         // 将纹理单元绑定到纹理对象textures[i]，表示后面的任何操作都是对这个纹理textures[i]的
+        // 激活之后纹理单元跟纹理对象进行绑定
         glBindTexture(GL_TEXTURE_2D, textures[i]);
 
         /**
@@ -150,6 +153,7 @@ GLboolean GLInputYUV420PFilter::uploadTexture(Texture *texture) {
 
         // 纹理对象和对应的采样器地址进行绑定
         // 该函数用于将纹理对象传入着色器中，第二个参数为纹理索引，其与函数glActiveTexture(GL_TEXTURE0 + i)中的参数相对应，如此处应该使用i
+        // 纹理单元跟纹理对象绑定以后，又将纹理单元跟着色器纹理句柄进行关联，这样着色器就可以通过纹理单元来操作纹理对象了
         glUniform1i(inputTextureHandle[i], i);
     }
     // 像素行必须对齐到用glPixelStroei设置的GL_UNPACK_ALIGNMENT
@@ -180,7 +184,7 @@ GLInputYUV420PFilter::renderTexture(Texture *texture, float *vertices, float *te
     // 解绑属性
     unbindAttributes();
     // 解绑纹理
-    unbindTextures();
+    // unbindTextures();
     // 解绑program
     glUseProgram(0);
     return GL_TRUE;

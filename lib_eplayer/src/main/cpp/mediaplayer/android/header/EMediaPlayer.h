@@ -107,6 +107,9 @@ public:
     // 改变滤镜
     void changeFilter(int type, const char *name);
 
+    // 设置水印
+    void setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height);
+
     // 改变滤镜
     void changeFilter(int type, const int id);
 

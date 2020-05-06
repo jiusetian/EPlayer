@@ -14,7 +14,7 @@
 #include <gtx/rotate_vector.hpp>
 #include <string>
 #include "FrameBuffer.h"
-#include "render/common/header/macros.h"
+#include "macros.h"
 #include "Shader.h"
 
 
@@ -28,6 +28,7 @@ using namespace std;
  */
 const std::string kDefaultVertexShader = SHADER_TO_STRING(
         precision mediump float; //默认精度
+
         //顶点坐标，x、y、z、w四个值
         attribute highp vec4 aPosition;
         //纹理坐标
@@ -37,7 +38,9 @@ const std::string kDefaultVertexShader = SHADER_TO_STRING(
 
         void main() {
             gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
+
             textureCoordinate = aTextureCoord.xy;
+
         }
 );
 
@@ -46,6 +49,7 @@ const std::string kDefaultVertexShader = SHADER_TO_STRING(
  */
 const std::string kDefaultFragmentShader = SHADER_TO_STRING(
         precision mediump float;
+
         uniform sampler2D inputTexture;
         varying vec2 textureCoordinate;
 

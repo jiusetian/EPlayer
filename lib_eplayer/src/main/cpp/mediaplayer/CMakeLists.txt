@@ -34,6 +34,7 @@ include_directories(
         source/render/filter/adjust/header
         source/render/filter/beauty/header
         source/render/filter/effect/header
+        source/render/filter/striker/header
         source/sync/header
         android/header
         ${soundtouch_dir})
@@ -53,6 +54,7 @@ file(GLOB my_source
         source/render/filter/adjust/*.cpp
         source/render/filter/beauty/*.cpp
         source/render/filter/effect/*.cpp
+        source/render/filter/striker/*.cpp
         source/sync/*.cpp
         source/player/*.cpp
         android/*.cpp

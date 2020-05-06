@@ -300,6 +300,13 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
+    public void setWatermark(byte[] data, int dataLen, int width, int height) {
+        if (mMediaPlayer!=null){
+            mMediaPlayer.setWatermark(data,dataLen,width,height);
+        }
+    }
+
+    @Override
     public void changeBackground(String name) {
         if (mMediaPlayer!=null)
             mMediaPlayer.changeBackground(name);

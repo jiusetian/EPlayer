@@ -42,18 +42,23 @@ void EMediaPlayer::init() {
     mMutex.unlock();
 }
 
+void EMediaPlayer::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height) {
+    if (videoDevice != nullptr) {
+        videoDevice->setWatermark(watermarkPixel, length, width, height);
+    }
+}
+
 void EMediaPlayer::changeFilter(int type, const char *name) {
     if (videoDevice != nullptr) {
-        videoDevice->changeFilter((RenderNodeType)type, name);
+        videoDevice->changeFilter((RenderNodeType) type, name);
     }
 }
 
 void EMediaPlayer::changeFilter(int type, const int id) {
     if (videoDevice != nullptr) {
-        videoDevice->changeFilter((RenderNodeType)type, id);
+        videoDevice->changeFilter((RenderNodeType) type, id);
     }
 }
-
 
 
 // java层对应mediaplayer的release方法的时候被调用

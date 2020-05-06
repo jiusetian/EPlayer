@@ -337,6 +337,15 @@ public interface IMediaPlayer {
     void changeEffect(int id);
 
     /**
+     * set water mark
+     * @param data
+     * @param dataLen
+     * @param width
+     * @param height
+     */
+    void  setWatermark(byte[] data,int dataLen,int width,int height);
+
+    /**
      * change background color
      * @param name
      */

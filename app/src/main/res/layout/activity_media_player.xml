@@ -219,6 +219,13 @@
                 android:text="双屏播放"
                 />
 
+        <Button
+                android:id="@+id/action_watermark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="添加水印"
+                />
+
     </com.eplayer.common.FlowLayout>
 
 <!--    视频信息界面-->

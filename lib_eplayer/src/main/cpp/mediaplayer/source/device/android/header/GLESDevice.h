@@ -43,6 +43,9 @@ public:
     // 改变滤镜
     void changeFilter(RenderNodeType type, const int id);
 
+    // 设置水印
+    void setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height);
+
 private:
     void resetVertices();
 
@@ -70,6 +73,7 @@ private:
     RenderNodeList *nodeList;           // 滤镜链
     FilterInfo filterInfo;              // 滤镜信息
     bool filterChange;                  // 切换滤镜
+
 
 };
 #endif //EPLAYER_GLESDEVICE_H

@@ -6,25 +6,18 @@
 
 // 输出节点的顶点着色器
 const std::string kOutFilterVertexShader = SHADER_TO_STRING(
-        precision
-        mediump float; //默认精度
+        precision mediump float; //默认精度
         //顶点坐标，x、y、z、w四个值
-        attribute
-        highp
-        vec4 aPosition;
+        attribute highp vec4 aPosition;
         //纹理坐标
-        attribute
-        highp
-        vec2 aTextureCoord;
+        attribute highp vec2 aTextureCoord;
         //纹理坐标传递到片元着色器的变量，通过varying通道传递
-        varying
-        vec2 textureCoordinate;
-        //正交矩阵
-        uniform
-        mat4 uMatrix;
+        varying vec2 textureCoordinate;
+        // 顶点坐标矩阵
+        uniform mat4 vMatrix;
 
         void main() {
-            gl_Position = uMatrix * vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
+            gl_Position = vMatrix * vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
             textureCoordinate = aTextureCoord.xy;
         }
 );
