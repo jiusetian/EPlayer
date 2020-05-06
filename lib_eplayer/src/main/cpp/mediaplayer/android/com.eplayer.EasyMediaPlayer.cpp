@@ -237,7 +237,7 @@ void EMediaPlayer_changeFilter(JNIEnv *env, jobject thiz, int node_type, jstring
 
 void EMediaPlayer_setWatermark(JNIEnv *env, jobject thiz, jbyteArray data_,
                                jint dataLen, jint watermarkWidth,
-                               jint watermarkHeight,jfloat scale,jint location){
+                               jint watermarkHeight, jfloat scale, jint location) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException");
@@ -246,7 +246,7 @@ void EMediaPlayer_setWatermark(JNIEnv *env, jobject thiz, jbyteArray data_,
 
     jbyte *data = env->GetByteArrayElements(data_, NULL);
 
-    mp->setWatermark((uint8_t *)data,(size_t) dataLen, watermarkWidth, watermarkHeight,scale, location);
+    mp->setWatermark((uint8_t *) data, (size_t) dataLen, watermarkWidth, watermarkHeight, scale, location);
 
     env->ReleaseByteArrayElements(data_, data, 0);
 }
@@ -589,14 +589,14 @@ jint EMediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz) {
     return mp->getVideoHeight();
 }
 
-void EMediaPlayer_surfaceChange(JNIEnv *env, jobject thiz,jint width, jint height){
+void EMediaPlayer_surfaceChange(JNIEnv *env, jobject thiz, jint width, jint height) {
     EMediaPlayer *mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException");
         return;
     }
 
-    mp->surfaceChanged(width,height);
+    mp->surfaceChanged(width, height);
 }
 
 void EMediaPlayer_setOption(JNIEnv *env, jobject thiz, int category, jstring type_, jstring option_) {
@@ -666,9 +666,9 @@ static const JNINativeMethod gMethods[] = {
         {"_setOption",          "(ILjava/lang/String;Ljava/lang/String;)V", (void *) EMediaPlayer_setOption},
         {"_setOption",          "(ILjava/lang/String;J)V",                  (void *) EMediaPlayer_setOptionLong},
         {"_surfaceChange",      "(II)V",                                    (void *) EMediaPlayer_surfaceChange},
-        {"_changeFilter",       "(ILjava/lang/String;)V",                   (void *)EMediaPlayer_changeFilter},
-        {"_changeFilter",       "(II)V",                                    (void *)EMediaPlayer_changeFilterById},
-        {"_setWatermark",       "([BIIIFI)V",                                 (void *)EMediaPlayer_setWatermark},
+        {"_changeFilter",       "(ILjava/lang/String;)V",                   (void *) EMediaPlayer_changeFilter},
+        {"_changeFilter",       "(II)V",                                    (void *) EMediaPlayer_changeFilterById},
+        {"_setWatermark",       "([BIIIFI)V",                               (void *) EMediaPlayer_setWatermark},
 };
 
 // 注册EMediaPlayer的Native方法

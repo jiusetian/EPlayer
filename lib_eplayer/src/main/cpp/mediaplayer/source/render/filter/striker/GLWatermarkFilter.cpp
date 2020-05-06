@@ -2,6 +2,7 @@
 // Created by Guns Roses on 2020/5/4.
 //
 #include "GLWatermarkFilter.h"
+#include <cstring>
 
 // 顶点坐标
 static const float vertices_default1[] = {
@@ -55,27 +56,30 @@ void GLWatermarkFilter::initProgram(const char *vertexShader, const char *fragme
     }
 }
 
+
 void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height, GLfloat scale,
                                      GLint location) {
 
     mWatermarkWidth = width;
     mWatermarkHeight = height;
-    if (!mWatermarkPixel) {
-        // 首先分配内存空间
-        mWatermarkPixel = new uint8_t[length];
-    }
+    mWatermarkPixel = nullptr;
+    // if (mWatermarkPixel== nullptr) {
+    // 首先分配内存空间
+    mWatermarkPixel = new uint8_t[length];
+    //}
     memcpy(mWatermarkPixel, watermarkPixel, length);
     // 计算水印的缩放矩阵
     // location的意义：0左上，1左下，2右上，3右下
-    if (location==0){
+    if (location == 0) {
         v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -0.0f, 0.0f));
-    } else if(location==1){
-        v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -scale+1, 0.0f));
-    } else if (location==2){
-        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale+1, -0.0f, 0.0f));
-    } else{
-        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale+1, -scale+1, 0.0f));
+    } else if (location == 1) {
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -scale + 1, 0.0f));
+    } else if (location == 2) {
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale + 1, -0.0f, 0.0f));
+    } else {
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale + 1, -scale + 1, 0.0f));
     }
+
     v_mat4 = glm::scale(v_mat4, glm::vec3(scale, scale, 0.0f));
 }
 

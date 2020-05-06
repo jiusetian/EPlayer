@@ -45,7 +45,7 @@ private:
     GLint mWatermarkWidth; //水印宽
     GLint mWatermarkHeight; //水印高
     GLint mMatrixHandle; //水印纹理矩阵
-    uint8_t *mWatermarkPixel; //水印纹理数据，一个byte指针
+    uint8_t *mWatermarkPixel= nullptr; //水印纹理数据，一个byte指针
 
     glm::mat4 v_mat4 = glm::mat4(1.0f); // 矩阵
 };

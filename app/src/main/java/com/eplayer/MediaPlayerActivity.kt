@@ -149,7 +149,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_dim,
             action_cooltone,
             action_warmtone,
-            action_twoscreen,
             action_next,
             action_prev,
             action_soul,
@@ -256,7 +255,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(textBitmap)
         val paint = Paint()
-        paint.color = Color.argb(255, 255, 0, 0)
+        paint.color = Color.argb(255, 200, 255, 100)
         paint.textSize = 28f
         paint.isAntiAlias = true
         paint.textAlign = Paint.Align.CENTER
@@ -275,7 +274,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermarkHeight = textBitmap.height
         textBitmap.recycle()
 
-        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 5f, 2)
+        LogUtil.d("大小="+mWatermark.size)
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 6f, 2)
     }
 
     override fun onClick(v: View) {
@@ -310,9 +310,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             // 暖色调
             R.id.action_warmtone -> mediaPlayer.changeBackground(Background.WARM.bgName)
 
-            // 双屏播放
-            R.id.action_twoscreen -> {
-            }
 
             // 播放上一个
             R.id.action_prev -> {
@@ -359,8 +356,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
             // 水印
             R.id.action_watermark -> {
-                //addImageWatermark()
-                addTextWatermark("刘兴荣",100,100)
+                addImageWatermark()
+                //addTextWatermark("EPlayer",100,100)
             }
 
         }
