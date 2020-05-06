@@ -2,8 +2,8 @@ package com.eplayer
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
+import android.opengl.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -248,7 +248,34 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermarkHeight = bitmap.height
         bitmap.recycle()
 
-        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, 1)
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, 2)
+    }
+
+    // 添加文字水印
+    fun addTextWatermark(text: String, width: Int, height: Int) {
+        val textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(textBitmap)
+        val paint = Paint()
+        paint.color = Color.argb(255, 255, 0, 0)
+        paint.textSize = 28f
+        paint.isAntiAlias = true
+        paint.textAlign = Paint.Align.CENTER
+        val rect = Rect(0, 0, width, height)
+        val fontMetrics = paint.fontMetricsInt
+        // 将文字绘制在矩形区域的正中间
+        val baseline = (rect.bottom + rect.top - fontMetrics.bottom - fontMetrics.top) / 2
+        canvas.drawText(text, rect.centerX().toFloat(), baseline.toFloat(), paint)
+        val capacity = width * height * 4
+        val buffer = ByteBuffer.allocate(capacity)
+        textBitmap.copyPixelsToBuffer(buffer)
+        buffer.position(0)
+
+        val mWatermark = buffer.array()
+        val mWatermarkWidth = textBitmap.width
+        val mWatermarkHeight = textBitmap.height
+        textBitmap.recycle()
+
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 5f, 2)
     }
 
     override fun onClick(v: View) {
@@ -331,7 +358,10 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
 
             // 水印
-            R.id.action_watermark -> addImageWatermark();
+            R.id.action_watermark -> {
+                //addImageWatermark()
+                addTextWatermark("刘兴荣",100,100)
+            }
 
         }
     }
