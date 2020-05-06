@@ -1,21 +1,7 @@
 //
 // Created by Guns Roses on 2020/5/4.
 //
-#include "GLWatermarkFilter.h"
-#include <cstring>
-
-// 顶点坐标
-static const float vertices_default1[] = {
-        -1.0f, -1.0f,  // left,  bottom,代表物体的左下角对应OpenGL的坐标值，这个值也是OpenGL坐标系的左下角
-        1.0f, -1.0f,  // right, bottom
-        -1.0f, 1.0f,  // left,  top
-        1.0f, 1.0f,  // right, top
-
-//        -1.0f, -0.5f,  // left,  bottom,代表物体的左下角对应OpenGL的坐标值，这个值也是OpenGL坐标系的左下角
-//        1.0f, -0.5f,  // right, bottom
-//        -1.0f, 0.5f,  // left,  top
-//        1.0f, 0.5f,  // right, top
-};
+#include "GLWatermarkFilter.h">
 
 // 水印纹理坐标
 const static GLfloat WATERMARK_COORD[] = {
@@ -26,6 +12,12 @@ const static GLfloat WATERMARK_COORD[] = {
 };
 
 GLWatermarkFilter::GLWatermarkFilter() {
+}
+
+GLWatermarkFilter::~GLWatermarkFilter() {
+    if (mWatermarkPixel){
+        free(mWatermarkPixel);
+    }
 }
 
 void GLWatermarkFilter::initProgram() {

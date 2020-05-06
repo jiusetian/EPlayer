@@ -265,7 +265,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         // 将文字绘制在矩形区域的正中间
         val baseline = (rect.bottom + rect.top - fontMetrics.bottom - fontMetrics.top) / 2
         canvas.drawText(text, rect.centerX().toFloat(), baseline.toFloat(), paint)
-        val capacity = width * height * 4
+        val capacity = width * height * 4 // ARGB_8888一个像素4个字节
         val buffer = ByteBuffer.allocate(capacity)
         textBitmap.copyPixelsToBuffer(buffer)
         buffer.position(0)

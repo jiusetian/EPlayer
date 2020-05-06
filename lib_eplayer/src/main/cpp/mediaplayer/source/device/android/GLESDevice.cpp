@@ -44,6 +44,7 @@ void GLESDevice::surfaceChanged(int width, int height) {
     mSurfaceWidth = width;
     mSurfaceHeight = height;
     if (nodeList != nullptr && nodeList->findNode(NODE_DISPLAY) != nullptr) {
+        // 对象在指针强转要注意，比如这里的findNode返回的RenderNode *也是可以强转为GLOutFilter *的，但是不能使用，编译切没有问题
         GLOutFilter *glOutFilter = (GLOutFilter *) nodeList->findNode(NODE_DISPLAY)->glFilter;
         glOutFilter->nativeSurfaceChanged(width, height);
     }

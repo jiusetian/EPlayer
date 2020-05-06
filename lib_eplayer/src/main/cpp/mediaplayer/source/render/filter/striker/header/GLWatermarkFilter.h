@@ -9,15 +9,14 @@
 #include <GLFilter.h>
 #include "macros.h"
 #include "glm.hpp"
-#include <gtc/matrix_transform.hpp>
-#include <detail/type_mat.hpp>
-#include <detail/type_mat4x4.hpp>
 
 class GLWatermarkFilter : public GLFilter {
 
 public:
 
     GLWatermarkFilter();
+
+    virtual ~GLWatermarkFilter();
 
     void initProgram() override;
 
