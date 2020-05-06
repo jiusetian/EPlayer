@@ -300,9 +300,9 @@ public class AndroidMediaPlayer implements IMediaPlayer {
     }
 
     @Override
-    public void setWatermark(byte[] data, int dataLen, int width, int height) {
+    public void setWatermark(byte[] data, int dataLen, int width, int height,float scale ,int location) {
         if (mMediaPlayer!=null){
-            mMediaPlayer.setWatermark(data,dataLen,width,height);
+            mMediaPlayer.setWatermark(data,dataLen,width,height,scale,location);
         }
     }
 

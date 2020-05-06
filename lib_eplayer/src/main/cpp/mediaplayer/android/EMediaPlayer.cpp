@@ -42,9 +42,10 @@ void EMediaPlayer::init() {
     mMutex.unlock();
 }
 
-void EMediaPlayer::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height) {
+void EMediaPlayer::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height, GLfloat scale,
+                                GLint location) {
     if (videoDevice != nullptr) {
-        videoDevice->setWatermark(watermarkPixel, length, width, height);
+        videoDevice->setWatermark(watermarkPixel, length, width, height,scale,location);
     }
 }
 

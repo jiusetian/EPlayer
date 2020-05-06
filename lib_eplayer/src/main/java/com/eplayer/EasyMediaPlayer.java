@@ -902,12 +902,21 @@ public class EasyMediaPlayer implements IMediaPlayer {
 
     private native void _changeFilter(int type, int id);
 
+    /**
+     *
+     * @param data
+     * @param dataLen
+     * @param width
+     * @param height
+     * @param scale 水印的缩放，在这里n代表缩小n倍
+     * @param location 水印的位置，分别代表意义：0左上，1左下，2右上，3右下
+     */
     @Override
-    public void setWatermark(byte[] data, int dataLen, int width, int height) {
-        _setWatermark(data,dataLen,width,height);
+    public void setWatermark(byte[] data, int dataLen, int width, int height,float scale ,int location) {
+        _setWatermark(data,dataLen,width,height,scale,location);
     }
 
-    private native void _setWatermark(byte[] data, int dataLen, int width, int height);
+    private native void _setWatermark(byte[] data, int dataLen, int width, int height,float scale ,int location);
 
     // ---------------------------------------------------------------------------------------------
     // Options

@@ -343,7 +343,7 @@ public interface IMediaPlayer {
      * @param width
      * @param height
      */
-    void  setWatermark(byte[] data,int dataLen,int width,int height);
+    void  setWatermark(byte[] data,int dataLen,int width,int height,float scale,int location);
 
     /**
      * change background color

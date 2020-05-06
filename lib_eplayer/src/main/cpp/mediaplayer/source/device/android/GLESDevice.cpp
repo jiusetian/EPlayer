@@ -122,7 +122,8 @@ void GLESDevice::changeFilter(RenderNodeType type, const int id) {
     mMutex.unlock();
 }
 
-void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height) {
+void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height, GLfloat scale,
+                              GLint location) {
 
     mMutex.lock();
     RenderNode *node = nodeList->findNode(NODE_STICKERS);
@@ -131,7 +132,7 @@ void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint widt
     }
     // 创建水印滤镜
     GLWatermarkFilter *watermarkFilter = new GLWatermarkFilter();
-    watermarkFilter->setWatermark(watermarkPixel,length,width,height);
+    watermarkFilter->setWatermark(watermarkPixel,length,width,height,scale,location);
 
     node->changeFilter(watermarkFilter);
     nodeList->addNode(node); // 添加水印节点

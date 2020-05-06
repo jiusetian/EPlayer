@@ -248,7 +248,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermarkHeight = bitmap.height
         bitmap.recycle()
 
-        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight);
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, 1)
     }
 
     override fun onClick(v: View) {
@@ -331,7 +331,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
 
             // 水印
-            R.id.action_watermark->addImageWatermark();
+            R.id.action_watermark -> addImageWatermark();
 
         }
     }

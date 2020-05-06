@@ -3,11 +3,24 @@
 //
 #include "GLWatermarkFilter.h"
 
+// 顶点坐标
+static const float vertices_default1[] = {
+        -1.0f, -1.0f,  // left,  bottom,代表物体的左下角对应OpenGL的坐标值，这个值也是OpenGL坐标系的左下角
+        1.0f, -1.0f,  // right, bottom
+        -1.0f, 1.0f,  // left,  top
+        1.0f, 1.0f,  // right, top
+
+//        -1.0f, -0.5f,  // left,  bottom,代表物体的左下角对应OpenGL的坐标值，这个值也是OpenGL坐标系的左下角
+//        1.0f, -0.5f,  // right, bottom
+//        -1.0f, 0.5f,  // left,  top
+//        1.0f, 0.5f,  // right, top
+};
+
 // 水印纹理坐标
 const static GLfloat WATERMARK_COORD[] = {
         0.0f, 1.0f, // 左下
         1.0f, 1.0f, // 右下
-        0.0f, 0.0f, // 左上
+        0.0f, 0.0f, // 左上，原点
         1.0f, 0.0f, // 右上
 };
 
@@ -42,7 +55,8 @@ void GLWatermarkFilter::initProgram(const char *vertexShader, const char *fragme
     }
 }
 
-void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height) {
+void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height, GLfloat scale,
+                                     GLint location) {
 
     mWatermarkWidth = width;
     mWatermarkHeight = height;
@@ -52,8 +66,18 @@ void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLi
     }
     memcpy(mWatermarkPixel, watermarkPixel, length);
     // 计算水印的缩放矩阵
-    v_mat4 = glm::scale(v_mat4, glm::vec3(6.5f, 6.5f, 0.0f));
-    //v_mat4= glm::translate(v_mat4, glm::vec3(0.5f, 0.5f, 0.0f));
+    // location的意义：0左上，1左下，2右上，3右下
+    if (location==0){
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -0.0f, 0.0f));
+    } else if(location==1){
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -scale+1, 0.0f));
+    } else if (location==2){
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale+1, -0.0f, 0.0f));
+    } else{
+        v_mat4 = glm::translate(v_mat4, glm::vec3(-scale+1, -scale+1, 0.0f));
+    }
+    //v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -5.5f, 0.0f));
+    v_mat4 = glm::scale(v_mat4, glm::vec3(scale, scale, 0.0f));
 }
 
 void GLWatermarkFilter::bindTexture(GLuint texture) {

@@ -23,7 +23,7 @@ public:
 
     void initProgram(const char *vertexShader, const char *fragmentShader) override;
 
-    void setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height);
+    void setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height,GLfloat scale,GLint location);
 
     // 绑定attribute属性
     void bindAttributes(const float *vertices, const float *textureVertices) override;
@@ -70,7 +70,10 @@ const std::string WatermarkVertexShader = SHADER_TO_STRING(
 
         void main() {
             textureCoordinate = aTextureCoord.xy;
-            watermarkTexCoordinate = (mWatermarkMatrix * watermarkTextureCoord).xy;
+            // 这里改变了水印的纹理坐标，所以纹理图像要变小，矩阵的数据要大于1，因为本来当前顶点到变换前的纹理坐标取纹素的，纹理坐标加倍变大
+            // 以后，就变成原来对应位置的纹素到加倍后的纹理坐标那里采取，所以图像整体上就变小了，然后图像纹理坐标超出1的范围就没有颜色了，所以
+            // 就是透明的了，就可以设置显示为视频的画面
+            watermarkTexCoordinate = (mWatermarkMatrix * watermarkTextureCoord).xy; //通过矩阵改变纹理坐标
             gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
         }
 );
