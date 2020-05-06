@@ -1,18 +1,18 @@
 package com.eplayer
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.*
-import android.opengl.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
-import android.view.MotionEvent
-import android.view.SurfaceHolder
-import android.view.View
-import android.view.WindowManager
+import android.view.*
+import android.view.View.MeasureSpec
+import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.TextView
 import com.eplayer.common.LogUtil
 import com.eplayer.common.StringUtils
 import com.eplayer.common.Utils
@@ -252,10 +252,11 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     // 添加文字水印
     fun addTextWatermark(text: String, width: Int, height: Int) {
+
         val textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(textBitmap)
         val paint = Paint()
-        paint.color = Color.argb(255, 200, 255, 100)
+        paint.color = Color.argb(255, 0, 255, 0)
         paint.textSize = 28f
         paint.isAntiAlias = true
         paint.textAlign = Paint.Align.CENTER
@@ -273,8 +274,6 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermarkWidth = textBitmap.width
         val mWatermarkHeight = textBitmap.height
         textBitmap.recycle()
-
-        LogUtil.d("大小="+mWatermark.size)
         mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 6f, 2)
     }
 
@@ -356,8 +355,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
             // 水印
             R.id.action_watermark -> {
-                addImageWatermark()
-                //addTextWatermark("EPlayer",100,100)
+                //addImageWatermark()
+                addTextWatermark("EPlayer", 100, 100)
             }
 
         }
