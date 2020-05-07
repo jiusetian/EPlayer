@@ -32,7 +32,6 @@
         <activity
                 android:name=".MediaPlayerActivity"
                 android:configChanges="orientation|screenSize"
-                android:hardwareAccelerated="false"
                 >
         </activity>
         <activity android:name=".LiveActivity">

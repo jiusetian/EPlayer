@@ -164,7 +164,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_four,
             action_six,
             action_nine,
-            action_watermark
+            action_watermark,
+            action_pip
         ).forEach { it.setOnClickListener(this) }
     }
 
@@ -356,15 +357,17 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             R.id.action_six -> mediaPlayer.changeEffect(Effect.SIX.effectName)
             // 九屏
             R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
+            // 画中画
+            R.id.action_pip-> mediaPlayer.changeEffect(Effect.PIP.effectName)
 
             // 水印
             R.id.action_watermark -> {
-                val it = markIndex % 4
+                val it = markIndex % 1
                 when (it) {
                     0 -> addImageWatermark(R.mipmap.ic_launcher, it)
-                    1 -> addTextWatermark("EPlayer", 100, 100, it)
-                    2 -> addImageWatermark(R.mipmap.ghost, it)
-                    3 -> addTextWatermark("刘兴荣", 100, 100, it)
+//                    1 -> addTextWatermark("EPlayer", 100, 100, it)
+//                    2 -> addImageWatermark(R.mipmap.ghost, it)
+//                    3 -> addTextWatermark("刘兴荣", 100, 100, it)
                 }
                 markIndex++
             }
@@ -399,6 +402,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         FOUR("四屏"),
         SIX("六屏"),
         NINE("九屏"),
+        PIP("画中画"),
     }
 
 }

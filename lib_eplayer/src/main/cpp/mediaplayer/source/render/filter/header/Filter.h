@@ -32,6 +32,7 @@
 #include "GLEffectScaleFilter.h"
 #include "GLEffectShakeFilter.h"
 #include "GLEffectSoulStuffFilter.h"
+#include "GLEffectPipFilter.h"
 
 // 分屏特效滤镜
 #include "GLFrameBlackWhiteThreeFilter.h"

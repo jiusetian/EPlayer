@@ -9,14 +9,13 @@
 #include <GLES2/gl2platform.h>
 #endif
 
-#include "glm.hpp"
+#include <glm.hpp>
 #include <gtc/type_ptr.inl>
 #include <gtx/rotate_vector.hpp>
 #include <string>
 #include "FrameBuffer.h"
 #include "macros.h"
 #include "Shader.h"
-
 
 using namespace std;
 

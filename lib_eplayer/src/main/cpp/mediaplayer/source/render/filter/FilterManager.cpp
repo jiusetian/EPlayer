@@ -1,10 +1,10 @@
 
-
 #include <cstring>
 #include "GLBackGroundFilter.h"
 #include "GLWatermarkFilter.h"
 #include "FilterManager.h"
 #include "Filter.h"
+
 
 FilterManager *FilterManager::instance = 0;
 std::mutex FilterManager::mutex;
@@ -115,6 +115,10 @@ GLFilter *FilterManager::getFilter(const char *name) {
     }
     if (!strcmp("九屏", name)) {
         return new GLFrameNineFilter();
+    }
+
+    if (!strcmp("画中画", name)) {
+        return new GLEffectPipFilter();
     }
     return nullptr;
 }

@@ -2,7 +2,6 @@
 #ifndef GLEFFECTSCALEFILTER_H
 #define GLEFFECTSCALEFILTER_H
 
-
 #include <GLFilter.h>
 
 class GLEffectScaleFilter : public GLFilter {

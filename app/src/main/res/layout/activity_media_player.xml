@@ -213,6 +213,13 @@
                 />
 
         <Button
+                android:id="@+id/action_pip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="画中画"
+                />
+
+        <Button
                 android:id="@+id/action_watermark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
