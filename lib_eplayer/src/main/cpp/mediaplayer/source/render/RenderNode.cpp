@@ -34,10 +34,9 @@ void RenderNode::setTextureSize(int width, int height) {
     if (textureWidth != width || textureHeight != height) {
         textureWidth = width;
         textureHeight = height;
-
-        if (glFilter) {
-            glFilter->setTextureSize(width, height);
-        }
+    }
+    if (glFilter) {
+        glFilter->setTextureSize(width, height);
     }
 }
 

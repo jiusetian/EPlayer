@@ -13,6 +13,7 @@ void GLEffectRotateCircleFilter::initProgram() {
 void GLEffectRotateCircleFilter::initProgram(const char *vertexShader, const char *fragmentShader) {
     GLFilter::initProgram(vertexShader, fragmentShader);
     if (isInitialized()) {
+        LOGD("转圜初始化");
         texSizeHandle = glGetUniformLocation(programHandle, "texSize");
         offsetHandle = glGetUniformLocation(programHandle, "u_offset");
     }
@@ -29,6 +30,7 @@ void GLEffectRotateCircleFilter::onDrawBegin() {
 void GLEffectRotateCircleFilter::setTextureSize(int width, int height) {
     GLFilter::setTextureSize(width, height);
     texSize = Vector2((float) width, (float) height);
+    LOGD("转圜设置大小");
 }
 
 void GLEffectRotateCircleFilter::setDisplaySize(int width, int height) {
