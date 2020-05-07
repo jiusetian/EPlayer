@@ -174,6 +174,7 @@ void GLFilter::drawTexture(GLuint texture, const float *vertices, const float *t
     unbindTextures();
     // 解绑program
     glUseProgram(0);
+
 }
 
 GLenum GLFilter::getTextureType() {

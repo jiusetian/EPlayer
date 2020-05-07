@@ -39,12 +39,12 @@ protected:
 private:
     int mWatermarkTexCoord;
     // 水印纹理对象
-    GLuint mWatermarkTexture;
+    GLuint mWatermarkTexture=0;
 
     GLint mWatermarkWidth; //水印宽
     GLint mWatermarkHeight; //水印高
     GLint mMatrixHandle; //水印纹理矩阵
-    uint8_t *mWatermarkPixel= nullptr; //水印纹理数据，一个byte指针
+    uint8_t *mWatermarkPixel = nullptr; //水印纹理数据，一个byte指针
 
     glm::mat4 v_mat4 = glm::mat4(1.0f); // 矩阵
 };
@@ -92,7 +92,7 @@ const std::string WatermarkFragmentShader = SHADER_TO_STRING(
         void main() {
             vec4 video = texture2D(inputTexture, textureCoordinate.xy);
             vec4 watermark = texture2D(watermarkTexture, watermarkTexCoordinate.xy);
-            // 水印之外的区域显示视频画面，
+            // 水印之外的区域显示视频画面
             float r = watermark.r + (1.0 - watermark.a) * video.r;
             float g = watermark.g + (1.0 - watermark.a) * video.g;
             float b = watermark.b + (1.0 - watermark.a) * video.b;

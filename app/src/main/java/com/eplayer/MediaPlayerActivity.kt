@@ -30,6 +30,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     //private lateinit var path: String
     private lateinit var paths: List<String>
     private var index = 0
+    private var markIndex = 0 // 记录水印点击规律
     private lateinit var mediaPlayer: EasyMediaPlayer
     private var mProgress = 0
     private var screenOrientation: Int = Configuration.ORIENTATION_UNDEFINED
@@ -233,10 +234,11 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
     // 添加水印
-    private fun addImageWatermark() {
+     fun addImageWatermark(imgId: Int) {
+        LogUtil.d("添加图片")
         val options = BitmapFactory.Options()
         options.inPreferredConfig = Bitmap.Config.ARGB_8888
-        val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher, options)
+        val bitmap = BitmapFactory.decodeResource(resources, imgId, options)
         val byteCount = bitmap.byteCount
         val buffer = ByteBuffer.allocate(byteCount)
         bitmap.copyPixelsToBuffer(buffer)
@@ -252,7 +254,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
     // 添加文字水印
     fun addTextWatermark(text: String, width: Int, height: Int) {
-
+        LogUtil.d("添加文字")
         val textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(textBitmap)
         val paint = Paint()
@@ -278,6 +280,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
     override fun onClick(v: View) {
+
         when (v.id) {
             // 播放暂停
             R.id.iv_pause_play -> {
@@ -355,8 +358,13 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
             // 水印
             R.id.action_watermark -> {
-                //addImageWatermark()
-                addTextWatermark("EPlayer", 100, 100)
+                when (markIndex % 4) {
+                    0 -> addImageWatermark(R.mipmap.ic_launcher)
+                    1 -> addTextWatermark("EPlayer", 100, 100)
+                    2 -> addImageWatermark(R.mipmap.ghost)
+                    3 -> addTextWatermark("刘兴荣", 100, 100)
+                }
+                markIndex++
             }
 
         }

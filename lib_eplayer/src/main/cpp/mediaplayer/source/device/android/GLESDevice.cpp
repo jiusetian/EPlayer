@@ -133,7 +133,7 @@ void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint widt
     }
     // 创建水印滤镜
     GLWatermarkFilter *watermarkFilter = new GLWatermarkFilter();
-    watermarkFilter->setWatermark(watermarkPixel,length,width,height,scale,location);
+    watermarkFilter->setWatermark(watermarkPixel, length, width, height, scale, location);
 
     node->changeFilter(watermarkFilter);
     nodeList->addNode(node); // 添加水印节点
@@ -240,7 +240,7 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
     }
     // 如果改变了滤镜效果的渲染，则在节点链表中增加或更改为当前的滤镜
     if (filterChange) {
-        // 改变滤镜效果
+        // 改变滤镜
         nodeList->changeFilter(filterInfo.type, FilterManager::getInstance()->getFilter(&filterInfo));
         filterChange = false;
         // 节点的视口大小
@@ -252,7 +252,6 @@ void GLESDevice::onInitTexture(int width, int height, TextureFormat format, Blen
         // 节点初始化，主要是filter的初始化
         nodeList->init(); //filter初始化了以后才能用
     }
-
     mMutex.unlock();
 }
 

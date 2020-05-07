@@ -15,7 +15,7 @@ GLWatermarkFilter::GLWatermarkFilter() {
 }
 
 GLWatermarkFilter::~GLWatermarkFilter() {
-    if (mWatermarkPixel){
+    if (mWatermarkPixel) {
         free(mWatermarkPixel);
     }
 }
@@ -37,6 +37,7 @@ void GLWatermarkFilter::initProgram(const char *vertexShader, const char *fragme
 
         // 水印纹理对象
         glGenTextures(1, &mWatermarkTexture);
+        LOGD("水印纹理对象%d", mWatermarkTexture);
         glBindTexture(GL_TEXTURE_2D, mWatermarkTexture);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -54,12 +55,11 @@ void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLi
 
     mWatermarkWidth = width;
     mWatermarkHeight = height;
-    mWatermarkPixel = nullptr;
-    // if (mWatermarkPixel== nullptr) {
+    //mWatermarkPixel = nullptr;
     // 首先分配内存空间
     mWatermarkPixel = new uint8_t[length];
-    //}
     memcpy(mWatermarkPixel, watermarkPixel, length);
+
     // 计算水印的缩放矩阵
     // location的意义：0左上，1左下，2右上，3右下
     if (location == 0) {
