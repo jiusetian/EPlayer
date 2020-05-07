@@ -52,8 +52,9 @@ public:
 
     //计算屏幕适配矩阵
     static glm::mat4 caculateVideoFitMat4(int videoWidth, int videoHeight, int displayWidth, int displayHeight);
+
     //从资源文件中读取shader代码
-    static std::string *readShaderFromAsset(const char *fileName);
+   // static std::string *readShaderFromAsset(const char *fileName);
 
 private:
     OpenGLUtils() = default;

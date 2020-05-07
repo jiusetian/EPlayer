@@ -219,6 +219,14 @@
                 android:text="画中画"
                 />
 
+
+        <Button
+                android:id="@+id/action_circle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="画中圆"
+                />
+
         <Button
                 android:id="@+id/action_watermark"
                 android:layout_width="wrap_content"

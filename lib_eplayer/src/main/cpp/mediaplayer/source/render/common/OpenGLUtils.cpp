@@ -129,7 +129,7 @@ void OpenGLUtils::checkActiveUniform(GLuint program) {
 
         location = glGetUniformLocation(program, uniformName);
 
-        LOGD("location:", location);
+        LOGD("location:%d", location);
 
         switch (type) {
             case GL_FLOAT: {
@@ -276,27 +276,27 @@ glm::mat4 OpenGLUtils::caculateVideoFitMat4(int videoWidth, int videoHeight, int
     return v_mat4;
 }
 
-std::string *OpenGLUtils::readShaderFromAsset(const char *fileName) {
-    //1.读取着色器的代码
-    string fragmentCode;
-    ifstream fShaderFile;
-    //确保文件流会输出异常
-    fShaderFile.exceptions(ifstream::failbit | ifstream::badbit);
-    try {
-        //打开文件
-        fShaderFile.open(fileName);
-        stringstream fShaderStream;
-        //读取文件到流中
-        //在 C++ 编程中，我们使用流提取运算符（ >> ）从文件读取信息，就像使用该运算符从键盘输入信息一样
-        //唯一不同的是，在这里您使用的是 ifstream 或 fstream 对象，而不是 cin 对象
-        fShaderStream << fShaderFile.rdbuf();
-        //关闭文件
-        fShaderFile.close();
-        //将流转换为字符串
-        fragmentCode = fShaderStream.str();
-
-        return &fragmentCode;
-    } catch (ifstream::failure) {
-        LOGD("读取文件失败，请检查文件是否存在");
-    }
-}
+//std::string *OpenGLUtils::readShaderFromAsset(const char *fileName) {
+//    //1.读取着色器的代码
+//    string fragmentCode;
+//    ifstream fShaderFile;
+//    //确保文件流会输出异常
+//    fShaderFile.exceptions(ifstream::failbit | ifstream::badbit);
+//    try {
+//        //打开文件
+//        fShaderFile.open(fileName);
+//        stringstream fShaderStream;
+//        //读取文件到流中
+//        //在 C++ 编程中，我们使用流提取运算符（ >> ）从文件读取信息，就像使用该运算符从键盘输入信息一样
+//        //唯一不同的是，在这里您使用的是 ifstream 或 fstream 对象，而不是 cin 对象
+//        fShaderStream << fShaderFile.rdbuf();
+//        //关闭文件
+//        fShaderFile.close();
+//        //将流转换为字符串
+//        fragmentCode = fShaderStream.str();
+//
+//        return &fragmentCode;
+//    } catch (ifstream::failure) {
+//        LOGD("读取文件失败，请检查文件是否存在");
+//    }
+//}

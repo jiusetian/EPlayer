@@ -1,10 +1,18 @@
 
 #include <cstring>
+#include <render/filter/effect/header/GLEffectScaleFilter.h>
+#include <render/filter/effect/header/GLFrameThreeFilter.h>
+#include <render/filter/effect/header/GLFrameTwoFilter.h>
+#include <render/filter/effect/header/GLFrameBlurFilter.h>
+#include <render/filter/effect/header/GLFrameBlackWhiteThreeFilter.h>
+#include <render/filter/effect/header/GLFrameFourFilter.h>
+#include <render/filter/effect/header/GLFrameSixFilter.h>
+#include <render/filter/effect/header/GLFrameNineFilter.h>
+#include <render/filter/effect/header/GLEffectPipFilter.h>
+#include <render/filter/effect/header/GLEffectRotateCircleFilter.h>
 #include "GLBackGroundFilter.h"
 #include "GLWatermarkFilter.h"
 #include "FilterManager.h"
-#include "Filter.h"
-
 
 FilterManager *FilterManager::instance = 0;
 std::mutex FilterManager::mutex;
@@ -120,6 +128,11 @@ GLFilter *FilterManager::getFilter(const char *name) {
     if (!strcmp("画中画", name)) {
         return new GLEffectPipFilter();
     }
+
+    if (!strcmp("画中圆", name)) {
+        return new GLEffectRotateCircleFilter();
+    }
+
     return nullptr;
 }
 

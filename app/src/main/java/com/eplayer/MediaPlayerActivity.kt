@@ -165,7 +165,8 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             action_six,
             action_nine,
             action_watermark,
-            action_pip
+            action_pip,
+            action_circle
         ).forEach { it.setOnClickListener(this) }
     }
 
@@ -248,7 +249,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermark = buffer.array()
         val mWatermarkWidth = bitmap.width
         val mWatermarkHeight = bitmap.height
-        LogUtil.d("宽高="+mWatermarkWidth+"---"+mWatermarkHeight)
+        LogUtil.d("宽高=" + mWatermarkWidth + "---" + mWatermarkHeight)
         bitmap.recycle()
 
         mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, loca)
@@ -358,7 +359,9 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
             // 九屏
             R.id.action_nine -> mediaPlayer.changeEffect(Effect.NINE.effectName)
             // 画中画
-            R.id.action_pip-> mediaPlayer.changeEffect(Effect.PIP.effectName)
+            R.id.action_pip -> mediaPlayer.changeEffect(Effect.PIP.effectName)
+            // 画中圆
+            R.id.action_circle -> mediaPlayer.changeEffect(Effect.CIRCLE.effectName)
 
             // 水印
             R.id.action_watermark -> {
@@ -403,6 +406,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         SIX("六屏"),
         NINE("九屏"),
         PIP("画中画"),
+        CIRCLE("画中圆"),
     }
 
 }
