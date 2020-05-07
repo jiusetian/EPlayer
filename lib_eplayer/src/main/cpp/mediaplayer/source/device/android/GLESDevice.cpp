@@ -133,8 +133,9 @@ void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint widt
     }
     // 创建水印滤镜
     GLWatermarkFilter *watermarkFilter = new GLWatermarkFilter();
+    watermarkFilter->setTextureSize(mVideoTexture->width,mVideoTexture->height);
+    watermarkFilter->setDisplaySize(mSurfaceWidth,mSurfaceHeight);
     watermarkFilter->setWatermark(watermarkPixel, length, width, height, scale, location);
-
     node->changeFilter(watermarkFilter);
     nodeList->addNode(node); // 添加水印节点
     // 要在onInitTexture中初始化水印filter，可能原因是egl属性的创建(比如着色器program，elgsurface等)和使用需要在同一个线程中完成

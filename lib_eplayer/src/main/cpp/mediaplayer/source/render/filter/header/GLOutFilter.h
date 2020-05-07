@@ -17,6 +17,7 @@ const std::string kOutFilterVertexShader = SHADER_TO_STRING(
         uniform mat4 vMatrix;
 
         void main() {
+            // 通过矩阵改变顶点坐标，顶点坐标基于OpenGL坐标系，用来指定物体的摆放位置
             gl_Position = vMatrix * vec4(aPosition.x, aPosition.y, aPosition.z, aPosition.w);
             textureCoordinate = aTextureCoord.xy;
         }

@@ -234,7 +234,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
     }
 
     // 添加水印
-     fun addImageWatermark(imgId: Int) {
+    fun addImageWatermark(imgId: Int, loca: Int) {
         LogUtil.d("添加图片")
         val options = BitmapFactory.Options()
         options.inPreferredConfig = Bitmap.Config.ARGB_8888
@@ -247,13 +247,14 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermark = buffer.array()
         val mWatermarkWidth = bitmap.width
         val mWatermarkHeight = bitmap.height
+        LogUtil.d("宽高="+mWatermarkWidth+"---"+mWatermarkHeight)
         bitmap.recycle()
 
-        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, 2)
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 7f, loca)
     }
 
     // 添加文字水印
-    fun addTextWatermark(text: String, width: Int, height: Int) {
+    fun addTextWatermark(text: String, width: Int, height: Int, loca: Int) {
         LogUtil.d("添加文字")
         val textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(textBitmap)
@@ -276,7 +277,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
         val mWatermarkWidth = textBitmap.width
         val mWatermarkHeight = textBitmap.height
         textBitmap.recycle()
-        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 6f, 2)
+        mediaPlayer.setWatermark(mWatermark, mWatermark.size, mWatermarkWidth, mWatermarkHeight, 6f, loca)
     }
 
     override fun onClick(v: View) {
@@ -358,11 +359,12 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
 
             // 水印
             R.id.action_watermark -> {
-                when (markIndex % 4) {
-                    0 -> addImageWatermark(R.mipmap.ic_launcher)
-                    1 -> addTextWatermark("EPlayer", 100, 100)
-                    2 -> addImageWatermark(R.mipmap.ghost)
-                    3 -> addTextWatermark("刘兴荣", 100, 100)
+                val it = markIndex % 4
+                when (it) {
+                    0 -> addImageWatermark(R.mipmap.ic_launcher, it)
+                    1 -> addTextWatermark("EPlayer", 100, 100, it)
+                    2 -> addImageWatermark(R.mipmap.ghost, it)
+                    3 -> addTextWatermark("刘兴荣", 100, 100, it)
                 }
                 markIndex++
             }
