@@ -20,6 +20,7 @@ VideoDecoder::VideoDecoder(AVFormatContext *pFormatCtx, AVCodecContext *avctx,
 }
 
 VideoDecoder::~VideoDecoder() {
+
     mMutex.lock();
     pFormatCtx = NULL;
     if (frameQueue) {
@@ -230,6 +231,7 @@ int VideoDecoder::decodeVideo() {
     av_free(frame);
     frame = NULL;
 
+    // 本身指针packet是操作了一个内存空间的，用完之后要是否，否则内存泄漏
     av_packet_free(&packet);
     av_free(packet);
     packet = NULL;

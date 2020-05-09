@@ -312,7 +312,7 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
                                                    jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
-    //转为jbyte数组的指针
+    // 转为jbyte数组的指针
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
     jint *outFramewSize = env->GetIntArrayElements(outFramewSize_, NULL);

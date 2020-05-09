@@ -51,14 +51,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             startActivity(intent)
         }
 
-        btn_both.setOnClickListener {
-            if (EasyPermissions.hasPermissions(this, *perms)) {
-                val intent = Intent(this, TwoScreenActivity::class.java)
-                intent.putExtra("path", PATH)
-                startActivity(intent)
-            } else
-                requestPerms(*perms)
-        }
     }
 
     /**

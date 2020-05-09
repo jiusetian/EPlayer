@@ -23,11 +23,11 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
 
     companion object {
-        //是否保存视频
+        // 是否保存视频
         private const val SAVE_FILE_FOR_TEST = false
     }
 
-    //相关参数设置
+    // 相关参数设置
     private var cameraWidth = LiveConfig.cameraWidth
     private var cameraHeight = LiveConfig.cameraHeight
     private var scaleWidth = LiveConfig.scaleWidthVer
@@ -37,26 +37,26 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private var cropStartX = LiveConfig.cropStartX
     private var cropStartY = LiveConfig.cropStartY
 
-    //第一次实例化的时候是不需要的
+    // 第一次实例化的时候是不需要的
     private var initialized = false
     private var lastX = 0f
     private var lastY = 0f
     private var lastZ = 0f
 
-    //传感器需要，这边使用的是加速度传感器
+    // 传感器需要，这边使用的是加速度传感器
     private val sensorManager: SensorManager
-    //阻塞线程安全队列，生产者和消费者
+    // 阻塞线程安全队列，生产者和消费者
     private val mQueue = LinkedBlockingDeque<ByteArray>()
-    //工作线程
+    // 工作线程
     private lateinit var workerThread: Thread
     private lateinit var fileManager: FileManager
     private var isLoop: Boolean = false
 
-    //yuv数据回调接口
+    // yuv数据回调接口
     private lateinit var yuvDataListener: ((data: ByteArray, width: Int, height: Int) -> Unit)
 
     init {
-        //将视频预览数据压入到队列中
+        // 将视频预览数据压入到队列中
         cameraSurface.setCameraNVDataListener { it?.let { mQueue.put(it) } }
 
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
@@ -68,7 +68,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         }
     }
 
-    //初始化配置参数
+    // 初始化配置参数
     private fun initConfig() {
         cameraWidth = LiveConfig.cameraWidth
         cameraHeight = LiveConfig.cameraHeight
@@ -78,7 +78,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
             scaleHeight = LiveConfig.scaleHeightVer
             cropWidht = LiveConfig.cropWidthVer
             cropHeight = LiveConfig.cropHeightVer
-        } else { //横屏
+        } else { // 横屏
             scaleWidth = LiveConfig.scaleWidthLand
             scaleHeight = LiveConfig.scaleHeightLand
             cropWidht = LiveConfig.cropWidthLand
@@ -89,11 +89,11 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     private fun initVideo() {
-        initConfig() //初始化相关配置
+        initConfig() // 初始化相关配置
         LogUtil.d("初始化视频相关")
-        //初始化，为操作需要分配空间
+        // 初始化，为操作需要分配空间
         LiveNativeManager.init(LiveConfig.cameraWidth, LiveConfig.cameraHeight, scaleWidth, scaleHeight)
-        //初始化视频编码
+        // 初始化视频编码
         LiveNativeManager.encoderVideoinit(scaleWidth, scaleHeight, scaleWidth, scaleHeight)
     }
 
@@ -111,24 +111,24 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private fun initWorkThread() {
         isLoop = true
         workerThread = thread(start = true) {
-            //循环执行
+            // 循环执行
             while (isLoop && !Thread.interrupted()) {
-                //获取阻塞队列中的数据，没有数据的时候阻塞
+                // 获取阻塞队列中的数据，没有数据的时候阻塞
                 val srcData = mQueue.take()
-                //YV12和NV12所占内存是12bits/Pixel,所以一帧原始图像大小为mCameraUtil.getCameraWidth()*mCameraUtil.getCameraHeight()*3/2.
-                //生成I420(YUV标准格式数据及YUV420P)目标数据，生成后的数据长度width * height * 3 / 2
+                // YV12和 NV12所占内存是12bits/Pixel,所以一帧原始图像大小为 mCameraUtil.getCameraWidth()*mCameraUtil.getCameraHeight()*3/2.
+                // 生成 I420(YUV标准格式数据及YUV420P)目标数据，生成后的数据长度 width * height * 3 / 2
                 val dstData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
-                //摄像头方向，正常的手机方向，后置摄像头的时候为90，前置摄像头的时候为270
+                // 摄像头方向，正常的手机方向，后置摄像头的时候为90，前置摄像头的时候为270
                 val orientation = LiveConfig.cameraOrientation
 
-                //LogUtil.d("摄像头角度="+orientation)
-                //压缩NV21(YUV420SP)数据，元素数据位1080 * 1920，很显然这样的数据推流会很占用带宽，我们压缩成480 * 640 的YUV数据
-                //为啥要转化为YUV420P数据？因为是在为转化为H264数据在做准备，NV21不是标准的，只能先通过转换，生成标准YUV420P数据，
-                //然后把标准数据encode为H264流
-                //参数mode为0代表压缩最快的
+                // LogUtil.d("摄像头角度="+orientation)
+                // 压缩 NV21(YUV420SP)数据，元素数据位1080 * 1920，很显然这样的数据推流会很占用带宽，我们压缩成480 * 640 的YUV数据
+                // 为啥要转化为YUV420P数据？因为是在为转化为 H264数据在做准备，NV21不是标准的，只能先通过转换，生成标准YUV420P数据
+                // 然后把标准数据encode为H264流
+                // 参数 mode为0代表压缩最快的
                 /**
-                 * compressYUV方法首先nv21转化为i420，然后进行scale缩放，最后进行rotate旋转（如果orientation==270还要进行镜像）
-                 * 1.nv21转化为i420，前后数据大小不变，这是存储数据格式改变了，方便进一步的处理
+                 * compressYUV方法首先nv21转化为i420，然后进行scale缩放，最后进行 rotate旋转（如果orientation==270还要进行镜像）
+                 * 1.nv21转化为i420，前后数据大小不变，只是存储数据格式改变了，方便进一步的处理
                  * 2.scale缩放，比如原来图像为1080*1920，scale以后变为480*640，大大缩小了，但是图像就没那么清晰了
                  * 3.rotate旋转，比如原来宽高比为640：480，旋转90度以后宽高比为480:640，注意观察下面的参数，其实cameraWidth：cameraHeight=1920:1080，
                  * scaleWidthVer：scaleHeightVer=480:640，所以在传参的时候scaleHeight作为宽传进去，而scaleWidth作为高传进去的，因为最后旋转以后，出来的图像宽高比才是480:640
@@ -159,9 +159,9 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                     )
                 }
 
-                //LogUtil.d("剪切前=" + dstData.size)
-                //进行YUV420P数据裁剪的操作，测试下这个借口，我们可以对数据进行裁剪，裁剪后的数据也是I420数据，我们采用的是libyuv库文件
-                //这个libyuv库效率非常高，这也是我们用它的原因,
+                // LogUtil.d("剪切前=" + dstData.size)
+                // 进行YUV420P数据裁剪的操作，测试下这个借口，我们可以对数据进行裁剪，裁剪后的数据也是I420数据，我们采用的是libyuv库文件
+                // 这个libyuv库效率非常高，这也是我们用它的原因,
                 val cropData = ByteArray(cropWidht * cropHeight * 3 / 2)
                 LiveNativeManager.cropYUV(
                     dstData,
@@ -173,13 +173,13 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                     cropStartX,
                     cropStartY
                 )
-                //LogUtil.d("剪切后=" + cropData.size)
+                // LogUtil.d("剪切后=" + cropData.size)
                 // LogUtil.d("数据=" + orientation + "---" + cameraWidth + "////" + cameraHeight + "/////" + scaleWidthVer + "////" + scaleHeightVer + "////" + cropWidht + "/////" + cropHeightVer)
-                //自此，我们得到了YUV420P标准数据，这个过程实际上就是NV21转化为YUV420P数据
-                //注意，有些机器是NV12格式，只是数据存储不一样，我们一样可以用libyuv库的接口转化
+                // 自此，我们得到了YUV420P标准数据，这个过程实际上就是NV21转化为YUV420P数据
+                // 注意，有些机器是NV12格式，只是数据存储不一样，我们一样可以用libyuv库的接口转化
                 yuvDataListener?.let { it.invoke(cropData, cropWidht, cropHeight) }
 
-                //设置为true，我们把生成的YUV文件用播放器播放一下，看我们的数据是否有误，起调试作用
+                // 设置为true，我们把生成的YUV文件用播放器播放一下，看我们的数据是否有误，起调试作用
                 if (SAVE_FILE_FOR_TEST) {
                     fileManager.saveFileData(cropData)
                 }
@@ -203,9 +203,9 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     fun startVideoGather() {
-        //打开摄像头
+        // 打开摄像头
         cameraSurface.openCamera()
-        //注册加速度传感器
+        // 注册加速度传感器
         sensorManager.registerListener(
             this,
             sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
@@ -224,8 +224,8 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         sensorManager.unregisterListener(this)
         isLoop = false
         mQueue.clear()
-        //workerThread.interrupt()
-        //释放jni层相关资源
+        // workerThread.interrupt()
+        // 释放jni层相关资源
         releaseJniVideo()
     }
 

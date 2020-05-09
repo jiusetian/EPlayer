@@ -119,7 +119,7 @@ int VideoEncoder::encodeFrame(char *inBytes, int frameSize, int pts, char *outBy
         //rtmp发送数据，outFrameSize是变长的，当有sps pps的时候大于1，其它时候值为1
         for (int i = 0; i < nal_nums; i++) { //当有sps和pps的时候，nal单元的数量大于1，其他时候为1
             outFrameSize[i] = nals[i].i_payload;
-            //将nals单元的数据复制到输出数据outBytes中
+            //将 nals单元的数据复制到输出数据outBytes中
             memcpy(outBytes + have_copy, nals[i].p_payload, nals[i].i_payload);
             have_copy += nals[i].i_payload;
         }

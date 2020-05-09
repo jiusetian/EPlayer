@@ -26,20 +26,20 @@ class MediaEncoder {
     private var videoEncoderLoop = false
     private var audioEncoderLoop = false
 
-    //队列
+    // 队列
     private val videoQueue: LinkedBlockingQueue<VideoData>
     private val audioQueue: LinkedBlockingQueue<AudioData>
 
-    //文件管理
+    // 文件管理
     private lateinit var videoFileManager: FileManager
     private lateinit var audioFileManager: FileManager
 
-    //表示每次传递多少数据为最佳
+    // 表示每次传递多少数据为最佳
     private var audioEncodeBuffer = 0
     private var fps = 0
 
     private lateinit var mediaEncoderCallback: MediaEncoderCallback
-    //硬编码
+    // 硬编码
     private lateinit var videoCodec:MediaCodec
     private  lateinit var vCodecInfo: MediaCodecInfo
 
@@ -50,7 +50,7 @@ class MediaEncoder {
         }
         videoQueue = LinkedBlockingQueue()
         audioQueue = LinkedBlockingQueue()
-        //这里我们初始化音频数据，为什么要初始化音频数据呢？音频数据里面我们做了什么事情？
+        // 这里我们初始化音频数据，为什么要初始化音频数据呢？音频数据里面我们做了什么事情？
 //        audioEncodeBuffer =
 //            LiveNativeManager.encoderAudioInit(LiveConfig.SAMPLE_RATE, LiveConfig.CHANNELS, LiveConfig.BIT_RATE)
     }
@@ -59,12 +59,12 @@ class MediaEncoder {
         
     }
 
-    //查询机器硬编码支持的颜色格式
+    // 查询机器硬编码支持的颜色格式
     private fun chooseColorFormat(){
         vCodecInfo=chooseVideoEncoder(null)
 
         var matchedColorFormat = 0
-        //查询机器上的MediaCodec实现具体支持哪些YUV格式作为输入格式
+        // 查询机器上的MediaCodec实现具体支持哪些YUV格式作为输入格式
         val cc = vCodecInfo?.getCapabilitiesForType(VCODEC)
         for (i in cc.colorFormats.indices) {
             val cf = cc.colorFormats[i]
@@ -73,7 +73,7 @@ class MediaEncoder {
             // choose YUV for h.264, prefer the bigger one.
             // corresponding to the color space transform in onPreviewFrame
             if (cf >= MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar && cf <= MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
-                //选大的，如果有大于matchedColorFormat的cf，则选择
+                // 选大的，如果有大于matchedColorFormat的cf，则选择
                 if (cf > matchedColorFormat) {
                     matchedColorFormat = cf
                 }
@@ -115,7 +115,7 @@ class MediaEncoder {
         this.mediaEncoderCallback = callback
     }
 
-    //摄像头的YUV420P数据，put到队列中，生产者模型
+    // 摄像头的YUV420P数据，put到队列中，生产者模型
     fun putVideoData(videoData: VideoData) {
         try {
             //Log.d("tag","接收到YUV数据="+videoData.with+"////"+videoData.height)
@@ -125,9 +125,9 @@ class MediaEncoder {
         }
     }
 
-    //麦克风PCM音频数据，put到队列中，生产者模型
+    // 麦克风PCM音频数据，put到队列中，生产者模型
     fun putAudioData(audioData: AudioData) {
-        //Log.d("tag","接收到音频原始数据="+audioData.audioData.size)
+        // Log.d("tag","接收到音频原始数据="+audioData.audioData.size)
         try {
             audioQueue.put(audioData)
         } catch (e: Exception) {
@@ -152,13 +152,13 @@ class MediaEncoder {
         fun receiveEncoderAudioData(audioData: ByteArray, size: Int)
     }
 
-    //开始编码
+    // 开始编码
     fun startEncode() {
         startVideoEncode()
         startAudioEncode2()
     }
 
-    //停止编码
+    // 停止编码
     fun stopEncode() {
         videoEncoderLoop = false
         audioEncoderLoop = false
@@ -168,26 +168,26 @@ class MediaEncoder {
 //        audioEncoderThread.interrupt()
     }
 
-    //开始视频的解码
+    // 开始视频的解码
     private fun startVideoEncode() {
         if (videoEncoderLoop) {
             throw RuntimeException("必须先停止")
         }
 
         videoEncoderLoop = true
-        //编码线程
+        // 编码线程
         videoEncoderThread = thread(start = true) {
-            //视频消费者模型，不断从队列中取出视频流来进行h264编码
+            // 视频消费者模型，不断从队列中取出视频流来进行h264编码
             while (videoEncoderLoop && !Thread.interrupted()) {
 
                 try {
-                    //队列中取视频数据，这里是指一帧图像的数据
+                    // 队列中取视频数据，这里是指一帧图像的数据
                     val videoData = videoQueue.take()
-                    fps++ //代表第几帧
+                    fps++ // 代表第几帧
                     val outBuffer = ByteArray(videoData.with * videoData.height)
-                    val nalLengths = IntArray(10) //保存所有nal单元的大小
-                    //对YUV420P进行h264编码，返回一个数据大小为nal单元的个数，里面是编码出来的h264数据，numNals是此次h264编码生成的nal单元数量
-                    //buffLength保存每个nal单元的大小
+                    val nalLengths = IntArray(10) // 保存所有nal单元的大小
+                    // 对YUV420P进行h264编码，返回一个数据大小为nal单元的个数，里面是编码出来的h264数据，numNals是此次h264编码生成的nal单元数量
+                    // buffLength保存每个nal单元的大小
                     val nalsNum = LiveNativeManager.encoderVideoEncode(
                         videoData.videoData,
                         videoData.videoData.size,
@@ -198,17 +198,17 @@ class MediaEncoder {
 
                     if (nalsNum > 0) {
                         val segment = IntArray(nalsNum)
-                        //segment中保存每个nal单元的大小，将buffLength中每一个nal单元的大小复制到segment中去
+                        // segment中保存每个nal单元的大小，将buffLength中每一个nal单元的大小复制到segment中去
                         System.arraycopy(nalLengths, 0, segment, 0, nalsNum)
-                        //总长度
+                        // 总长度
                         var totalLength = 0
                         segment.forEach { totalLength += it }
-                        //编码后的h264数据
+                        // 编码后的h264数据
                         val encoderData = ByteArray(totalLength)
-                        //outbuffer存储的是编码后的h264数据，在这里做个拷贝
+                        // outbuffer存储的是编码后的h264数据，在这里做个拷贝
                         System.arraycopy(outBuffer, 0, encoderData, 0, encoderData.size)
                         mediaEncoderCallback?.let { it.receiveEncoderVideoData(encoderData, encoderData.size, segment) }
-                        //我们可以把数据在java层保存到文件中，看看我们编码的h264数据是否能播放，h264裸数据可以在VLC播放器中播放
+                        // 我们可以把数据在java层保存到文件中，看看我们编码的h264数据是否能播放，h264裸数据可以在VLC播放器中播放
                         if (SAVE_FILE_FOR_TEST) {
                             LogUtil.d("保存视频数据")
                             videoFileManager.saveFileData(encoderData)
@@ -229,37 +229,40 @@ class MediaEncoder {
         if (audioEncoderLoop) {
             throw RuntimeException("必须先停止")
         }
-        //开启线程
+        // 开启线程
         audioEncoderLoop = true
         audioEncoderThread = thread(start = true) {
+
             val outBuffer = ByteArray(1024)
             val inBuffer = ByteArray(audioEncodeBuffer)
 
             while (audioEncoderLoop && !Thread.interrupted()) {
                 try {
-                    //从保存队列中获取到音频数据
+                    // 从保存队列中获取到音频数据
                     val audioData = audioQueue.take()
-                    //我们通过fdk-aac接口获取到了audioEncodeBuffer的数据，即每次编码多少数据为最优
-                    //我们每次可以让MIC录取audioEncodeBuffer大小的数据，然后把录取的数据传递到AudioEncoder.cpp中去编码
+                    // 我们通过fdk-aac接口获取到了audioEncodeBuffer的数据，即每次编码多少数据为最优
+                    // 我们每次可以让MIC录取 audioEncodeBuffer大小的数据，然后把录取的数据传递到AudioEncoder.cpp中去编码
                     val audioLength = audioData.audioData.size
-
-                    //从audioDataz的0位置开始复制audioLength个字节到haveCopyLength位置开始的inbuffer中
+                    // 从audioDataz的0位置开始复制audioLength个字节到 haveCopyLength位置开始的 inbuffer中
                     System.arraycopy(audioData.audioData, 0, inBuffer, 0, audioLength)
-
-                    //fdk-aac编码PCM裸音频数据，返回可用长度的有效字段
+                    //LogUtil.d("编码前大小="+audioEncodeBuffer)
+                    // 发送给 NDK层的 fdk-aac编码 PCM裸音频数据，返回可用长度的有效字段
                     val validLength = LiveNativeManager.encoderAudioEncode(
                         inBuffer,
                         audioEncodeBuffer,
                         outBuffer,
                         outBuffer.size
                     )
+                    //LogUtil.d("编码后大小="+validLength)
                     val VALIDLENGTH = validLength
+                    // 编码成功
                     if (VALIDLENGTH > 0) {
                         val encoderData = ByteArray(VALIDLENGTH)
+                        // 复制数据
                         System.arraycopy(outBuffer, 0, encoderData, 0, VALIDLENGTH)
-                        //编码后，把数据抛给rtmp去推流
+                        // 编码后，把数据抛给 rtmp推流
                         mediaEncoderCallback?.let { it.receiveEncoderAudioData(encoderData, VALIDLENGTH) }
-                        //我们可以把Fdk-aac编码后的数据保存到文件中，然后用播放器听一下，音频文件是否编码正确
+                        // 我们可以把 Fdk-aac编码后的数据保存到文件中，然后用播放器听一下，音频文件是否编码正确
                         if (SAVE_FILE_FOR_TEST) {
                             audioFileManager.saveFileData(encoderData)
                         }
@@ -280,7 +283,7 @@ class MediaEncoder {
         if (audioEncoderLoop) {
             throw RuntimeException("必须先停止")
         }
-        //开启线程
+        // 开启线程
         audioEncoderLoop = true
         audioEncoderThread = thread(start = true) {
             val outBuffer = ByteArray(1024)
@@ -289,22 +292,22 @@ class MediaEncoder {
 
             while (audioEncoderLoop && !Thread.interrupted()) {
                 try {
-                    //从保存队列中获取到音频数据
+                    // 从保存队列中获取到音频数据
                     val audioData = audioQueue.take()
-                    //我们通过fdk-aac接口获取到了audioEncodeBuffer的数据，即每次编码多少数据为最优
-                    //这里我这边的手机每次都是返回的4096即4K的数据，其实为了简单点，我们每次可以让
-                    //MIC录取4K大小的数据，然后把录取的数据传递到AudioEncoder.cpp中去编码
+                    // 我们通过fdk-aac接口获取到了audioEncodeBuffer的数据，即每次编码多少数据为最优
+                    // 这里我这边的手机每次都是返回的4096即4K的数据，其实为了简单点，我们每次可以让
+                    // MIC录取4K大小的数据，然后把录取的数据传递到AudioEncoder.cpp中去编码
                     val audioLength = audioData.audioData.size
 
                     if (haveCopyLength < audioEncodeBuffer) {
-                        //从audioDataz的0位置开始复制audioLength个字节到haveCopyLength位置开始的inbuffer中
+                        // 从audioDataz的0位置开始复制audioLength个字节到haveCopyLength位置开始的inbuffer中
                         System.arraycopy(audioData.audioData, 0, inBuffer, haveCopyLength, audioLength)
                         haveCopyLength += audioLength
-                        //remain用来判断编码的数据是否已经读取完
+                        // remain用来判断编码的数据是否已经读取完
                         val remain = audioEncodeBuffer - haveCopyLength
-                        //如果已经读取到了audioEncodeBuffer长度的数据，则编码PCM裸音频数据
+                        // 如果已经读取到了audioEncodeBuffer长度的数据，则编码PCM裸音频数据
                         if (remain == 0) {
-                            //fdk-aac编码PCM裸音频数据，返回可用长度的有效字段
+                            // fdk-aac编码PCM裸音频数据，返回可用长度的有效字段
                             val validLength = LiveNativeManager.encoderAudioEncode(
                                 inBuffer,
                                 audioEncodeBuffer,
@@ -314,10 +317,11 @@ class MediaEncoder {
                             val VALIDLENGTH = validLength
                             if (VALIDLENGTH > 0) {
                                 val encoderData = ByteArray(VALIDLENGTH)
+                                // 复制编码输出数据
                                 System.arraycopy(outBuffer, 0, encoderData, 0, VALIDLENGTH)
-                                //编码后，把数据抛给rtmp去推流
+                                // 编码后，把数据抛给rtmp去推流
                                 mediaEncoderCallback?.let { it.receiveEncoderAudioData(encoderData, VALIDLENGTH) }
-                                //我们可以把Fdk-aac编码后的数据保存到文件中，然后用播放器听一下，音频文件是否编码正确
+                                // 我们可以把Fdk-aac编码后的数据保存到文件中，然后用播放器听一下，音频文件是否编码正确
                                 if (SAVE_FILE_FOR_TEST) {
                                     audioFileManager.saveFileData(encoderData)
                                 }

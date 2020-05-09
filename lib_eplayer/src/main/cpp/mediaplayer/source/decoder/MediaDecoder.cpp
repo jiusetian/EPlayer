@@ -80,7 +80,6 @@ AVCodecContext *MediaDecoder::getCodecContext() {
 }
 
 int MediaDecoder::getMemorySize() {
-
     return packetQueue ? packetQueue->getSize() : 0;
 }
 

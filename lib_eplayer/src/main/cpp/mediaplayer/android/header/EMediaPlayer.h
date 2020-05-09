@@ -4,7 +4,7 @@
 
 #include <AndroidLog.h>
 #include <Mutex.h>
- #include <Condition.h>
+#include <Condition.h>
 #include <Thread.h>
 #include <android/native_window.h>
 #include <libavutil/dict.h>
@@ -190,7 +190,7 @@ private:
     status_t mPrepareStatus;
     int mAudioSessionId;
 
-};
 
+};
 
 #endif //EPLAYER_EMEDIAPLAYER_H

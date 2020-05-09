@@ -5,7 +5,6 @@
 #include <malloc.h>
 #include "header/AndroidLog.h"
 #include "header/AudioEncoder.h"
-
 AudioEncoder::AudioEncoder(int channels, int sampleRate, int bitRate) {
     this->channels = channels;
     this->sampleRate = sampleRate;
@@ -15,6 +14,20 @@ AudioEncoder::AudioEncoder(int channels, int sampleRate, int bitRate) {
 AudioEncoder::~AudioEncoder() {
     close();
 }
+
+void AudioEncoder::start() {
+    MediaEncoder::start();
+
+    // 创建编码线程
+    if(!encoderThread){
+        encoderThread=new Thread(this);
+        encoderThread->start();
+    }
+}
+
+void AudioEncoder::stop() {}
+
+void AudioEncoder::flush() {}
 
 int AudioEncoder::init() {
 
@@ -82,8 +95,19 @@ int AudioEncoder::init() {
     int inputSize = channels * 2 * info.frameLength;
     LOGI("inputSize = %d", inputSize);
 
-    return inputSize;
+    return inputSize; // 返回每次解码最合适的大小
 }
+
+// 线程执行体
+void AudioEncoder::run() {
+    startEncodeAudio();
+}
+
+int AudioEncoder::startEncodeAudio() {
+
+
+}
+
 
 /**
  * Fdk-AAC库压缩裸音频PCM数据，转化为AAC，这里为什么用fdk-aac，这个库相比普通的aac库，压缩效率更高
@@ -95,43 +119,43 @@ int AudioEncoder::init() {
  */
 int AudioEncoder::encodeAudio(unsigned char *inBytes, int length, unsigned char *outBytes, int outlength) {
     void *inptr, *outptr;
-    AACENC_BufDesc in_buf = {0};
+    AACENC_BufDesc in_buf = {0}; // 描述用以编码的输入或输出参数
     int in_identifier = IN_AUDIO_DATA;
-    int in_elem_size = 2; //每个采样点2个字节，量化宽度
-    //输入数据配置
+    int in_elem_size = 2; // 每个采样点2个字节，量化宽度
+    // 输入数据配置
     inptr = inBytes;
-    //为什么是二级指针，可能是函数内需要对一级指针的值重新赋值
+    // 为什么是二级指针，因为需要给指针赋值
     in_buf.bufs = &inptr;
+    in_buf.bufSizes = &length;
     in_buf.numBufs = 1;
     in_buf.bufferIdentifiers = &in_identifier;
-    in_buf.bufSizes = &length;
-    //buffer中每个样本的大小
+    // buffer中每个样本的大小
     in_buf.bufElSizes = &in_elem_size;
 
-    AACENC_BufDesc out_buf = {0}; //初始化
+    AACENC_BufDesc out_buf = {0}; // 初始化
     int out_identifier = OUT_BITSTREAM_DATA;
     int elSize = 1;
-    //out数据放到out_buf中
+    // out数据放到out_buf中
     outptr = outBytes;
-    out_buf.bufs = &outptr;
+    out_buf.bufs = &outptr; // 编码的数据结果指针
     out_buf.numBufs = 1;
     out_buf.bufferIdentifiers = &out_identifier;
-    out_buf.bufSizes = &outlength;
-    out_buf.bufElSizes = &elSize; //buffer中每个元素的大小，1代表1字节
+    out_buf.bufSizes = &outlength; // &引用是一个指针，
+    out_buf.bufElSizes = &elSize; // buffer中每个元素的大小，1代表1字节
 
-    AACENC_InArgs in_args = {0};
-    //因为每个采样点占两个字节大小，所以总字节大小除以2就是采样点数量
-    in_args.numInSamples = length / 2;  //size为pcm字节数
+    AACENC_InArgs in_args = {0}; // 输入参数
+    // 因为每个采样点占两个字节大小，所以总字节大小除以2就是采样点数量
+    in_args.numInSamples = length / 2;  // size为pcm字节数
 
-    AACENC_OutArgs out_args = {0};
+    AACENC_OutArgs out_args = {0}; // 输出参数
     AACENC_ERROR err;
 
-    //利用aacEncEncode来编码PCM裸音频数据，上面的代码都是fdk-aac的流程步骤
+    // 利用aacEncEncode来编码PCM裸音频数据，上面的代码都是fdk-aac的流程步骤
     if ((err = aacEncEncode(handle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK) {
         LOGI("Encoding aac failed\n");
         return err;
     }
-    //返回编码后的有效字段长度
+    // 返回编码后的有效字段长度
     return out_args.numOutBytes;
 }
 

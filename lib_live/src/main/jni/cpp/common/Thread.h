@@ -13,12 +13,12 @@ typedef enum {
 } ThreadPriority;
 
 class Runnable {
-
 public:
+
     //析构函数也声明为虚函数，为了派生类在调用析构函数的时候，调用的是派生类实现的析构函数而不是基类的析构函数
     virtual ~Runnable(){}
 
-    virtual void run() = 0; //=0代表纯虚函数，派生类必须重写，否则也是个虚基类
+    virtual void run() = 0; // =0代表纯虚函数，派生类必须重写，否则也是个虚基类
 };
 
 /**

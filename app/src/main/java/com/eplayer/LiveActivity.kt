@@ -27,7 +27,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         }
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         supportActionBar!!.hide()
         initView()
         mediaPublisher = MediaPublisher(this, camera_surface, rtmpUrl)

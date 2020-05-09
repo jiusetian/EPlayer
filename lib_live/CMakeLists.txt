@@ -44,7 +44,11 @@ set_target_properties(x264
         ${distribution_DIR}/armeabi-v7a/libx264.a)
 
 #添加头文件
-include_directories(src/main/jni/include)
+include_directories(
+        src/main/jni/include
+        src/main/jni/cpp/common
+        src/main/jni/cpp/header
+)
 #target_include_directories(src/main/jni/include)
 
 find_library(

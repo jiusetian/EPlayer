@@ -16,7 +16,7 @@ GLESDevice::GLESDevice() {
     mHaveEGLSurface = false;
     mHaveEGlContext = false;
     mHasSurface = false;
-
+    // 分配纹理数据的内存
     mVideoTexture = (Texture *) malloc(sizeof(Texture));
     memset(mVideoTexture, 0, sizeof(Texture));
     mRenderNode = NULL;
@@ -36,6 +36,8 @@ GLESDevice::GLESDevice() {
 GLESDevice::~GLESDevice() {
     mMutex.lock();
     terminate();
+    free(mVideoTexture);
+    delete nodeList;
     mMutex.unlock();
 }
 
@@ -91,11 +93,15 @@ void GLESDevice::terminate(bool releaseContext) {
 
     // 销毁egl上下文
     if (eglHelper->getEglContext() != EGL_NO_CONTEXT && releaseContext) {
-        if (mRenderNode) {
+        if (mRenderNode) { //释放输入节点
             mRenderNode->destroy();
             delete mRenderNode;
         }
         eglHelper->release();
+        delete eglHelper;
+        if (mWindow) {
+            delete mWindow;
+        }
         mHaveEGlContext = false;
     }
 }
@@ -133,8 +139,8 @@ void GLESDevice::setWatermark(uint8_t *watermarkPixel, size_t length, GLint widt
     }
     // 创建水印滤镜
     GLWatermarkFilter *watermarkFilter = new GLWatermarkFilter();
-    watermarkFilter->setTextureSize(mVideoTexture->width,mVideoTexture->height);
-    watermarkFilter->setDisplaySize(mSurfaceWidth,mSurfaceHeight);
+    watermarkFilter->setTextureSize(mVideoTexture->width, mVideoTexture->height);
+    watermarkFilter->setDisplaySize(mSurfaceWidth, mSurfaceHeight);
     watermarkFilter->setWatermark(watermarkPixel, length, width, height, scale, location);
     node->changeFilter(watermarkFilter);
     nodeList->addNode(node); // 添加水印节点
