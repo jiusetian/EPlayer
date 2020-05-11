@@ -57,22 +57,20 @@ void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLi
     mWatermarkWidth = width;
     mWatermarkHeight = height;
     //mWatermarkPixel = nullptr;
-    // 首先分配内存空间
+    // 改变水印的时候，要释放原来的像素数据
+    if (mWatermarkPixel != nullptr) {
+        free(mWatermarkPixel);
+        mWatermarkPixel = NULL;
+    }
+    // 分配内存空间
     mWatermarkPixel = new uint8_t[length];
+    // 将参数中的水印数据复制给mWatermarkPixel，这里为什么要选择复制数据，因为如果你只是把当前指针指向函数传参过来的内存，这个内存是函数外的内存
+    // 如果在函数外改变了这个内存，那么当前指针的指向也会发生变化，这样就造成了很大不确定性
     memcpy(mWatermarkPixel, watermarkPixel, length);
     GLfloat xScale = scale, yScale = scale;
-//    LOGD("显示：%d,%d",displayWidth,displayHeight);
-//    if (displayWidth > displayHeight) {
-//        yScale = scale * (float)displayHeight / displayWidth;
-//        xScale = scale;
-//    } else {
-//        yScale = scale;
-//        xScale = scale * (float)displayHeight / displayWidth;
-//    }
-//    LOGD("缩放：%f,%f",xScale,yScale);
+
     // 计算水印的缩放矩阵
     // location的意义：0左上，1左下，2右上，3右下
-
     if (location == 0) {
         v_mat4 = glm::translate(v_mat4, glm::vec3(-0.0f, -0.0f, 0.0f));
     } else if (location == 1) {

@@ -247,7 +247,7 @@ void EMediaPlayer_setWatermark(JNIEnv *env, jobject thiz, jbyteArray data_,
     jbyte *data = env->GetByteArrayElements(data_, NULL);
 
     mp->setWatermark((uint8_t *) data, (size_t) dataLen, watermarkWidth, watermarkHeight, scale, location);
-
+    // 释放
     env->ReleaseByteArrayElements(data_, data, 0);
 }
 
