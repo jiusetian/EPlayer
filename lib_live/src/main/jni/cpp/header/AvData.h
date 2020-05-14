@@ -8,7 +8,7 @@
 // av数据的结构体
 typedef struct AvData {
     int len;
-    u_int8_t *data;
+    uint8_t *data;
     int type;
 } AvData;
 

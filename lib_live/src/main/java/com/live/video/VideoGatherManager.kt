@@ -91,10 +91,8 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private fun initVideo() {
         initConfig() // 初始化相关配置
         LogUtil.d("初始化视频相关")
-        // 初始化，为操作需要分配空间
-        LiveNativeManager.init(LiveConfig.cameraWidth, LiveConfig.cameraHeight, scaleWidth, scaleHeight)
         // 初始化视频编码
-        LiveNativeManager.encoderVideoinit(scaleWidth, scaleHeight, scaleWidth, scaleHeight)
+        LiveNativeManager.encoderVideoinit(LiveConfig.cameraWidth, LiveConfig.cameraHeight, scaleWidth, scaleHeight)
     }
 
     private fun releaseJniVideo() {
@@ -145,7 +143,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                         orientation,
                         orientation == 270
                     )
-                } else { //竖屏
+                } else { //竖屏，90°或270°
                     LiveNativeManager.compressYUV(
                         srcData,
                         LiveConfig.cameraWidth,

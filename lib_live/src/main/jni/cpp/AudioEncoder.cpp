@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include "header/AndroidLog.h"
 #include "header/AudioEncoder.h"
+
 AudioEncoder::AudioEncoder(int channels, int sampleRate, int bitRate) {
     this->channels = channels;
     this->sampleRate = sampleRate;
@@ -19,19 +20,84 @@ void AudioEncoder::start() {
     MediaEncoder::start();
 
     // 创建编码线程
-    if(!encoderThread){
-        encoderThread=new Thread(this);
+    if (!encoderThread) {
+        encoderThread = new Thread(this);
         encoderThread->start();
     }
 }
 
-void AudioEncoder::stop() {}
+void AudioEncoder::stop() {
+    MediaEncoder::stop();
 
-void AudioEncoder::flush() {}
+    // 删除线程对象
+    if(encoderThread){
+        encoderThread->join();
+        delete encoderThread;
+        encoderThread=NULL;
+    }
+}
 
+void AudioEncoder::flush() {
+    MediaEncoder::flush();
+}
+
+void AudioEncoder::setEncodeCallback(EncodeCallback *encodeCallback) {
+    callback=encodeCallback;
+}
+
+// 线程执行体
+void AudioEncoder::run() {
+    // 开始编码音频数据
+    startEncodeAudio();
+}
+
+int AudioEncoder::startEncodeAudio() {
+
+    uint8_t  outBuffer[1024];
+    int outLen = 1024;
+    AvData *data;
+    int ret = 0; // 返回结果
+
+    for (;;) {
+        // 停止
+        if (abortRequest) {
+            ret = -1;
+            break;
+        }
+
+        // 暂停
+        if (pauseRequest) {
+            continue;
+        }
+        // 获取原始av数据
+        if (avQueue->getData(data) < 0) {
+            ret = -1;
+            break;
+        }
+
+        // 编码
+        int validLength = encodeAudio(data->data, data->len, outBuffer, outLen);
+
+        if (validLength > 0) {
+            // 复制编码结果
+            uint8_t *cpy = new uint8_t[validLength];
+            memcpy(cpy, outBuffer, validLength);
+            // 回调编码结果
+            if(callback!= nullptr){
+                callback(cpy, validLength);
+            }
+        }
+    }
+    // 释放avdata
+    free(data);
+
+    return ret;
+}
+
+// 初始化编码相关参数
 int AudioEncoder::init() {
 
-    //打开AAC音频编码引擎，创建AAC编码句柄
+    // 打开AAC音频编码引擎，创建AAC编码句柄
     if (aacEncOpen(&handle, 0, channels) != AACENC_OK) {
         LOGE("打开fdkaac编码器失败");
         return -1;
@@ -43,31 +109,31 @@ int AudioEncoder::init() {
         return -1;
     }
 
-    //设置采样率
+    // 设置采样率
     if (aacEncoder_SetParam(handle, AACENC_SAMPLERATE, sampleRate) != AACENC_OK) {
         LOGE("音频采样率设置失败");
         return -1;
     }
 
-    //设置为双通道
+    // 设置为双通道
     if (aacEncoder_SetParam(handle, AACENC_CHANNELMODE, MODE_2) != AACENC_OK) {
         LOGE("音频通道设置失败");
         return -1;
     }
 
-    //音频数据的通道顺序，设置为WAVE文件格式的通道顺序
+    // 音频数据的通道顺序，设置为WAVE文件格式的通道顺序
     if (aacEncoder_SetParam(handle, AACENC_CHANNELORDER, 1) != AACENC_OK) {
         LOGE("Unable to set the wav channel order");
         return -1;
     }
 
-    //比特率
+    // 比特率
     if (aacEncoder_SetParam(handle, AACENC_BITRATE, bitRate) != AACENC_OK) {
         LOGE("音频比特率设置失败");
         return -1;
     }
 
-    //数据传输流格式 2: ADTS
+    // 数据传输流格式 2: ADTS
     if (aacEncoder_SetParam(handle, AACENC_TRANSMUX, TT_MP4_ADTS) != AACENC_OK) {
         LOGE("音频传输流格式设置失败");
         return -1;
@@ -78,36 +144,25 @@ int AudioEncoder::init() {
         return -1;
     }
 
-    //初始化
+    // 初始化
     if (aacEncEncode(handle, NULL, NULL, NULL, NULL) != AACENC_OK) {
         LOGE("Unable to initialize the encoder\n");
         return -1;
     }
 
-    //aac编码器信息
+    // aac编码器信息
     AACENC_InfoStruct info = {0}; //结构体的初始化
     if (aacEncInfo(handle, &info) != AACENC_OK) {
         LOGE("Unable to get the encoder info\n");
         return -1;
     }
 
-    //返回数据给上层，表示每次传递多少个数据最佳，这样encode效率最高，frameLength是每帧每个channel的采样点数
+    // 返回数据给上层，表示每次传递多少个数据最佳，这样encode效率最高，frameLength是每帧每个channel的采样点数
     int inputSize = channels * 2 * info.frameLength;
     LOGI("inputSize = %d", inputSize);
 
     return inputSize; // 返回每次解码最合适的大小
 }
-
-// 线程执行体
-void AudioEncoder::run() {
-    startEncodeAudio();
-}
-
-int AudioEncoder::startEncodeAudio() {
-
-
-}
-
 
 /**
  * Fdk-AAC库压缩裸音频PCM数据，转化为AAC，这里为什么用fdk-aac，这个库相比普通的aac库，压缩效率更高
@@ -117,7 +172,7 @@ int AudioEncoder::startEncodeAudio() {
  * @param outlength
  * @return
  */
-int AudioEncoder::encodeAudio(unsigned char *inBytes, int length, unsigned char *outBytes, int outlength) {
+int AudioEncoder::encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, int outlength) {
     void *inptr, *outptr;
     AACENC_BufDesc in_buf = {0}; // 描述用以编码的输入或输出参数
     int in_identifier = IN_AUDIO_DATA;
@@ -178,15 +233,15 @@ int AudioEncoder::encodePCMAudioFile() {
     FILE *out, *inFile;
     int format = 1, sample_rate = 44100, bits_per_sample = 16;
     int input_size;
-    uint8_t* input_buf;
-    int16_t* convert_buf;
+    uint8_t *input_buf;
+    int16_t *convert_buf;
     int aot = 2;
     int afterburner = 1;
     int eld_sbr = 0;
     int vbr = 0;
     HANDLE_AACENCODER handle;
     CHANNEL_MODE mode;
-    AACENC_InfoStruct info = { 0 };
+    AACENC_InfoStruct info = {0};
     int channels = 2;
 
     pcmfile = "/sdcard/789.pcm";
@@ -206,12 +261,24 @@ int AudioEncoder::encodePCMAudioFile() {
         return 1;
     }
     switch (channels) {
-        case 1: mode = MODE_1;       break;
-        case 2: mode = MODE_2;       break;
-        case 3: mode = MODE_1_2;     break;
-        case 4: mode = MODE_1_2_1;   break;
-        case 5: mode = MODE_1_2_2;   break;
-        case 6: mode = MODE_1_2_2_1; break;
+        case 1:
+            mode = MODE_1;
+            break;
+        case 2:
+            mode = MODE_2;
+            break;
+        case 3:
+            mode = MODE_1_2;
+            break;
+        case 4:
+            mode = MODE_1_2_1;
+            break;
+        case 5:
+            mode = MODE_1_2_2;
+            break;
+        case 6:
+            mode = MODE_1_2_2_1;
+            break;
         default:
             LOGI("Unsupported WAV channels %d\n", channels);
             return 1;
@@ -276,15 +343,15 @@ int AudioEncoder::encodePCMAudioFile() {
         return 1;
     }
 
-    input_size = channels*2*info.frameLength;
-    input_buf = (uint8_t*) malloc(input_size);
-    convert_buf = (int16_t*) malloc(input_size);
+    input_size = channels * 2 * info.frameLength;
+    input_buf = (uint8_t *) malloc(input_size);
+    convert_buf = (int16_t *) malloc(input_size);
     LOGI("input_size %d", input_size);
 
     while (1) {
-        AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
-        AACENC_InArgs in_args = { 0 };
-        AACENC_OutArgs out_args = { 0 };
+        AACENC_BufDesc in_buf = {0}, out_buf = {0};
+        AACENC_InArgs in_args = {0};
+        AACENC_OutArgs out_args = {0};
         int in_identifier = IN_AUDIO_DATA;
         int in_size, in_elem_size;
         int out_identifier = OUT_BITSTREAM_DATA;
@@ -303,7 +370,7 @@ int AudioEncoder::encodePCMAudioFile() {
             in_size = read;
             in_elem_size = 2;
 
-            in_args.numInSamples = read/2;
+            in_args.numInSamples = read / 2;
             in_buf.numBufs = 1;
             in_buf.bufs = &in_ptr;
             in_buf.bufferIdentifiers = &in_identifier;

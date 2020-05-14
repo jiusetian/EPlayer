@@ -11,8 +11,6 @@ public final class LiveNativeManager {
         System.loadLibrary("live-lib");
     }
 
-    public static native int init(int width, int height, int outWidth, int outHeight);
-
     public static native int release();
 
     public static native int yuvI420ToNV21(byte[] i420Src, byte[] nv21Src, int width, int height);
@@ -48,13 +46,13 @@ public final class LiveNativeManager {
 
     /**
      * 编码视频数据准备工作
+     * @param src_width
+     * @param src_height
      * @param in_width
      * @param in_height
-     * @param out_width
-     * @param out_height
      * @return
      */
-    public static native int encoderVideoinit(int in_width, int in_height, int out_width, int out_height);
+    public static native int encoderVideoinit( int src_width, int src_height,int in_width, int in_height);
 
     /**
      * 编码视频数据接口

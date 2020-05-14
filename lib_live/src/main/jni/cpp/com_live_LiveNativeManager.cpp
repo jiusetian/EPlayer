@@ -18,6 +18,9 @@ VideoEncoder *videoEncoder;
 AudioEncoder *audioEncoder;
 RtmpLivePush *rtmpLivePush;
 
+// 声明几个回调函数
+extern void audioEncodeCallback(uint8_t *data ,int dataLen);
+
 static JavaVM *jvm = NULL;
 
 //在库加载时执行
@@ -26,18 +29,20 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
-//在卸载库时执行
+// 在卸载库时执行
 void JNI_OnUnload(JavaVM *vm, void *reserved) {
     jvm = NULL;
 }
 
-//为中间操作的需要分配空间
+
+// 为中间操作的需要分配空间
 void init(jint width, jint height, jint dst_width, jint dst_height) {
-    //i420临时数据缓存空间
+    // i420临时原始数据的缓存
     temp_i420_data = static_cast<jbyte *>(malloc(sizeof(jbyte) * width * height * 3 / 2));
-    //i420临时缩小数据的缓存
+    // i420临时压缩数据的缓存
     temp_i420_data_scale = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
     temp_i420_data_rotate = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
+
 }
 
 /**
@@ -169,13 +174,6 @@ void nv21ToI420(jbyte *src_nv21_data, jint width, jint height, jbyte *src_i420_d
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_init(JNIEnv *env, jclass type, jint width, jint height, jint outWidth, jint outHeight) {
-    init(width, height, outWidth, outHeight);
-    return 0;
-}
-
-extern "C"
-JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_release(JNIEnv *env, jclass type) {
     LOGD("调用了LiveNativeManager_release");
     free(temp_i420_data);
@@ -230,19 +228,19 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *dst = env->GetByteArrayElements(dst_, NULL);
 
-    //nv21转化为i420(标准YUV420P数据) 这个temp_i420_data大小是和Src_data是一样的，是原始YUV数据的大小
+    // nv21转化为i420(标准YUV420P数据) 这个temp_i420_data大小是和Src_data是一样的，是原始YUV数据的大小
     nv21ToI420(src, width, height, temp_i420_data);
-    //进行缩放的操作，这个缩放，会把数据压缩
+    // 进行缩放的操作，这个缩放，会把数据压缩
     scaleI420(temp_i420_data, width, height, temp_i420_data_scale, dst_width, dst_height, mode);
 
-    //如果是前置摄像头，进行镜像操作
+    // 如果是前置摄像头，进行镜像操作
     if (isMirror) {
-        //进行旋转的操作
+        // 进行旋转的操作
         rotateI420(temp_i420_data_scale, dst_width, dst_height, temp_i420_data_rotate, degree);
-        //因为旋转的角度都是90和270，那后面的数据width和height是相反的
+        // 因为旋转的角度都是90和270，那后面的数据width和height是相反的
         mirrorI420(temp_i420_data_rotate, dst_height, dst_width, dst);
     } else {
-        //进行旋转的操作
+        // 进行旋转的操作
         rotateI420(temp_i420_data_scale, dst_width, dst_height, dst, degree);
     }
 
@@ -293,15 +291,15 @@ Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint in_width, jint in_height,
-                                                 jint out_width,
-                                                 jint out_height) {
+Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint src_width,
+                                                 jint src_height,jint in_width, jint in_height) {
+    // 初始化临时空间
+    init(src_width,src_height,in_width,in_height);
+
     videoEncoder = new VideoEncoder();
     //设置相关参数
     videoEncoder->setInWidth(in_width);
     videoEncoder->setInHeight(in_height);
-    videoEncoder->setOutWidth(out_width);
-    videoEncoder->setOutHeight(out_height);
     videoEncoder->setBitrate(1200 * 1000); //设置比特率
     videoEncoder->open();
     return 0;
@@ -317,7 +315,7 @@ Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jby
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
     jint *outFramewSize = env->GetIntArrayElements(outFramewSize_, NULL);
 
-    int numNals = videoEncoder->encodeFrame((char *) srcFrame, frameSize, fps, (char *) dstFrame, outFramewSize);
+    int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (char *) dstFrame, outFramewSize);
 
     env->ReleaseByteArrayElements(srcFrame_, srcFrame, 0);
     env->ReleaseByteArrayElements(dstFrame_, dstFrame, 0);
@@ -332,9 +330,9 @@ Java_com_live_LiveNativeManager_encoderAudioInit(JNIEnv *env, jclass type, jint 
                                                  jint bitRate) {
     audioEncoder = new AudioEncoder(channels, sampleRate, bitRate);
     int value = audioEncoder->init();
+    audioEncoder->setEncodeCallback(&audioEncodeCallback);
     return value;
 }
-
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -462,4 +460,15 @@ Java_com_live_LiveNativeManager_releaseAudio(JNIEnv *env, jclass type) {
     }
     return 0;
 }
+
+/**
+ * 音频编码结果的回调函数
+ * @param data
+ * @param dataLen
+ */
+void audioEncodeCallback(uint8_t *data ,int dataLen){
+    LOGD("音频回调函数");
+}
+
+
 

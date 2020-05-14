@@ -15,7 +15,7 @@ import java.net.SocketException
 class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.RtmpListener {
 
     companion object {
-        private const val rtmpUrl = "rtmp://192.168.3.9:1935/live/home"
+        private const val rtmpUrl = "rtmp://192.168.3.19:1935/live/home"
     }
 
     private lateinit var mediaPublisher: MediaPublisher

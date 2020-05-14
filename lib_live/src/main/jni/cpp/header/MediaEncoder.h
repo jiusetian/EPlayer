@@ -21,12 +21,17 @@ public:
 
     virtual void flush();
 
+    virtual void pause();
+
+    virtual void resume();
+
     virtual void run(); // 虚函数代表子类可以重写
 
 protected:
     Mutex mutex;
     Condition condition;
     bool abortRequest; // 停止
+    bool pauseRequest=false; // 暂停
 
     AVQueue *avQueue;
 };

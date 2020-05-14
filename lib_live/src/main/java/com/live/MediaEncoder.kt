@@ -258,7 +258,7 @@ class MediaEncoder {
                     // 编码成功
                     if (VALIDLENGTH > 0) {
                         val encoderData = ByteArray(VALIDLENGTH)
-                        // 复制数据
+                        // 复制数据，因为outBuffer要重新赋值的，所以要复制
                         System.arraycopy(outBuffer, 0, encoderData, 0, VALIDLENGTH)
                         // 编码后，把数据抛给 rtmp推流
                         mediaEncoderCallback?.let { it.receiveEncoderAudioData(encoderData, VALIDLENGTH) }

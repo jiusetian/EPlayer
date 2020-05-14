@@ -4,7 +4,6 @@
 #include "MediaEncoder.h"
 
 MediaEncoder::MediaEncoder() {
-
     avQueue = new AVQueue();
 }
 
@@ -16,6 +15,20 @@ MediaEncoder::~MediaEncoder() {
         delete avQueue;
         avQueue = NULL;
     }
+    mutex.unlock();
+}
+
+void MediaEncoder::pause() {
+    mutex.lock();
+    pauseRequest=true;
+    condition.signal();
+    mutex.unlock();
+}
+
+void MediaEncoder::resume() {
+    mutex.lock();
+    pauseRequest=false;
+    condition.signal();
     mutex.unlock();
 }
 

@@ -65,7 +65,7 @@ void GLWatermarkFilter::setWatermark(uint8_t *watermarkPixel, size_t length, GLi
     // 分配内存空间
     mWatermarkPixel = new uint8_t[length];
     // 将参数中的水印数据复制给mWatermarkPixel，这里为什么要选择复制数据，因为如果你只是把当前指针指向函数传参过来的内存，这个内存是函数外的内存
-    // 如果在函数外改变了这个内存，那么当前指针的指向也会发生变化，这样就造成了很大不确定性
+    // 如果在函数外改变了这个内存，那么当前指针的指向也会发生变化，这样会造成了很大不确定性
     memcpy(mWatermarkPixel, watermarkPixel, length);
     GLfloat xScale = scale, yScale = scale;
 

@@ -6,19 +6,18 @@
 #define EPLAYER_VIDEOENCODER_H
 
 #include <stdio.h>
+#include "MediaEncoder.h"
 
 extern "C" {
 #include <libx264/x264.h>
 }
 
-class VideoEncoder{
+class VideoEncoder :public MediaEncoder{
 
 private:
-    //
+    // 视频宽高
     int in_width;
     int in_height;
-    int out_width;
-    int out_height;
 
     int fps; //帧率
     int bitrate; //比特率
@@ -42,13 +41,28 @@ private:
     FILE *out1;
     FILE *out2;
 
+    Thread *encoderThread; // 编码线程
+
+protected:
+    // 线程执行函数
+    void run() override;
+
+    void start() override;
+
+    void stop() override;
+
+    void flush() override;
+
+    // 开始编码视频
+    void startEncodeVideo();
+
 public:
     VideoEncoder();
     ~VideoEncoder();
 
     bool open();
     /* encode the given data */
-    int encodeFrame(char* inBytes, int frameSize, int pts, char* outBytes, int *outFrameSize);
+    int encodeFrame(uint8_t * inBytes, int frameSize, int pts, char* outBytes, int *outFrameSize);
     /* close the encoder and file, frees all memory */
     bool close();
     /* validates if all params are set correctly, like width,height, etc.. */
@@ -64,10 +78,6 @@ public:
     void setInWidth(int inWidth);
     int getNumNals() const;
     void setNumNals(int numNals);
-    int getOutHeight() const;
-    void setOutHeight(int outHeight);
-    int getOutWidth() const;
-    void setOutWidth(int outWidth);
     int getBitrate() const;
     void setBitrate(int bitrate);
     int getSliceMaxSize() const;
