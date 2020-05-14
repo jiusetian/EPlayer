@@ -205,7 +205,7 @@ class MediaEncoder {
                         segment.forEach { totalLength += it }
                         // 编码后的h264数据
                         val encoderData = ByteArray(totalLength)
-                        // outbuffer存储的是编码后的h264数据，在这里做个拷贝
+                        // outbuffer存储的是编码后的h264数据，做个拷贝
                         System.arraycopy(outBuffer, 0, encoderData, 0, encoderData.size)
                         mediaEncoderCallback?.let { it.receiveEncoderVideoData(encoderData, encoderData.size, segment) }
                         // 我们可以把数据在java层保存到文件中，看看我们编码的h264数据是否能播放，h264裸数据可以在VLC播放器中播放

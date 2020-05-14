@@ -15,7 +15,7 @@ extern "C" {
 class AudioEncoder : public MediaEncoder {
 
     // 编码结果的回调函数
-    typedef void (EncodeCallback)(uint8_t *data, int dataLen);
+    typedef void (EncoderCallback)(uint8_t *data, int dataLen);
 
 protected:
     // 线程执行函数
@@ -36,7 +36,7 @@ private:
     Thread *encoderThread; // 编码线程
 
     // 回调函数
-    EncodeCallback *callback= nullptr;
+    EncoderCallback *callback= nullptr;
 
 
 public:
@@ -45,7 +45,7 @@ public:
     ~AudioEncoder();
 
     // 设置回调函数
-    void setEncodeCallback(EncodeCallback *encodeCallback);
+    void setEncoderCallback(EncoderCallback *encodeCallback);
 
     int init();
 
@@ -53,7 +53,7 @@ public:
     int encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, int outlength);
 
     // 开始音频编码
-    int startEncodeAudio();
+    int excuteEncodeAudio();
 
     int encodeWAVAudioFile();
 

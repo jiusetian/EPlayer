@@ -63,7 +63,7 @@ private:
     bool pauseRequest=false; // 暂停
     AVQueue *avQueue; // 存储原始视频数据
     Thread *yuvThread; // yuv处理线程
-    YuvCallback  yuvCallback; // 回调函数
+    YuvCallback  *yuvCallback; // 回调函数
 
     // 临时空间
     uint8_t *temp_i420_data;

@@ -25,6 +25,8 @@ public:
 
     virtual void resume();
 
+    virtual void pushAvData(AvData data);
+
     virtual void run(); // 虚函数代表子类可以重写
 
 protected:

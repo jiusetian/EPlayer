@@ -41,17 +41,17 @@ void AudioEncoder::flush() {
     MediaEncoder::flush();
 }
 
-void AudioEncoder::setEncodeCallback(EncodeCallback *encodeCallback) {
+void AudioEncoder::setEncoderCallback(EncoderCallback *encodeCallback) {
     callback=encodeCallback;
 }
 
 // 线程执行体
 void AudioEncoder::run() {
     // 开始编码音频数据
-    startEncodeAudio();
+    excuteEncodeAudio();
 }
 
-int AudioEncoder::startEncodeAudio() {
+int AudioEncoder::excuteEncodeAudio() {
 
     uint8_t  outBuffer[1024];
     int outLen = 1024;

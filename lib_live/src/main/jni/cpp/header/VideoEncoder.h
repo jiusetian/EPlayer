@@ -14,6 +14,8 @@ extern "C" {
 
 class VideoEncoder :public MediaEncoder{
 
+    typedef void (videoEncoderCallback)(uint8_t* data,int len,int nalNum,int* nalsSize);
+
 private:
     // 视频宽高
     int in_width;
@@ -42,6 +44,7 @@ private:
     FILE *out2;
 
     Thread *encoderThread; // 编码线程
+    videoEncoderCallback* callback;
 
 protected:
     // 线程执行函数
@@ -54,7 +57,9 @@ protected:
     void flush() override;
 
     // 开始编码视频
-    void startEncodeVideo();
+    void excuteEncodeVideo();
+
+    void setVideoEncoderCallback(videoEncoderCallback* callback);
 
 public:
     VideoEncoder();
@@ -62,9 +67,9 @@ public:
 
     bool open();
     /* encode the given data */
-    int encodeFrame(uint8_t * inBytes, int frameSize, int pts, char* outBytes, int *outFrameSize);
+    int encodeFrame(uint8_t * inBytes, int frameSize, int pts, uint8_t * outBytes, int *outFrameSize);
     /* close the encoder and file, frees all memory */
-    bool close();
+    bool closeEncoder();
     /* validates if all params are set correctly, like width,height, etc.. */
     bool validateSettings();
     /* sets the x264 params */

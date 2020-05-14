@@ -2,6 +2,7 @@
 // Created by lxr on 2019/9/19.
 //
 #include <cstring>
+#include <cstdlib>
 #include "header/VideoEncoder.h"
 #include "header/AndroidLog.h"
 // 供测试文件使用,测试的时候打开
@@ -22,8 +23,7 @@ VideoEncoder::VideoEncoder() : in_width(0), in_height(0), fps(0), encoder(NULL),
 }
 
 VideoEncoder::~VideoEncoder() {
-    LOGD("调用了VideoEncoder的析构函数");
-    close();
+    closeEncoder();
 }
 
 void VideoEncoder::start() {
@@ -51,12 +51,54 @@ void VideoEncoder::stop() {
     }
 }
 
+// 线程的执行
 void VideoEncoder::run() {
-    startEncodeVideo();
+    excuteEncodeVideo();
 }
 
-void VideoEncoder::startEncodeVideo() {
+void VideoEncoder::setVideoEncoderCallback(videoEncoderCallback *callback) {
+    this->callback = callback;
+}
 
+void VideoEncoder::excuteEncodeVideo() {
+
+    uint8_t *outBytes; // 输出数据
+    int nalSizes[10]; // 保存输出数据 nal的大小
+    AvData *data;
+    int pts = 0;
+
+    for (;;) {
+        // 停止
+        if (abortRequest) {
+            break;
+        }
+
+        // 暂停
+        if (pauseRequest) {
+            continue;
+        }
+        // 获取原始av数据
+        if (avQueue->getData(data) < 0) {
+            break;
+        }
+
+        // 编码
+        int nalNum = encodeFrame(data->data, data->len, ++pts, outBytes, nalSizes);
+        int totalLen; // 总长度
+        int temNalSizes[nalNum]; // 保存nal长度
+        uint8_t *cpy;
+        for (int i = 0; i < nalNum; i++) {
+            totalLen += nalSizes[i];
+            temNalSizes[i] = nalSizes[i];
+        }
+        memcpy(cpy, outBytes, totalLen);
+        // 回调
+        callback(cpy, totalLen, nalNum, temNalSizes);
+    }
+
+    // 释放
+    free(outBytes);
+    free(data);
 }
 
 
@@ -84,7 +126,7 @@ bool VideoEncoder::open() {
 
     if (!encoder) {
         LOGE("不能打开编码器");
-        close(); //关闭
+        closeEncoder(); //关闭
         return false;
     }
 
@@ -102,12 +144,12 @@ bool VideoEncoder::open() {
  * 编码一帧图像数据
  * @param inBytes 输入的要编码的数据
  * @param frameSize 编码数据的大小
- * @param pts 第几帧
+ * @param pts 第几帧，从1开始计算，类似 1、2、3、.....
  * @param outBytes 保存编码后的输出数据
- * @param outFrameSize 编码后输出数据的大小
+ * @param outFrameSize 输出编码后数据的大小
  * @return 返回编码后的nal单元的数量
  */
-int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, char *outBytes, int *outFrameSize) {
+int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t *outBytes, int *outFrameSize) {
     // YUV420数据的大小
     int i420_y_size = in_width * in_height;
     int i420_u_size = (in_width >> 1) * (in_height >> 1);
@@ -318,7 +360,7 @@ void VideoEncoder::setParams2() {
     x264_param_apply_profile(&params, "main");
 }
 
-bool VideoEncoder::close() {
+bool VideoEncoder::closeEncoder() {
     LOGD("调用了videoencoder的close函数");
     if (encoder) {
         x264_picture_clean(&pic_in);

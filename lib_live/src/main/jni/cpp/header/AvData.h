@@ -10,6 +10,8 @@ typedef struct AvData {
     int len;
     uint8_t *data;
     int type;
+    int nalNums; // nal数量
+    int *nalSizes; // 保存nal的大小
 } AvData;
 
 

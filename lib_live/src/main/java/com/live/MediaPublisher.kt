@@ -191,7 +191,6 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         var sps: ByteArray = byteArrayOf()
         var pps: ByteArray
         var haveCopy = 0
-
         // segment为 C++传递上来的数组，当为SPS，PPS的时候，视频 NALU数组大于1，其它时候等于1
         segment.forEach {
 

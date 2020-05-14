@@ -9,17 +9,20 @@
 #include "header/VideoEncoder.h"
 #include "header/AudioEncoder.h"
 #include "header/RtmpLivePush.h"
+#include "YuvProcess.h"
 
 jbyte *temp_i420_data;
 jbyte *temp_i420_data_scale;
 jbyte *temp_i420_data_rotate;
 
+YuvProcess *yuvProcess;
 VideoEncoder *videoEncoder;
 AudioEncoder *audioEncoder;
 RtmpLivePush *rtmpLivePush;
 
 // 声明几个回调函数
-extern void audioEncodeCallback(uint8_t *data ,int dataLen);
+extern void audioEncoderCallback(uint8_t *data, int dataLen);
+extern void yuvProcessCallback(uint8_t *data, int dataLen);
 
 static JavaVM *jvm = NULL;
 
@@ -42,7 +45,6 @@ void init(jint width, jint height, jint dst_width, jint dst_height) {
     // i420临时压缩数据的缓存
     temp_i420_data_scale = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
     temp_i420_data_rotate = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
-
 }
 
 /**
@@ -292,9 +294,9 @@ Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint src_width,
-                                                 jint src_height,jint in_width, jint in_height) {
+                                                 jint src_height, jint in_width, jint in_height) {
     // 初始化临时空间
-    init(src_width,src_height,in_width,in_height);
+    init(src_width, src_height, in_width, in_height);
 
     videoEncoder = new VideoEncoder();
     //设置相关参数
@@ -315,7 +317,7 @@ Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jby
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
     jint *outFramewSize = env->GetIntArrayElements(outFramewSize_, NULL);
 
-    int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (char *) dstFrame, outFramewSize);
+    int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (unsigned char *) dstFrame, outFramewSize);
 
     env->ReleaseByteArrayElements(srcFrame_, srcFrame, 0);
     env->ReleaseByteArrayElements(dstFrame_, dstFrame, 0);
@@ -330,7 +332,7 @@ Java_com_live_LiveNativeManager_encoderAudioInit(JNIEnv *env, jclass type, jint 
                                                  jint bitRate) {
     audioEncoder = new AudioEncoder(channels, sampleRate, bitRate);
     int value = audioEncoder->init();
-    audioEncoder->setEncodeCallback(&audioEncodeCallback);
+    audioEncoder->setEncoderCallback(&audioEncoderCallback);
     return value;
 }
 
@@ -466,9 +468,25 @@ Java_com_live_LiveNativeManager_releaseAudio(JNIEnv *env, jclass type) {
  * @param data
  * @param dataLen
  */
-void audioEncodeCallback(uint8_t *data ,int dataLen){
+void audioEncoderCallback(uint8_t *data, int dataLen) {
     LOGD("音频回调函数");
 }
+
+/**
+ * YUV数据处理回调
+ * @param data
+ * @param dataLen
+ */
+void yuvProcessCallback(uint8_t *data, int dataLen) {
+    AvData avData;
+    avData.data=data;
+    avData.len=dataLen;
+    // 保存
+    if (videoEncoder){
+        videoEncoder->pushAvData(avData);
+    }
+}
+
 
 
 
