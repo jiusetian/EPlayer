@@ -21,12 +21,6 @@ protected:
     // 线程执行函数
     void run() override;
 
-    void start() override;
-
-    void stop() override;
-
-    void flush() override;
-
 private:
     int sampleRate;
     int channels;
@@ -48,6 +42,15 @@ public:
     void setEncoderCallback(EncoderCallback *encodeCallback);
 
     int init();
+
+    void start() override;
+
+    void stop() override;
+
+    void flush() override;
+
+    void putAudioData(uint8_t* data,int len);
+
 
     // 其实 uint8_t和 unsigned char 是一样的
     int encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, int outlength);

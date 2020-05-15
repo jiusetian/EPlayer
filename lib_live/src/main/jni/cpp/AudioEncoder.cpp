@@ -26,14 +26,21 @@ void AudioEncoder::start() {
     }
 }
 
+void AudioEncoder::putAudioData(uint8_t *data, int len) {
+    AvData avData;
+    avData.data = data;
+    avData.len = len;
+    pushAvData(avData);
+}
+
 void AudioEncoder::stop() {
     MediaEncoder::stop();
 
     // 删除线程对象
-    if(encoderThread){
+    if (encoderThread) {
         encoderThread->join();
         delete encoderThread;
-        encoderThread=NULL;
+        encoderThread = NULL;
     }
 }
 
@@ -42,7 +49,7 @@ void AudioEncoder::flush() {
 }
 
 void AudioEncoder::setEncoderCallback(EncoderCallback *encodeCallback) {
-    callback=encodeCallback;
+    callback = encodeCallback;
 }
 
 // 线程执行体
@@ -53,7 +60,7 @@ void AudioEncoder::run() {
 
 int AudioEncoder::excuteEncodeAudio() {
 
-    uint8_t  outBuffer[1024];
+    uint8_t outBuffer[1024];
     int outLen = 1024;
     AvData *data;
     int ret = 0; // 返回结果
@@ -83,7 +90,7 @@ int AudioEncoder::excuteEncodeAudio() {
             uint8_t *cpy = new uint8_t[validLength];
             memcpy(cpy, outBuffer, validLength);
             // 回调编码结果
-            if(callback!= nullptr){
+            if (callback != nullptr) {
                 callback(cpy, validLength);
             }
         }
@@ -159,7 +166,6 @@ int AudioEncoder::init() {
 
     // 返回数据给上层，表示每次传递多少个数据最佳，这样encode效率最高，frameLength是每帧每个channel的采样点数
     int inputSize = channels * 2 * info.frameLength;
-    LOGI("inputSize = %d", inputSize);
 
     return inputSize; // 返回每次解码最合适的大小
 }

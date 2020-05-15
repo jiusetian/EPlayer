@@ -20,6 +20,8 @@ public:
 
     void run() override;
 
+    void putAvData(uint8_t *data, int len);
+
     void init();
 
     void start();
@@ -47,10 +49,6 @@ public:
 
     void setScaleWH(int width, int height);
 
-    void setCropWH(int width, int height);
-
-    void setStartXY(int cropStartX, int cropStartY);
-
     void setDegress(int degress);
 
     void setYuvCallback(YuvCallback callback);
@@ -61,7 +59,7 @@ private:
     Condition condition;
     bool abortRequest; // 停止
     bool pauseRequest=false; // 暂停
-    AVQueue *avQueue; // 存储原始视频数据
+    AVQueue *avQueue; // 存储视频数据
     Thread *yuvThread; // yuv处理线程
     YuvCallback  *yuvCallback; // 回调函数
 
@@ -73,10 +71,6 @@ private:
     int srcWidth, srcHeight; // 原始数据宽高
 
     int scaleWidth, scaleHeight; // 压缩后的宽高
-
-    int cropWidth, cropHeight; // 剪裁后的宽高
-
-    int cropStartX, cropStartY; // 剪裁的起点
 
     int filterMode = 0; // 镜像类型
 

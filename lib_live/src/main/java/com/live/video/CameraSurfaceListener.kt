@@ -9,5 +9,5 @@ interface CameraSurfaceListener {
     fun startAutoFocus(x: Float, y: Float)
     fun openCamera()
     fun releaseCamera()
-    fun changeCamera():Int
+    fun switchCamera():Int
 }

@@ -14,5 +14,11 @@ typedef struct AvData {
     int *nalSizes; // 保存nal的大小
 } AvData;
 
+typedef enum AvDataType {
+    AUDIO = 0, // audio
+    VIDEO = 1, // video
+
+} AvDataType;
+
 
 #endif //EPLAYER_AVDATA_H

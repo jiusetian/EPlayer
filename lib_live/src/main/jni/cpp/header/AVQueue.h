@@ -52,7 +52,7 @@ private:
 
     AVNode *first, *last;
     int size;
-    int abort_action;
+    int abort_request; // 停止
 
 };
 

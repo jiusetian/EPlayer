@@ -61,6 +61,7 @@ void MediaEncoder::stop() {
     mutex.unlock();
     if (avQueue) {
         avQueue->abort();
+        flush();
     }
 }
 

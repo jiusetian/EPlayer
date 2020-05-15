@@ -119,7 +119,7 @@ bool VideoEncoder::open() {
     // 按照色度空间分配内存，即为图像结构体x264_picture_t分配内存，并返回内存的首地址作为指针
     // i_csp(图像颜色空间参数，目前只支持I420/YUV420)为X264_CSP_I420
     // 为图像结构体x264_picture_t分配内存,用于存储未压缩的数据
-    x264_picture_alloc(&pic_in, params.i_csp, params.i_width, params.i_height);
+    x264_picture_alloc(&pic_in, params.i_csp, getInWidth(), getInHeight());
 
     // 打开编码器
     encoder = x264_encoder_open(&params);
@@ -227,6 +227,7 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
  * 设置编码参数，没有问题的配置
  */
 void VideoEncoder::setParams() {
+    LOGD("设置参数");
 
     // Preset可选项: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo
     // Tune可选项: film（胶片电影）, animation（动画片）, grain（颗粒感很重的）, stillimage（静态图像）, psnr（信噪比）
@@ -299,6 +300,7 @@ void VideoEncoder::setParams2() {
     // 设置帧宽度和高度
     params.i_width = in_width;
     params.i_height = in_height;
+
     // LOGD("设置的宽高=%d /// %d",getOutWidth(),getOutHeight()); //并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
     params.i_fps_num = 25; //getFps(); //设置帧率

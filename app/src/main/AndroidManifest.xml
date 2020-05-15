@@ -32,7 +32,8 @@
                 android:configChanges="orientation|screenSize"
                 >
         </activity>
-        <activity android:name=".LiveActivity">
+        <activity android:name=".LiveActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         <activity android:name=".MainActivity">
             <intent-filter>

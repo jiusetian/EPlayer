@@ -52,7 +52,29 @@ public final class LiveNativeManager {
      * @param in_height
      * @return
      */
-    public static native int encoderVideoinit( int src_width, int src_height,int in_width, int in_height);
+    public static native int encoderVideoinit( int src_width, int src_height,int in_width, int in_height,int orientation);
+
+    /**
+     * 初始化视频编码器
+     * @param videoWith
+     * @param videoHeight
+     * @param scaleWidth
+     * @param scaleHeight
+     */
+    public static native void initVideoEncoder(int videoWith,int videoHeight,int scaleWidth,int scaleHeight,int orientation);
+
+    /**
+     * 开始视频的编码
+     */
+    public static native void startVideoEncoder();
+
+    public static native void stopVideoEncoder();
+
+    public static native void pauseVideoEncoder();
+
+    public static native void resumeVideoEncoder();
+
+    public static native void putVideoData(byte[] videoData,int dataLen);
 
     /**
      * 编码视频数据接口
@@ -72,7 +94,29 @@ public final class LiveNativeManager {
      * @param bitRate    音频bitRate
      * @return 每次编码的数据适合大小
      */
-    public static native int encoderAudioInit(int sampleRate, int channels, int bitRate);
+    public static native int initAudioEncoder(int sampleRate, int channels, int bitRate);
+
+    /**
+     * 开始音频编码
+     */
+    public static native void startAudioEncode();
+
+    /**
+     * 停止音频编码
+     */
+    public static native void stopAudioEncode();
+
+    /**
+     * 暂停音频编码
+     */
+    public static native void pauseAudioEncode();
+
+    public static native void putAudioData(byte[] audioData,int dataLen);
+
+    /**
+     * 继续音频编码
+     */
+    public static native void resumeAudioEncode();
 
     public static native int encoderAudioEncode(byte[] srcFrame, int frameSize, byte[] dstFrame, int dstSize);
 

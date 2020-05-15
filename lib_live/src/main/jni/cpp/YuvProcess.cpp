@@ -13,6 +13,10 @@ YuvProcess::~YuvProcess() {
     free(temp_i420_data_scale);
     free(temp_i420_data);
     free(temp_i420_data_rotate);
+    if (avQueue) {
+        avQueue->flush();
+        delete avQueue;
+    }
 }
 
 void YuvProcess::init() {
@@ -21,6 +25,16 @@ void YuvProcess::init() {
     // i420临时缩小数据的缓存
     temp_i420_data_scale = static_cast<uint8_t *>(malloc(sizeof(uint8_t) * scaleWidth * scaleHeight * 3 / 2));
     temp_i420_data_rotate = static_cast<uint8_t *>(malloc(sizeof(uint8_t) * scaleWidth * scaleHeight * 3 / 2));
+}
+
+// push av data into queue
+void YuvProcess::putAvData(uint8_t *data, int len) {
+    AvData avData;
+    avData.data = data;
+    avData.len = len;
+    if (avQueue) {
+        avQueue->pushData(&avData);
+    }
 }
 
 void YuvProcess::start() {
@@ -52,12 +66,13 @@ void YuvProcess::stop() {
     mutex.unlock();
     if (avQueue) {
         avQueue->abort();
+        avQueue->flush();
     }
     // 注销线程
-    if(yuvThread){
+    if (yuvThread) {
         yuvThread->join();
         delete yuvThread;
-        yuvThread=NULL;
+        yuvThread = NULL;
     }
 }
 
@@ -86,8 +101,8 @@ void YuvProcess::setYuvCallback(YuvProcess::YuvCallback callback) {
 
 void YuvProcess::excuteProcessYUV() {
 
-    uint8_t compressData[scaleWidth * scaleHeight * 3 / 2]; // 保存压缩结果
-    uint8_t cropData[cropWidth * cropHeight * 3 / 2]; // 保存剪裁结果
+    int scaleLen = scaleWidth * scaleHeight * 3 / 2;
+    uint8_t compressData[scaleLen]; // 保存压缩结果
     AvData *videoData;
 
     for (;;) {
@@ -116,20 +131,16 @@ void YuvProcess::excuteProcessYUV() {
                         degress == 270);
         }
 
-        // 剪裁数据
-        cropYUV(compressData, scaleWidth, scaleHeight, cropData, cropWidth, cropHeight, cropStartX, cropStartY);
 
-        int len = cropWidth * cropHeight * 3 / 2;
-        uint8_t *cpy = new uint8_t[len];
+        uint8_t *cpy = new uint8_t[scaleLen];
         // 复制数据
-        memcpy(cpy, cropData, len);
+        memcpy(cpy, compressData, scaleLen);
         // 回调
-        yuvCallback(cpy, len);
+        yuvCallback(cpy, scaleLen);
     }
 
     // 释放
     free(compressData);
-    free(cropData);
     free(videoData);
 }
 
@@ -162,10 +173,6 @@ void YuvProcess::cropYUV(uint8_t *src, int width, int height,
     YuvUtil::cropI420(src, srcLen, width, height, dst, dst_width, dst_height, left, top);
 }
 
-void YuvProcess::setCropWH(int width, int height) {
-    cropWidth = width;
-    cropHeight = height;
-}
 
 void YuvProcess::setScaleWH(int width, int height) {
     scaleWidth = width;
@@ -179,10 +186,5 @@ void YuvProcess::setSrcWH(int width, int height) {
 
 void YuvProcess::setDegress(int degress) {
     this->degress = degress;
-}
-
-void YuvProcess::setStartXY(int cropStartX, int cropStartY) {
-    this->cropStartX = cropStartX;
-    this->cropStartY = cropStartY;
 }
 

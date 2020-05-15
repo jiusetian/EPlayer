@@ -6,9 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.widget.Toast
 import com.live.FileManager
-import com.live.LiveConfig
 import com.live.LiveNativeManager
 import com.live.LogUtil
 import java.util.concurrent.LinkedBlockingDeque
@@ -27,15 +25,18 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         private const val SAVE_FILE_FOR_TEST = false
     }
 
-    // 相关参数设置
-    private var cameraWidth = LiveConfig.cameraWidth
-    private var cameraHeight = LiveConfig.cameraHeight
-    private var scaleWidth = LiveConfig.scaleWidthVer
-    private var scaleHeight = LiveConfig.scaleHeightVer
-    private var cropWidht = LiveConfig.cropWidthVer
-    private var cropHeight = LiveConfig.cropHeightVer
-    private var cropStartX = LiveConfig.cropStartX
-    private var cropStartY = LiveConfig.cropStartY
+    // 摄像头视频宽高
+    private var videoWidth = 0
+    private var videoHeight = 0
+
+    // 视频的压缩比例
+    private var scaleWidth = 0
+    private var scaleHeight = 0
+
+    // 旋转角度
+    private var orientation = 0
+
+    private var isInit = false
 
     // 第一次实例化的时候是不需要的
     private var initialized = false
@@ -45,8 +46,10 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
     // 传感器需要，这边使用的是加速度传感器
     private val sensorManager: SensorManager
+
     // 阻塞线程安全队列，生产者和消费者
     private val mQueue = LinkedBlockingDeque<ByteArray>()
+
     // 工作线程
     private lateinit var workerThread: Thread
     private lateinit var fileManager: FileManager
@@ -57,42 +60,42 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
     init {
         // 将视频预览数据压入到队列中
-        cameraSurface.setCameraNVDataListener { it?.let { mQueue.put(it) } }
+        cameraSurface.onCameraNVDataListener { it?.let { mQueue.put(it) } }
+
+        cameraSurface.onCameraOrientationChangeListener {
+            LogUtil.d("摄像头方向：" + it)
+            orientation = it
+        }
+
+        cameraSurface.onCameraSizeChangeListener { width, height ->
+            LogUtil.d("摄像头宽高：" + width + "---" + height)
+            videoWidth = width
+            videoHeight = height
+            scaleWidth = videoWidth / 3
+            scaleHeight = scaleWidth*75/100
+
+            // 是否初始化了视频
+            if (!isInit) {
+                initVideo()
+                isInit = true
+            }
+        }
 
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
 
-        isParametersSupport()
-        LogUtil.d("初始化宽高=" + scaleWidth + "///" + scaleHeight)
+        // isParametersSupport()
+
         if (SAVE_FILE_FOR_TEST) {
             fileManager = FileManager(FileManager.TEST_YUV_FILE)
         }
     }
 
-    // 初始化配置参数
-    private fun initConfig() {
-        cameraWidth = LiveConfig.cameraWidth
-        cameraHeight = LiveConfig.cameraHeight
-        val orientation = LiveConfig.cameraOrientation
-        if (orientation == 90 || orientation == 270) { //竖屏
-            scaleWidth = LiveConfig.scaleWidthVer
-            scaleHeight = LiveConfig.scaleHeightVer
-            cropWidht = LiveConfig.cropWidthVer
-            cropHeight = LiveConfig.cropHeightVer
-        } else { // 横屏
-            scaleWidth = LiveConfig.scaleWidthLand
-            scaleHeight = LiveConfig.scaleHeightLand
-            cropWidht = LiveConfig.cropWidthLand
-            cropHeight = LiveConfig.cropHeightLand
-        }
-        cropStartX = LiveConfig.cropStartX
-        cropStartY = LiveConfig.cropStartY
-    }
-
     private fun initVideo() {
-        initConfig() // 初始化相关配置
+        //initConfig() // 初始化相关配置
         LogUtil.d("初始化视频相关")
         // 初始化视频编码
-        LiveNativeManager.encoderVideoinit(LiveConfig.cameraWidth, LiveConfig.cameraHeight, scaleWidth, scaleHeight)
+        // LiveNativeManager.encoderVideoinit(LiveConfig.cameraWidth, LiveConfig.cameraHeight, scaleWidth, scaleHeight)
+        LiveNativeManager.encoderVideoinit(videoWidth, videoHeight, scaleWidth, scaleHeight, orientation)
     }
 
     private fun releaseJniVideo() {
@@ -117,8 +120,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                 // 生成 I420(YUV标准格式数据及YUV420P)目标数据，生成后的数据长度 width * height * 3 / 2
                 val dstData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
                 // 摄像头方向，正常的手机方向，后置摄像头的时候为90，前置摄像头的时候为270
-                val orientation = LiveConfig.cameraOrientation
-
+                //val orientation = LiveConfig.cameraOrientation
                 // LogUtil.d("摄像头角度="+orientation)
                 // 压缩 NV21(YUV420SP)数据，元素数据位1080 * 1920，很显然这样的数据推流会很占用带宽，我们压缩成480 * 640 的YUV数据
                 // 为啥要转化为YUV420P数据？因为是在为转化为 H264数据在做准备，NV21不是标准的，只能先通过转换，生成标准YUV420P数据
@@ -131,73 +133,26 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                  * 3.rotate旋转，比如原来宽高比为640：480，旋转90度以后宽高比为480:640，注意观察下面的参数，其实cameraWidth：cameraHeight=1920:1080，
                  * scaleWidthVer：scaleHeightVer=480:640，所以在传参的时候scaleHeight作为宽传进去，而scaleWidth作为高传进去的，因为最后旋转以后，出来的图像宽高比才是480:640
                  */
-                if (orientation == 0 || orientation == 180) { //横屏
-                    LiveNativeManager.compressYUV(
-                        srcData,
-                        LiveConfig.cameraWidth,
-                        LiveConfig.cameraHeight,
-                        dstData,
-                        scaleWidth,
-                        scaleHeight,
-                        0,
-                        orientation,
-                        orientation == 270
-                    )
-                } else { //竖屏，90°或270°
-                    LiveNativeManager.compressYUV(
-                        srcData,
-                        LiveConfig.cameraWidth,
-                        LiveConfig.cameraHeight,
-                        dstData,
-                        scaleHeight,
-                        scaleWidth,
-                        0,
-                        orientation,
-                        orientation == 270
-                    )
-                }
-
-                // LogUtil.d("剪切前=" + dstData.size)
-                // 进行YUV420P数据裁剪的操作，测试下这个借口，我们可以对数据进行裁剪，裁剪后的数据也是I420数据，我们采用的是libyuv库文件
-                // 这个libyuv库效率非常高，这也是我们用它的原因,
-                val cropData = ByteArray(cropWidht * cropHeight * 3 / 2)
-                LiveNativeManager.cropYUV(
+                LiveNativeManager.compressYUV(
+                    srcData,
+                    videoWidth,
+                    videoHeight,
                     dstData,
                     scaleWidth,
                     scaleHeight,
-                    cropData,
-                    cropWidht,
-                    cropHeight,
-                    cropStartX,
-                    cropStartY
+                    0,
+                    orientation,
+                    orientation == 270
                 )
-                // LogUtil.d("剪切后=" + cropData.size)
-                // LogUtil.d("数据=" + orientation + "---" + cameraWidth + "////" + cameraHeight + "/////" + scaleWidthVer + "////" + scaleHeightVer + "////" + cropWidht + "/////" + cropHeightVer)
-                // 自此，我们得到了YUV420P标准数据，这个过程实际上就是NV21转化为YUV420P数据
-                // 注意，有些机器是NV12格式，只是数据存储不一样，我们一样可以用libyuv库的接口转化
-                yuvDataListener?.let { it.invoke(cropData, cropWidht, cropHeight) }
+
+                yuvDataListener?.let { it.invoke(dstData, scaleWidth, scaleHeight) }
 
                 // 设置为true，我们把生成的YUV文件用播放器播放一下，看我们的数据是否有误，起调试作用
                 if (SAVE_FILE_FOR_TEST) {
-                    fileManager.saveFileData(cropData)
+                    fileManager.saveFileData(dstData)
                 }
             }
         }
-    }
-
-    /**
-     * 参数是否支持
-     */
-    private fun isParametersSupport(): Boolean {
-        if (cropStartX % 2 != 0 && cropStartY % 2 != 0) {
-            Toast.makeText(context, "剪裁开始位置必须为偶数", Toast.LENGTH_SHORT)
-            return false
-        }
-        if (cropStartX + cropWidht > scaleWidth || cropStartY + cropHeight > scaleHeight) {
-            Toast.makeText(context, "剪裁区域超出范围", Toast.LENGTH_SHORT)
-            return false
-        }
-        return true
     }
 
     fun startVideoGather() {
@@ -209,12 +164,12 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
             sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
             SensorManager.SENSOR_DELAY_UI
         )
-        initVideo()
+        //initVideo()
         initWorkThread()
     }
 
-    fun changeCamera() {
-        cameraSurface.changeCamera()
+    fun switchCamera() {
+        cameraSurface.switchCamera()
     }
 
     fun stopVideoGather() {

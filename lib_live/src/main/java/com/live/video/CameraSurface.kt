@@ -29,8 +29,14 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     private lateinit var cameraUtil: CameraUtil
     private var targetAspect: Float = -1.0f
 
-    //这是一个函数的声明，作为回调函数的存在，监听摄像头采集的数据
+    //  这是一个函数的声明，作为回调函数的存在，监听摄像头采集的数据
     private var cameraNVDataListener: ((data: ByteArray) -> Unit)? = null
+
+    // 摄像头尺寸监听
+    private var cameraSizeChangeListener: ((width: Int, height: Int) -> Unit)? = null
+
+    // 摄像头方向监听
+    private var cameraOrientationChangeListener: ((orientation: Int) -> Unit)? = null
 
     constructor(context: Context) : super(context) {
         init()
@@ -49,17 +55,28 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         surfaceView = view.findViewById(R.id.surface)
         ivFoucView = view.findViewById(R.id.iv_focus)
         removeAllViews()
-        addView(view) //添加摄像头预览控件
+        addView(view) // 添加摄像头预览控件
 
-        //创建所需要的camera和surfaceview
+        // 创建所需要的camera和surfaceview
         cameraUtil = CameraUtil(context)
+        // surfaceView的监听
         surfaceView.holder.addCallback(this)
     }
 
     fun getCameraUtil() = cameraUtil
 
-    fun setCameraNVDataListener(listener: ((data: ByteArray) -> Unit)) {
+    fun onCameraNVDataListener(listener: ((data: ByteArray) -> Unit)) {
         this.cameraNVDataListener = listener
+    }
+
+    // 设置摄像头方向的监听
+    fun onCameraOrientationChangeListener(listener: (orientation: Int) -> Unit) {
+        cameraOrientationChangeListener = listener
+    }
+
+    // 设置摄像头尺寸变换的监听
+    fun onCameraSizeChangeListener(listener: (width: Int, height: Int) -> Unit) {
+        cameraSizeChangeListener = listener
     }
 
     /**
@@ -67,10 +84,10 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
      */
     override fun onPreviewFrame(data: ByteArray, camera: Camera) {
         camera.addCallbackBuffer(data)
-        //如果是1080*1920像素的摄像头，那么一帧图像的大小为1080*1920*1.5=3110400 byte
-        //LogUtil.d("原始摄像头数据="+data.size)
-        //LogUtil.d("摄像头宽高="+camera.parameters.previewSize.width+"///"+camera.parameters.previewSize.height)
-        //获取NV数据
+        // 如果是1080*1920像素的摄像头，那么一帧图像的大小为1080*1920*1.5=3110400 byte
+        // LogUtil.d("原始摄像头数据="+data.size)
+        // LogUtil.d("摄像头宽高="+camera.parameters.previewSize.width+"///"+camera.parameters.previewSize.height)
+        // 获取NV数据
         cameraNVDataListener?.let { it.invoke(data) }
     }
 
@@ -79,12 +96,12 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        //cameraUtil.releaseCamera()
+        // cameraUtil.releaseCamera()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        //设置摄像头接口和surfaceview的关联还有摄像头的数据回调相关
-        //第二个参数是摄像头的回调接口，回调方法为onPreviewFrame，这个方法可以捕捉到摄像头数据byte[] data,这就是摄像头的原始数据流，即YUV420SP格式的数据
+        // 设置摄像头接口和surfaceview的关联还有摄像头的数据回调相关
+        // 第二个参数是摄像头的回调接口，回调方法为onPreviewFrame，这个方法可以捕捉到摄像头数据byte[] data,这就是摄像头的原始数据流，即YUV420SP格式的数据
         cameraUtil.handleCameraStartPreview(holder, this)
     }
 
@@ -93,22 +110,22 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         var widthMeasureSpec = widthMeasureSpec
         var heightMeasureSpec = heightMeasureSpec
         if (targetAspect > 0) {
-            //获取当前view的宽高值
+            // 获取当前view的宽高值
             var initialWidth = MeasureSpec.getSize(widthMeasureSpec)
             var initialHeight = MeasureSpec.getSize(heightMeasureSpec)
-            //边距
+            // 边距
             val hPadding = paddingLeft + paddingRight
             val vPadding = paddingBottom + paddingTop
             initialWidth -= hPadding
             initialHeight -= vPadding
-            //当前view的宽高比
+            // 当前view的宽高比
             val viewAspectRatio = initialWidth / initialHeight
-            //目标比例和当前view比例的差值
+            // 目标比例和当前view比例的差值
             val aspectDiff = targetAspect / viewAspectRatio - 1
 
-            if (Math.abs(aspectDiff) > 0.01) { //差值大于0.01，则需要调整
+            if (Math.abs(aspectDiff) > 0.01) { // 差值大于0.01，则需要调整
 
-                if (aspectDiff > 0) { //当前view高的比例大于目标高的比例，所以要缩短高来适配mTargetAspect
+                if (aspectDiff > 0) { // 当前view高的比例大于目标高的比例，所以要缩短高来适配mTargetAspect
                     initialHeight = (initialWidth / targetAspect).toInt()
                 } else {
                     initialWidth = (initialHeight * targetAspect).toInt()
@@ -130,22 +147,22 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     }
 
     override fun startAutoFocus(x: Float, y: Float) {
-        //后置摄像头才有对焦功能
+        // 后置摄像头才有对焦功能
         if (cameraUtil != null && cameraUtil.getCurrentCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             return
         }
         if (x != -1f && y != -1f) {
-            //设置位置和初始状态
+            // 设置位置和初始状态
             ivFoucView.apply {
                 translationX = x - width / 2
                 translationY = y - height / 2
                 clearAnimation()
             }
 
-            //执行动画
+            // 执行动画
             val scaleX = ObjectAnimator.ofFloat(ivFoucView, "scaleX", 1.75f, 1.0f)
             val scaleY = ObjectAnimator.ofFloat(ivFoucView, "scaleY", 1.75f, 1.0f)
-            //动画设置
+            // 动画设置
             AnimatorSet().apply {
                 play(scaleX).with(scaleY)
                 duration = 500
@@ -158,7 +175,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
                         ivFoucView.visibility = View.GONE
                     }
                 })
-                //开始动画
+                // 开始动画
                 start()
             }
 
@@ -167,30 +184,43 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     }
 
     override fun openCamera() {
+        //  打开摄像头
         cameraUtil.openCamera(cameraUtil.getCurrentCameraType())
 
-        //等待surfaceview创建好以后会执行post里面的内容
+        cameraOrientationChangeListener?.let { it.invoke(cameraUtil.getCameraOrientation()) }
+
+        cameraSizeChangeListener?.let { it.invoke(cameraUtil.getCameraWidth(), cameraUtil.getCameraHeight()) }
+
+        // 等待surfaceview创建好以后会执行post里面的内容
         surfaceView.post {
             cameraUtil.handleCameraStartPreview(surfaceView.holder, this)
-            //这里可以获取真正的预览的分辨率，在这里要进行屏幕的适配，主要适配非16:9的屏幕
+            // 这里可以获取真正的预览的分辨率，在这里要进行屏幕的适配，主要适配非16:9的屏幕
             targetAspect = (cameraUtil.getCameraHeight() / cameraUtil.getCameraWidth()).toFloat()
-            //再次测量
+            // 再次测量
             this.measure(-1, -1)
         }
+    }
+
+    // 改变摄像机方向
+    fun changeCarmeraOrientation(): Int {
+        val or = cameraUtil.changeCarmeraOrientation()
+        cameraOrientationChangeListener?.let { it.invoke(cameraUtil.getCameraOrientation()) }
+        return or
     }
 
     override fun releaseCamera() {
         cameraUtil.releaseCamera()
     }
 
-    override fun changeCamera(): Int {
-        cameraUtil.apply {
-            releaseCamera()
-            val cameraType = if (getCurrentCameraType() == Camera.CameraInfo.CAMERA_FACING_FRONT)
-                Camera.CameraInfo.CAMERA_FACING_BACK else Camera.CameraInfo.CAMERA_FACING_FRONT
-            setCurrentCameraType(cameraType)
-            openCamera()
-        }
+    override fun switchCamera(): Int {
+        releaseCamera()
+        //  前置或者后置摄像头
+        val cameraType = if (cameraUtil.getCurrentCameraType() == 0) 1 else 0
+        //  摄像头类型
+        cameraUtil.setCurrentCameraType(cameraType)
+        //  打开摄像头
+        openCamera()
+
         return cameraUtil.getCurrentCameraType()
     }
 }

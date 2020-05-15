@@ -1,6 +1,6 @@
-//
-// Created by public on 2019/9/18.
-//
+// 
+//  Created by public on 2019/9/18.
+// 
 #include <jni.h>
 #include <string>
 #include <libyuv.h>
@@ -14,35 +14,39 @@
 jbyte *temp_i420_data;
 jbyte *temp_i420_data_scale;
 jbyte *temp_i420_data_rotate;
+jint mOriantation=0;
 
-YuvProcess *yuvProcess;
-VideoEncoder *videoEncoder;
-AudioEncoder *audioEncoder;
-RtmpLivePush *rtmpLivePush;
+YuvProcess *yuvProcess = nullptr;
+VideoEncoder *videoEncoder = nullptr;
+AudioEncoder *audioEncoder = nullptr;
+RtmpLivePush *rtmpLivePush = nullptr;
 
-// 声明几个回调函数
+//  声明几个回调函数
 extern void audioEncoderCallback(uint8_t *data, int dataLen);
+
 extern void yuvProcessCallback(uint8_t *data, int dataLen);
+
+extern void videoEncoderCallback(uint8_t *data, int dataLen, int nalNum, int *nalsSize);
 
 static JavaVM *jvm = NULL;
 
-//在库加载时执行
+// 在库加载时执行
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jvm = vm;
     return JNI_VERSION_1_6;
 }
 
-// 在卸载库时执行
+//  在卸载库时执行
 void JNI_OnUnload(JavaVM *vm, void *reserved) {
     jvm = NULL;
 }
 
 
-// 为中间操作的需要分配空间
+//  为中间操作的需要分配空间
 void init(jint width, jint height, jint dst_width, jint dst_height) {
-    // i420临时原始数据的缓存
+    //  i420临时原始数据的缓存
     temp_i420_data = static_cast<jbyte *>(malloc(sizeof(jbyte) * width * height * 3 / 2));
-    // i420临时压缩数据的缓存
+    //  i420临时压缩数据的缓存
     temp_i420_data_scale = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
     temp_i420_data_rotate = static_cast<jbyte *>(malloc(sizeof(jbyte) * dst_width * dst_height * 3 / 2));
 }
@@ -59,22 +63,22 @@ void init(jint width, jint height, jint dst_width, jint dst_height) {
  */
 void scaleI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_data, jint dst_width, jint dst_height,
                jint mode) {
-    //Y数据大小width*height，U数据大小为1/4的width*height，V大小和U一样，一共是3/2的width*height大小
+    // Y数据大小width*height，U数据大小为1/4的width*height，V大小和U一样，一共是3/2的width*height大小
     jint src_i420_y_size = width * height;
     jint src_i420_u_size = (width >> 1) * (height >> 1);
-    //由于是标准的YUV420P的数据，我们可以把三个通道全部分离出来
+    // 由于是标准的YUV420P的数据，我们可以把三个通道全部分离出来
     jbyte *src_i420_y_data = src_i420_data;
     jbyte *src_i420_u_data = src_i420_data + src_i420_y_size;
     jbyte *src_i420_v_data = src_i420_data + src_i420_y_size + src_i420_u_size;
 
-    //由于是标准的YUV420P的数据，我们可以把三个通道全部分离出来
+    // 由于是标准的YUV420P的数据，我们可以把三个通道全部分离出来
     jint dst_i420_y_size = dst_width * dst_height;
     jint dst_i420_u_size = (dst_width >> 1) * (dst_height >> 1);
     jbyte *dst_i420_y_data = dst_i420_data;
     jbyte *dst_i420_u_data = dst_i420_data + dst_i420_y_size;
     jbyte *dst_i420_v_data = dst_i420_data + dst_i420_y_size + dst_i420_u_size;
 
-    //调用libyuv库，进行缩放操作，因为src是不变的，可以用const修饰，而dst是可变的，所以不用const修饰
+    // 调用libyuv库，进行缩放操作，因为src是不变的，可以用const修饰，而dst是可变的，所以不用const修饰
     libyuv::I420Scale((const uint8 *) src_i420_y_data, width,
                       (const uint8 *) src_i420_u_data, width >> 1,
                       (const uint8 *) src_i420_v_data, width >> 1,
@@ -86,7 +90,6 @@ void scaleI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_da
                       (libyuv::FilterMode) mode);
 }
 
-//旋转以后width和height是相反的
 void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_data, jint degree) {
     jint src_i420_y_size = width * height;
     jint src_i420_u_size = (width >> 1) * (height >> 1);
@@ -98,10 +101,10 @@ void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_d
     jbyte *dst_i420_y_data = dst_i420_data;
     jbyte *dst_i420_u_data = dst_i420_data + src_i420_y_size;
     jbyte *dst_i420_v_data = dst_i420_data + src_i420_y_size + src_i420_u_size;
-    //LOGE("角度=%d",degree);
-    //要注意这里的width和height在旋转之后是相反的
-    if (degree == libyuv::kRotate90 || degree == libyuv::kRotate270) {
-        //原来的行间隔为width，旋转以后行间隔变为height，就是宽高交换了
+    // LOGE("角度=%d",degree);
+    // 要注意这里的width和height在旋转之后是相反的
+    if (degree == libyuv::kRotate90 || degree == libyuv::kRotate270) {  // 竖屏
+        // 因为旋转90或270度以后，宽高跟原来的正好相反，所以旋转后宽就是原来的高了
         libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
                            (const uint8 *) src_i420_u_data, width >> 1,
                            (const uint8 *) src_i420_v_data, width >> 1,
@@ -110,7 +113,7 @@ void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_d
                            (uint8 *) dst_i420_v_data, height >> 1,
                            width, height,
                            (libyuv::RotationMode) degree);
-    } else {
+    }else { // 横屏
         libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
                            (const uint8 *) src_i420_u_data, width >> 1,
                            (const uint8 *) src_i420_v_data, width >> 1,
@@ -144,28 +147,28 @@ void mirrorI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_d
                        width, height);
 }
 
-//NV21转化为YUV420P数据
+// NV21转化为YUV420P数据
 void nv21ToI420(jbyte *src_nv21_data, jint width, jint height, jbyte *src_i420_data) {
-    //Y通道数据大小
+    // Y通道数据大小
     jint src_y_size = width * height;
-    //U通道数据大小
+    // U通道数据大小
     jint src_u_size = (width >> 1) * (height >> 1);
 
-    //NV21中Y通道数据，定义一个byte指针指向NV21数据中的起点，即指向了Y通道数据的起点
+    // NV21中Y通道数据，定义一个byte指针指向NV21数据中的起点，即指向了Y通道数据的起点
     jbyte *src_nv21_y_data = src_nv21_data;
-    //定义的指针指向VU数据的起点，即在所有数据的起点+Y数据的大小就是VU数据的起点，指针都是指向保存数据内存中的第一个内存地址
-    //由于是连续存储的Y通道数据后即为VU数据，它们的存储方式是交叉存储的
+    // 定义的指针指向VU数据的起点，即在所有数据的起点+Y数据的大小就是VU数据的起点，指针都是指向保存数据内存中的第一个内存地址
+    // 由于是连续存储的Y通道数据后即为VU数据，它们的存储方式是交叉存储的
     jbyte *src_nv21_vu_data = src_nv21_data + src_y_size;
 
-    //YUV420P中Y通道数据
+    // YUV420P中Y通道数据
     jbyte *src_i420_y_data = src_i420_data;
-    //YUV420P中U通道数据
+    // YUV420P中U通道数据
     jbyte *src_i420_u_data = src_i420_data + src_y_size;
-    //YUV420P中V通道数据
+    // YUV420P中V通道数据
     jbyte *src_i420_v_data = src_i420_data + src_y_size + src_u_size;
 
-    //直接调用libyuv中接口，把NV21数据转化为YUV420P标准数据，此时，它们的存储大小是不变的
-    //参数src_stride_y和src_stride_vu表示Y和VU的行间距，都应该传递源Y平面的宽
+    // 直接调用libyuv中接口，把NV21数据转化为YUV420P标准数据，此时，它们的存储大小是不变的
+    // 参数src_stride_y和src_stride_vu表示Y和VU的行间距，都应该传递源Y平面的宽
     libyuv::NV21ToI420((const uint8 *) src_nv21_y_data, width,
                        (const uint8 *) src_nv21_vu_data, width,
                        (uint8 *) src_i420_y_data, width,
@@ -230,19 +233,33 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *dst = env->GetByteArrayElements(dst_, NULL);
 
-    // nv21转化为i420(标准YUV420P数据) 这个temp_i420_data大小是和Src_data是一样的，是原始YUV数据的大小
+    //  nv21转化为i420(标准YUV420P数据) 这个temp_i420_data大小是和Src_data是一样的，是原始YUV数据的大小
     nv21ToI420(src, width, height, temp_i420_data);
-    // 进行缩放的操作，这个缩放，会把数据压缩
+    //  进行缩放的操作，这个缩放，会把数据压缩
     scaleI420(temp_i420_data, width, height, temp_i420_data_scale, dst_width, dst_height, mode);
+    // 视频角度发生改变
+    if(degree!=mOriantation){
+        mOriantation=degree;
+        if (degree==90||degree==270){
+            videoEncoder->setInWidth(dst_height);
+            videoEncoder->setInHeight(dst_width);
+        } else{
+            videoEncoder->setInWidth(dst_width);
+            videoEncoder->setInHeight(dst_height);
+        }
 
-    // 如果是前置摄像头，进行镜像操作
+        videoEncoder->closeEncoder();
+        videoEncoder->open();
+    }
+
+    //  如果是前置摄像头，进行镜像操作
     if (isMirror) {
-        // 进行旋转的操作
+        //  进行旋转的操作
         rotateI420(temp_i420_data_scale, dst_width, dst_height, temp_i420_data_rotate, degree);
-        // 因为旋转的角度都是90和270，那后面的数据width和height是相反的
+        //  因为270度才需要镜像的，此时是需要旋转270度的，旋转以后宽高就交换了
         mirrorI420(temp_i420_data_rotate, dst_height, dst_width, dst);
     } else {
-        // 进行旋转的操作
+        //  进行旋转的操作
         rotateI420(temp_i420_data_scale, dst_width, dst_height, dst, degree);
     }
 
@@ -257,16 +274,16 @@ JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src_, jint width, jint height,
                                         jbyteArray dst_, jint dst_width, jint dst_height, jint left, jint top) {
 
-    //裁剪的区域大小不对，left指宽度从哪里开始剪裁，dst_width指从剪裁处开始算的目标宽度，top指高度从哪里开始剪裁
+    // 裁剪的区域大小不对，left指宽度从哪里开始剪裁，dst_width指从剪裁处开始算的目标宽度，top指高度从哪里开始剪裁
     if (left + dst_width > width || top + dst_height > height) {
         return -1;
     }
 
-    //left和top必须为偶数，否则显示会有问题
+    // left和top必须为偶数，否则显示会有问题
     if (left % 2 != 0 || top % 2 != 0) {
         return -1;
     }
-    jint src_length = env->GetArrayLength(src_); //源数据大小
+    jint src_length = env->GetArrayLength(src_); // 源数据大小
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *dst = env->GetByteArrayElements(dst_, NULL);
 
@@ -294,15 +311,20 @@ Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint src_width,
-                                                 jint src_height, jint in_width, jint in_height) {
-    // 初始化临时空间
+                                                 jint src_height, jint in_width, jint in_height, jint orientation) {
+    //  初始化临时空间
     init(src_width, src_height, in_width, in_height);
-
+    mOriantation=orientation;
     videoEncoder = new VideoEncoder();
-    //设置相关参数
-    videoEncoder->setInWidth(in_width);
-    videoEncoder->setInHeight(in_height);
-    videoEncoder->setBitrate(1200 * 1000); //设置比特率
+    // 设置相关参数
+    if (orientation == 90 || orientation == 270) { // 竖屏，输出宽高要交换
+        videoEncoder->setInWidth(in_height);
+        videoEncoder->setInHeight(in_width);
+    } else { // 横屏
+        videoEncoder->setInWidth(in_width);
+        videoEncoder->setInHeight(in_height);
+    }
+    videoEncoder->setBitrate(1200 * 1000); // 设置比特率
     videoEncoder->open();
     return 0;
 
@@ -312,12 +334,13 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
                                                    jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
-    // 转为jbyte数组的指针
+    //  转为jbyte数组的指针
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
     jint *outFramewSize = env->GetIntArrayElements(outFramewSize_, NULL);
 
-    int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (unsigned char *) dstFrame, outFramewSize);
+    int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (unsigned char *) dstFrame,
+                                            outFramewSize);
 
     env->ReleaseByteArrayElements(srcFrame_, srcFrame, 0);
     env->ReleaseByteArrayElements(dstFrame_, dstFrame, 0);
@@ -328,10 +351,11 @@ Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jby
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_encoderAudioInit(JNIEnv *env, jclass type, jint sampleRate, jint channels,
+Java_com_live_LiveNativeManager_initAudioEncoder(JNIEnv *env, jclass type, jint sampleRate, jint channels,
                                                  jint bitRate) {
     audioEncoder = new AudioEncoder(channels, sampleRate, bitRate);
     int value = audioEncoder->init();
+    //  set encoder callback for result
     audioEncoder->setEncoderCallback(&audioEncoderCallback);
     return value;
 }
@@ -358,7 +382,7 @@ Java_com_live_LiveNativeManager_initRtmpData(JNIEnv *env, jclass type, jstring u
 
     const char *url = env->GetStringUTFChars(url_, 0);
 
-    //复制url内容到rtmp_path
+    // 复制url内容到rtmp_path
     char *rtmp_path = (char *) malloc(strlen(url) + 1);
     memset(rtmp_path, 0, strlen(url) + 1);
     memcpy(rtmp_path, url, strlen(url));
@@ -380,7 +404,7 @@ Java_com_live_LiveNativeManager_sendRtmpVideoSpsPPS(JNIEnv *env, jclass type, jb
         jbyte *pps = env->GetByteArrayElements(pps_, NULL);
 
         rtmpLivePush->pushSPSPPS((unsigned char *) sps, spsLen, (unsigned char *) pps, ppsLen);
-        //rtmpLivePush->send_video_sps_pps((unsigned char *) sps, spsLen,(unsigned char *) pps, ppsLen);
+        // rtmpLivePush->send_video_sps_pps((unsigned char *) sps, spsLen,(unsigned char *) pps, ppsLen);
 
         env->ReleaseByteArrayElements(sps_, sps, 0);
         env->ReleaseByteArrayElements(pps_, pps, 0);
@@ -402,13 +426,13 @@ Java_com_live_LiveNativeManager_sendRtmpVideoData(JNIEnv *env, jclass type, jbyt
     return 0;
 }
 
-//发送音频Sequence头数据
+// 发送音频Sequence头数据
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_sendRtmpAudioSpec(JNIEnv *env, jclass type, jlong timeStamp) {
 
     if (rtmpLivePush) {
-        //直接指定为44100采样率，2声道
+        // 直接指定为44100采样率，2声道
         rtmpLivePush->addSequenceAacHeader(44100, 2, 0);
     }
     return 0;
@@ -421,7 +445,7 @@ Java_com_live_LiveNativeManager_sendRtmpAudioData(JNIEnv *env, jclass type, jbyt
 
     if (rtmpLivePush) {
         jbyte *data = env->GetByteArrayElements(data_, NULL);
-        //c++ 中没有byte类型，用unsigned char代替
+        // c++ 中没有byte类型，用unsigned char代替
         rtmpLivePush->addAccBody((unsigned char *) data, dataLen, timeStamp);
 
         env->ReleaseByteArrayElements(data_, data, 0);
@@ -469,7 +493,14 @@ Java_com_live_LiveNativeManager_releaseAudio(JNIEnv *env, jclass type) {
  * @param dataLen
  */
 void audioEncoderCallback(uint8_t *data, int dataLen) {
-    LOGD("音频回调函数");
+    AvData avData;
+    avData.data = data;
+    avData.len = dataLen;
+    avData.type = AUDIO;
+    //  保存到推流器
+    if (rtmpLivePush) {
+        rtmpLivePush->pushAudioData(avData);
+    }
 }
 
 /**
@@ -479,14 +510,124 @@ void audioEncoderCallback(uint8_t *data, int dataLen) {
  */
 void yuvProcessCallback(uint8_t *data, int dataLen) {
     AvData avData;
-    avData.data=data;
-    avData.len=dataLen;
-    // 保存
-    if (videoEncoder){
+    avData.data = data;
+    avData.len = dataLen;
+    //  保存视频编码器
+    if (videoEncoder) {
         videoEncoder->pushAvData(avData);
     }
 }
 
+void videoEncoderCallback(uint8_t *data, int dataLen, int nalNum, int *nalsSize) {
+    AvData avData;
+    avData.data = data;
+    avData.len = dataLen;
+    avData.nalNums = nalNum;
+    avData.nalSizes = nalsSize;
+    avData.type = VIDEO;
+    //  save
+    if (rtmpLivePush) {
+        rtmpLivePush->pushVideoData(avData);
+    }
+}
 
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_startAudioEncode(JNIEnv *env, jclass clazz) {
+    if (audioEncoder) {
+        audioEncoder->start();
+    }
+}
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_stopAudioEncode(JNIEnv *env, jclass clazz) {
+    audioEncoder->stop();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_pauseAudioEncode(JNIEnv *env, jclass clazz) {
+    audioEncoder->pause();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_resumeAudioEncode(JNIEnv *env, jclass clazz) {
+    audioEncoder->resume();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_putAudioData(JNIEnv *env, jclass clazz, jbyteArray audio_data, jint data_len) {
+    //  转为jbyte数组的指针
+    jbyte *srcData = env->GetByteArrayElements(audio_data, NULL);
+    //  保存音频数据
+    audioEncoder->putAudioData((uint8_t *) srcData, data_len);
+
+    env->ReleaseByteArrayElements(audio_data, srcData, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_initVideoEncoder(JNIEnv *env, jclass clazz, jint video_with, jint video_height,
+                                                 jint scale_width, jint scale_height,jint orientation) {
+    //  初始化YUV处理器
+    yuvProcess = new YuvProcess();
+    yuvProcess->setSrcWH(video_with, video_height);
+    yuvProcess->setScaleWH(scale_width, scale_height);
+    yuvProcess->setDegress(orientation);
+    yuvProcess->init();
+    yuvProcess->setYuvCallback(&yuvProcessCallback); //  回调函数
+
+    //  初始化视频编码器
+    videoEncoder = new VideoEncoder();
+    // 设置相关参数
+    videoEncoder->setInWidth(scale_width);
+    videoEncoder->setInHeight(scale_height);
+    videoEncoder->setBitrate(1200 * 1000); // 设置比特率
+    videoEncoder->open(); //  打开编码器
+    videoEncoder->setVideoEncoderCallback(&videoEncoderCallback); //  回调函数
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_putVideoData(JNIEnv *env, jclass clazz, jbyteArray video_data, jint data_len) {
+    //  转为jbyte数组的指针
+    jbyte *srcData = env->GetByteArrayElements(video_data, NULL);
+    //  保存数据
+    if (yuvProcess) {
+        yuvProcess->putAvData((uint8_t *) srcData, data_len);
+    }
+    env->ReleaseByteArrayElements(video_data, srcData, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_startVideoEncoder(JNIEnv *env, jclass clazz) {
+    // start video encode
+    yuvProcess->start();
+    videoEncoder->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_stopVideoEncoder(JNIEnv *env, jclass clazz) {
+    yuvProcess->stop();
+    videoEncoder->stop();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_pauseVideoEncoder(JNIEnv *env, jclass clazz) {
+    yuvProcess->pause();
+    videoEncoder->pause();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_resumeVideoEncoder(JNIEnv *env, jclass clazz) {
+    yuvProcess->resume();
+    videoEncoder->resume();
+}

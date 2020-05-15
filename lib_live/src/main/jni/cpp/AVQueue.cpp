@@ -6,7 +6,7 @@
 #include "AndroidLog.h"
 
 AVQueue::AVQueue() {
-    abort_action = 0;
+    abort_request = 0;
     first = NULL;
     last = NULL;
     size = 0;
@@ -53,7 +53,7 @@ int AVQueue::getData(AvData *data, bool block) {
 
     for (;;) {
 
-        if (abort_action) {
+        if (abort_request) {
             ret = -1;
             break;
         }
@@ -88,7 +88,7 @@ int AVQueue::getData(AvData *data, bool block) {
 
 void AVQueue::abort() {
     mMutex.lock();
-    abort_action=1;
+    abort_request=1;
     mCondition.signal();
     mMutex.unlock();
 }
@@ -114,7 +114,7 @@ int AVQueue::putData(AvData *data) {
 
     AVNode *node;
     // 终止
-    if (abort_action) {
+    if (abort_request) {
         return -1;
     }
 
@@ -148,7 +148,7 @@ int AVQueue::getSize() {
 // start代表可以存取了
 void AVQueue::start() {
     mMutex.lock();
-    abort_action = 0;
+    abort_request = 0;
     mCondition.signal();
     mMutex.unlock();
 }

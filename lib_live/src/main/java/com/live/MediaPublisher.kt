@@ -154,6 +154,10 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         videoGatherManager.stopVideoGather()
     }
 
+    fun changeCamera(){
+        videoGatherManager.switchCamera()
+    }
+
     // rtmp相关
     fun initRtmp() {
         //初始化rtmp
@@ -185,46 +189,46 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
     /**
      * 接收编码好的视频数据
      */
-    private fun onEncoderVideoData(encoderVideoData: ByteArray, totalLength: Int, segment: IntArray) {
+    private fun onEncoderVideoData(encoderVideoData: ByteArray, totalLength: Int, nalSizes: IntArray) {
         var spsLen = 0
         var ppsLen = 0
         var sps: ByteArray = byteArrayOf()
         var pps: ByteArray
         var haveCopy = 0
         // segment为 C++传递上来的数组，当为SPS，PPS的时候，视频 NALU数组大于1，其它时候等于1
-        segment.forEach {
+        nalSizes.forEach {
 
             // nal长度
-            val segmentLength = it
-            val segmentByte = ByteArray(segmentLength)
+            val nalLen = it
+            val nalBytes = ByteArray(nalLen)
             // 复制 nalu数据到segmentByte，包括起始码
-            System.arraycopy(encoderVideoData, haveCopy, segmentByte, 0, segmentLength)
-            haveCopy += segmentLength
+            System.arraycopy(encoderVideoData, haveCopy, nalBytes, 0, nalLen)
+            haveCopy += nalLen
             // 起始码
             var offset = 4
-            if (segmentByte[0].toInt() == 0x00 && segmentByte[1].toInt() == 0x00 && segmentByte[2].toInt() == 0x01) {
+            if (nalBytes[0].toInt() == 0x00 && nalBytes[1].toInt() == 0x00 && nalBytes[2].toInt() == 0x01) {
                 offset = 3
             }
             // nal的类型，nal单元的第一个字节为header信息，有nal的类型值
-            val type = segmentByte[offset].toInt().and(0x1f)
+            val type = nalBytes[offset].toInt().and(0x1f)
 
             // 获取到 NALU的 type，SPS，PPS，SEI，还是关键帧
             if (type == NAL_SPS) {
                 // 减去起始码长度
-                spsLen = segmentLength - offset
+                spsLen = nalLen - offset
                 sps = ByteArray(spsLen)
-                System.arraycopy(segmentByte, offset, sps, 0, spsLen)
+                System.arraycopy(nalBytes, offset, sps, 0, spsLen)
                 // LogUtil.d("sps的类型值"+sps[0].toInt()+"...."+sps[1].toInt())
                 // LogUtil.d("是否包含起始码1="+isContainStartCode(sps))
             } else if (type == NAL_PPS) {
-                ppsLen = segmentLength - offset
+                ppsLen = nalLen - offset
                 pps = ByteArray(ppsLen)
-                System.arraycopy(segmentByte, offset, pps, 0, ppsLen)
+                System.arraycopy(nalBytes, offset, pps, 0, ppsLen)
                 // LogUtil.d("是否包含起始码2="+isContainStartCode(pps))
                 // LogUtil.d("pps的类型值"+pps[0].toInt()+"...."+pps[1].toInt())
                 sendVideoSPSAndPPS(sps, spsLen, pps, ppsLen, 0)
             } else {
-                sendVideoData(segmentByte, segmentLength, videoID++)
+                sendVideoData(nalBytes, nalLen, videoID++)
             }
         }
     }

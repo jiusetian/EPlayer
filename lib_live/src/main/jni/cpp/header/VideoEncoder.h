@@ -50,16 +50,8 @@ protected:
     // 线程执行函数
     void run() override;
 
-    void start() override;
-
-    void stop() override;
-
-    void flush() override;
-
     // 开始编码视频
     void excuteEncodeVideo();
-
-    void setVideoEncoderCallback(videoEncoderCallback* callback);
 
 public:
     VideoEncoder();
@@ -93,6 +85,14 @@ public:
     void setIThreads(int threads);
     int getBFrameFrq() const;
     void setBFrameFrq(int frameFrq);
+    // 设置回调函数
+    void setVideoEncoderCallback(videoEncoderCallback* callback);
+
+    void start() override;
+
+    void stop() override;
+
+    void flush() override;
 };
 
 #endif //EPLAYER_VIDEOENCODER_H

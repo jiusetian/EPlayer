@@ -1,11 +1,14 @@
 package com.eplayer
 
+import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
 import com.live.LiveConfig
+import com.live.LogUtil
 import com.live.MediaPublisher
 import com.live.simplertmp.RtmpHandler
 import kotlinx.android.synthetic.main.activity_live.*
@@ -86,8 +89,15 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
         initCameraInfo()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        val orientation = newConfig!!.orientation
+        if (orientation == ORIENTATION_LANDSCAPE) {
+            LogUtil.i( "-------------横屏-------------")
+        } else {
+            LogUtil.i( "-------------竖屏-------------")
+        }
+        mediaPublisher.getVideoGatherManager().cameraSurface.changeCarmeraOrientation()
     }
 
     override fun onStop() {
@@ -107,12 +117,12 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
     override fun onClick(v: View) {
         when (v) {
             switch_camera_img -> {
-                mediaPublisher.getVideoGatherManager().changeCamera()
+                mediaPublisher.getVideoGatherManager().switchCamera()
                 initCameraInfo()
             }
 
-            rtmp_publish_img->{
-               // mediaPublisher.getMediaEncoder().startRecord()
+            rtmp_publish_img -> {
+                // mediaPublisher.getMediaEncoder().startRecord()
             }
         }
     }
