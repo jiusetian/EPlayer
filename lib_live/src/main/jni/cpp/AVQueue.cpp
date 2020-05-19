@@ -41,7 +41,7 @@ int AVQueue::putData(AvData *data) {
 
     LOGD("链表中存nal数量=%d", data->nalNums);
     LOGD("链表中存数据的大小=%d", data->len);
-    if (0<data->nalNums < 10) {
+    if (0 < data->nalNums < 10) {
         for (int i = 0; i < data->nalNums; i++) {
             LOGD("链表中存nal大小：%d", data->nalSizes[i]);
         }
@@ -66,10 +66,11 @@ int AVQueue::putData(AvData *data) {
     return 1;
 }
 
-AvData* AVQueue::getData() {
+AvData *AVQueue::getData() {
     mMutex.lock();
+
     AVNode *node = NULL;
-    AvData *data=NULL;
+    AvData *data = NULL;
 
     for (;;) {
         // 终止
@@ -99,11 +100,12 @@ AvData* AVQueue::getData() {
             }
             // 跳出
             break;
-        }else { // 没元素阻塞，不跳出循环
+        } else { // 没元素阻塞，不跳出循环
             LOGD("取数据阻塞");
             mCondition.wait(mMutex);
         }
     }
+
     mMutex.unlock();
     return data;
 }

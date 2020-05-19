@@ -4,17 +4,19 @@
 #include "MediaEncoder.h"
 
 MediaEncoder::MediaEncoder() {
-    avQueue = new AVQueue();
+    //avQueue = new AVQueue();
+    avQueue1=new BlockQueue<AvData*>();
 }
 
 MediaEncoder::~MediaEncoder() {
     mutex.lock();
     // 是否avqueue
-    if (avQueue) {
-        avQueue->flush();
-        delete avQueue;
-        avQueue = NULL;
+    if (avQueue1) {
+        avQueue1->flush();
+        delete avQueue1;
+        avQueue1 = NULL;
     }
+
     mutex.unlock();
 }
 
@@ -26,9 +28,10 @@ void MediaEncoder::pause() {
 }
 
 void MediaEncoder::putAvData(AvData* data) {
-    if (avQueue){
-        avQueue->putData(data);
+    if (avQueue1){
+        avQueue1->putData(data);
     }
+
 }
 
 void MediaEncoder::resume() {
@@ -39,8 +42,8 @@ void MediaEncoder::resume() {
 }
 
 void MediaEncoder::start() {
-    if (avQueue) {
-        avQueue->start();
+    if (avQueue1) {
+        avQueue1->start();
     }
     mutex.lock();
     abortRequest = false;
@@ -49,8 +52,8 @@ void MediaEncoder::start() {
 }
 
 void MediaEncoder::flush() {
-    if(avQueue){
-        avQueue->flush();
+    if(avQueue1){
+        avQueue1->flush();
     }
 }
 
@@ -60,8 +63,8 @@ void MediaEncoder::stop() {
     condition.signal();
     mutex.unlock();
 
-    if (avQueue) {
-        avQueue->abort();
+    if (avQueue1) {
+        avQueue1->abort();
         flush();
     }
 }

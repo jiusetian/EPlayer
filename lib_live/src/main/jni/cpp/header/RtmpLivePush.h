@@ -7,6 +7,7 @@
 
 #include "Thread.h"
 #include "AVQueue.h"
+#include "BlockQueue.h"
 
 extern "C" {
 #include <librtmp/rtmp.h>
@@ -33,7 +34,8 @@ private:
     Condition condition;
     bool abortRequest=false; // 停止
     bool pauseRequest = false; // 暂停
-    AVQueue *avQueue=NULL; // 存储视频数据
+    //AVQueue *avQueue=NULL; // 存储视频数据
+    BlockQueue<AvData *> *avQueue1 = NULL; //阻塞队列
     Thread *rtmpThread= nullptr; // yuv处理线程
     bool isSendAudioHeader=false;
 

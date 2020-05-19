@@ -7,16 +7,18 @@
 #include "YuvUtil.h"
 
 YuvProcess::YuvProcess() {
-    avQueue = new AVQueue();
+    //avQueue = new AVQueue();
+    avQueue1 = new BlockQueue<AvData *>();
 }
 
 YuvProcess::~YuvProcess() {
     free(temp_i420_data_scale);
     free(temp_i420_data);
     free(temp_i420_data_rotate);
-    if (avQueue) {
-        avQueue->flush();
-        delete avQueue;
+    // 阻塞队列
+    if (avQueue1) {
+        avQueue1->flush();
+        delete avQueue1;
     }
 }
 
@@ -31,25 +33,27 @@ void YuvProcess::init() {
 // push av data into queue
 void YuvProcess::putAvData(uint8_t *data, int len) {
     // 分配空间
-    AvData *avData= static_cast<AvData *>(malloc(sizeof(AvData)));
+    AvData *avData = static_cast<AvData *>(malloc(sizeof(AvData)));
     avData->data = data;
     avData->len = len;
-    avData->type=VIDEO;
-    avData->nalNums=0;
-    avData->nalSizes=NULL;
-    if (avQueue) {
-        LOGD("YUV数据开始保存=%d",avData->len);
-        avQueue->putData(avData);
-        LOGD("YUV数据保存成功");
-    } else{
+    avData->type = VIDEO;
+    avData->nalNums = 0;
+    avData->nalSizes = NULL;
+    if (avQueue1) {
+        LOGD("YUV开始保存=%d", avData->len);
+        avQueue1->putData(avData);
+        LOGD("YUV保存成功");
+    } else {
         free(avData);
     }
 }
 
 void YuvProcess::start() {
-    if (avQueue) {
-        avQueue->start();
+
+    if (avQueue1) {
+        avQueue1->start();
     }
+
     mutex.lock();
     abortRequest = false;
     condition.signal();
@@ -74,10 +78,11 @@ void YuvProcess::stop() {
     condition.signal();
     mutex.unlock();
 
-    if (avQueue) {
-        avQueue->abort();
-        avQueue->flush();
+    if (avQueue1) {
+        avQueue1->abort();
+        avQueue1->flush();
     }
+
     // 注销线程
     if (yuvThread) {
         yuvThread->join();
@@ -94,8 +99,9 @@ void YuvProcess::pause() {
 }
 
 void YuvProcess::flush() {
-    if (avQueue) {
-        avQueue->flush();
+
+    if (avQueue1) {
+        avQueue1->flush();
     }
 }
 
@@ -112,7 +118,7 @@ void YuvProcess::setYuvCallback(YuvProcess::YuvCallback callback) {
 void YuvProcess::excuteProcessYUV() {
     int scaleLen = scaleWidth * scaleHeight * 3 / 2;
     //AvData *videoData=(AvData *) malloc(sizeof(AvData));
-    AvData *videoData= NULL;
+    AvData *videoData = NULL;
 
     for (;;) {
         // 停止
@@ -124,19 +130,16 @@ void YuvProcess::excuteProcessYUV() {
             continue;
         }
 
-        LOGD("YUV数据开始取");
+        LOGD("YUV开始取");
         // 获取原始av数据
-        videoData=avQueue->getData();
-        if (videoData==NULL){
+        videoData = avQueue1->getData();
+        if (videoData == NULL) {
             // 终止
             break;
         }
 
-//        if (avQueue->getData(&videoData) < 0) {
-//            break;
-//        }
-        LOGD("YUV数据取成功：%d",videoData->len);
-        uint8_t* compressData=new uint8_t[scaleLen]; // 保存压缩结果
+        LOGD("YUV取成功：%d", videoData->len);
+        uint8_t *compressData = new uint8_t[scaleLen]; // 保存压缩结果
         // 压缩数据
         if (degress == 0 || degress == 180) { // 横屏
             compressYUV(videoData->data, srcWidth, srcHeight, compressData, scaleWidth, scaleHeight, filterMode,
@@ -147,16 +150,16 @@ void YuvProcess::excuteProcessYUV() {
                         degress,
                         degress == 270);
         }
-        LOGD("YUV数据压缩成功");
-        uint8_t *cpy = new uint8_t[scaleLen];
-        // 复制压缩数据
-        memcpy(cpy, compressData, scaleLen);
+        LOGD("YUV压缩成功");
+//        uint8_t *cpy = new uint8_t[scaleLen];
+//        // 复制压缩数据
+//        memcpy(cpy, compressData, scaleLen);
         // 回调
-        yuvCallback(cpy, scaleLen);
+        yuvCallback(compressData, scaleLen);
         // 释放
         free(videoData); // 不再使用的时候需要free
-        free(compressData);
-        LOGD("YUV数据压缩回调完毕");
+        // delete []compressData;
+        LOGD("YUV回调完毕");
     }
 
 }

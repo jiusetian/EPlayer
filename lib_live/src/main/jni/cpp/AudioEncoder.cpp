@@ -79,7 +79,7 @@ int AudioEncoder::excuteEncodeAudio() {
             continue;
         }
         // 获取原始av数据
-        data = avQueue->getData();
+        data = avQueue1->getData();
         if (data == NULL) {
             LOGD("取音频数据失败");
             ret = -1;
@@ -98,14 +98,13 @@ int AudioEncoder::excuteEncodeAudio() {
         LOGD("编码后的音频数据：%d", validLength);
         if (validLength > 0) {
             // 复制编码结果
-            uint8_t *cpy = new uint8_t[validLength];
-            memcpy(cpy, outBuffer, validLength);
+//            uint8_t *cpy = new uint8_t[validLength];
+//            memcpy(cpy, outBuffer, validLength);
             // 回调编码结果
             if (callback != nullptr) {
-                callback(cpy, validLength);
+                callback(outBuffer, validLength);
             }
         }
-
         // 释放avdata
         free(data);
     }
@@ -224,8 +223,8 @@ int AudioEncoder::encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, i
 
     // 利用aacEncEncode来编码PCM裸音频数据，上面的代码都是fdk-aac的流程步骤
     if ((err = aacEncEncode(handle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK) {
-        LOGI("Encoding aac failed\n");
-        return err;
+        LOGE("Encoding aac failed：%d\n",err);
+        return 0;
     }
     // 返回编码后的有效字段长度
     return out_args.numOutBytes;

@@ -10,21 +10,22 @@
 #define RTMP_HEAD_SIZE (sizeof(RTMPPacket)+RTMP_MAX_HEADER_SIZE)
 
 RtmpLivePush::RtmpLivePush() {
-    avQueue = new AVQueue();
+    //avQueue = new AVQueue();
+    avQueue1=new BlockQueue<AvData*>();
 }
 
 RtmpLivePush::~RtmpLivePush() {
     releaseRtmp();
-    if (avQueue) {
-        avQueue->flush();
-        delete avQueue;
+    if (avQueue1) {
+        avQueue1->flush();
+        delete avQueue1;
     }
 }
 
 
 void RtmpLivePush::start() {
-    if (avQueue) {
-        avQueue->start();
+    if (avQueue1) {
+        avQueue1->start();
     }
     mutex.lock();
     abortRequest = false;
@@ -42,8 +43,8 @@ void RtmpLivePush::putAvData(AvData *data) {
     if (data->type == VIDEO) {
         LOGD("编码后数据开始保存");
     }
-    if (avQueue) {
-        avQueue->putData(data);
+    if (avQueue1) {
+        avQueue1->putData(data);
     }
     if (data->type == VIDEO) {
         LOGD("编码后数据保存成功");
@@ -69,9 +70,9 @@ void RtmpLivePush::stop() {
     abortRequest = true;
     condition.signal();
     mutex.unlock();
-    if (avQueue) {
-        avQueue->abort();
-        avQueue->flush();
+    if (avQueue1) {
+        avQueue1->abort();
+        avQueue1->flush();
     }
     // 注销线程
     if (rtmpThread) {
@@ -87,8 +88,8 @@ void RtmpLivePush::run() {
 }
 
 void RtmpLivePush::flush() {
-    if (avQueue) {
-        avQueue->flush();
+    if (avQueue1) {
+        avQueue1->flush();
     }
 }
 
@@ -107,7 +108,7 @@ void RtmpLivePush::excuteRtmpPush() {
             continue;
         }
         LOGD("编码后数据开始取");
-        data=avQueue->getData();
+        data=avQueue1->getData();
         if (data==NULL){
             break;
         }

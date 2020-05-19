@@ -1,11 +1,11 @@
-package com.live.video
+package com.live
 
 /**
  * Author：Mapogo
- * Date：2020/5/15
+ * Date：2020/5/20
  * Note：
  */
-interface VideoInterfaces {
+interface LiveInterfaces {
     fun init()
     fun start()
     fun stop()

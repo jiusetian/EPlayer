@@ -11,17 +11,22 @@ import com.live.LiveConfig
 import com.live.LogUtil
 import com.live.MediaPublisher
 import com.live.simplertmp.RtmpHandler
+import kotlinx.android.synthetic.main.activity_a_v_live.*
 import kotlinx.android.synthetic.main.activity_live.*
+import kotlinx.android.synthetic.main.activity_live.camera_surface
 import java.io.IOException
 import java.net.SocketException
+import kotlin.concurrent.thread
 
-class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.RtmpListener {
+class LiveActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         private const val rtmpUrl = "rtmp://192.168.3.19:1935/live/home"
     }
 
+    // 音视频推流器
     private lateinit var mediaPublisher: MediaPublisher
+    private var isPublish = false // 是否正在推流
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,19 +37,72 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         supportActionBar!!.hide()
+
         initView()
         mediaPublisher = MediaPublisher(this, camera_surface, rtmpUrl)
-        mediaPublisher.setRtmpHandler(RtmpHandler(this))
+        // 初始化推流器
+        mediaPublisher.init()
+
     }
 
     private fun initView() {
-        rtmp_url_edit_text.setText(rtmpUrl)
+        // 切换摄像头
         switch_camera_img.setOnClickListener(this)
+        // 开始或暂停推流
         rtmp_publish_img.setOnClickListener(this)
     }
 
-    private fun initCameraInfo() {
+    override fun onResume() {
+        super.onResume()
+        //mediaPublisher.resume()
+    }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        val orientation = newConfig!!.orientation
+        if (orientation == ORIENTATION_LANDSCAPE) {
+            LogUtil.i("-------------横屏-------------")
+        } else {
+            LogUtil.i("-------------竖屏-------------")
+        }
+        mediaPublisher.changeCarmeraOrientation()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mediaPublisher.stop()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //mediaPublisher.pause()
+    }
+
+
+    override fun onClick(v: View) {
+        when (v) {
+            // 切换摄像头
+            switch_camera_img -> {
+                mediaPublisher.switchCamera()
+            }
+
+            // 开始或暂停推流
+            rtmp_publish_img -> {
+                if (!isPublish) {
+                    isPublish = true
+                    rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
+                    mediaPublisher.start()
+                } else {
+                    isPublish = false
+                    rtmp_publish_img.setImageResource(R.mipmap.start_publish)
+                    mediaPublisher.pause()
+                }
+            }
+        }
+    }
+
+
+    private fun initCameraInfo() {
         LiveConfig.apply {
             //摄像头预览信息
             val cameraWidth = cameraWidth
@@ -76,108 +134,5 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener, RtmpHandler.Rtmp
             et_crop_start_y.setText(cropStartY.toString())
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        mediaPublisher.apply {
-            initRtmp()
-            startVideoGather()
-            startAudioGather()
-            startMediaEncoder()
-        }
-        //初始化摄像头信息
-        initCameraInfo()
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration?) {
-        super.onConfigurationChanged(newConfig)
-        val orientation = newConfig!!.orientation
-        if (orientation == ORIENTATION_LANDSCAPE) {
-            LogUtil.i( "-------------横屏-------------")
-        } else {
-            LogUtil.i( "-------------竖屏-------------")
-        }
-        mediaPublisher.getVideoGatherManager().cameraSurface.changeCarmeraOrientation()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mediaPublisher.stopVideoGather()
-        mediaPublisher.stopAudioGather()
-        mediaPublisher.stopMediaEncoder()
-        mediaPublisher.stopPublish()
-        mediaPublisher.relaseRtmp()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaPublisher.releaseIOStream()
-    }
-
-    override fun onClick(v: View) {
-        when (v) {
-            switch_camera_img -> {
-                mediaPublisher.getVideoGatherManager().switchCamera()
-                initCameraInfo()
-            }
-
-            rtmp_publish_img -> {
-                // mediaPublisher.getMediaEncoder().startRecord()
-            }
-        }
-    }
-
-    override fun onRtmpConnecting(msg: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpConnected(msg: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpVideoStreaming() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpAudioStreaming() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpStopped() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpDisconnected() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpVideoFpsChanged(fps: Double) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpVideoBitrateChanged(bitrate: Double) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpAudioBitrateChanged(bitrate: Double) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpSocketException(e: SocketException?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpIOException(e: IOException?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpIllegalArgumentException(e: IllegalArgumentException?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRtmpIllegalStateException(e: IllegalStateException?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 
 }

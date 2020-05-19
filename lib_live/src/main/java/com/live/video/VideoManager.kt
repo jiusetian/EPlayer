@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.live.FileManager
+import com.live.LiveInterfaces
 import com.live.LiveNativeManager
 import com.live.LogUtil
 import java.util.concurrent.LinkedBlockingDeque
@@ -16,7 +17,7 @@ import kotlin.concurrent.thread
  * Date：2020/5/15
  * Note：
  */
-class VideoManager(val cameraSurface: CameraSurface, val context: Context) : VideoInterfaces, SensorEventListener {
+class VideoManager(val cameraSurface: CameraSurface, val context: Context) : LiveInterfaces, SensorEventListener {
 
     companion object {
         // 是否保存视频
@@ -116,7 +117,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
     }
 
     override fun start() {
-        pause = false
+        pause = true
         // 开始线程
         initWorkThread()
         // 打开摄像头

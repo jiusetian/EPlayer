@@ -8,6 +8,7 @@ import android.media.audiofx.AutomaticGainControl
 import android.os.Process
 import com.live.FileManager
 import com.live.LiveConfig
+import com.live.LiveInterfaces
 import com.live.LiveNativeManager
 import java.util.*
 import kotlin.concurrent.thread
@@ -17,7 +18,7 @@ import kotlin.concurrent.thread
  * Date：2020/5/15
  * Note：音频管理器
  */
-class AudioManager : AudioInterfaces {
+class AudioManager : LiveInterfaces {
 
     companion object {
         // 音频获取

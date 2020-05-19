@@ -7,6 +7,7 @@
 
 #include <Thread.h>
 #include "AVQueue.h"
+#include "BlockQueue.h"
 
 class YuvProcess : public Runnable {
 
@@ -57,11 +58,13 @@ private:
 
     Mutex mutex;
     Condition condition;
-    bool abortRequest=false; // 停止
-    bool pauseRequest=false; // 暂停
-    AVQueue *avQueue= nullptr; // 存储视频数据
-    Thread *yuvThread= nullptr; // yuv处理线程
-    YuvCallback  *yuvCallback; // 回调函数
+    bool abortRequest = false; // 停止
+    bool pauseRequest = false; // 暂停
+    //AVQueue *avQueue = nullptr; // 存储视频数据
+    BlockQueue<AvData *> *avQueue1 = NULL; //阻塞队列
+
+    Thread *yuvThread = nullptr; // yuv处理线程
+    YuvCallback *yuvCallback; // 回调函数
 
     // 临时空间
     uint8_t *temp_i420_data;

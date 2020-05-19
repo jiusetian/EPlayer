@@ -11,6 +11,7 @@ typedef struct AvData {
     uint8_t *data; // byte类型数据指针
     int type; // 数据类型
     int nalNums; // nal数量
+    // int数组的指针
     int *nalSizes; // 保存nal的大小
 } AvData;
 

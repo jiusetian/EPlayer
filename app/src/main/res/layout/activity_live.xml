@@ -27,9 +27,11 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="50dp"
-            android:src="@mipmap/start_rtmp_publish"/>
+            android:src="@mipmap/start_publish"/>
 
+<!--    推流相关信息的显示-->
     <LinearLayout
+            android:visibility="gone"
             android:id="@+id/layout_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -166,6 +168,6 @@
                     android:textSize="14dp"/>
 
         </LinearLayout>
-
     </LinearLayout>
+
 </RelativeLayout>

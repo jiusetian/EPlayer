@@ -83,7 +83,7 @@ void VideoEncoder::excuteEncodeVideo() {
         }
         LOGD("压缩后YUV数据开始取");
         // 获取原始av数据
-        data=avQueue->getData();
+        data=avQueue1->getData();
         if (data==NULL){
             break;
         }
@@ -98,21 +98,21 @@ void VideoEncoder::excuteEncodeVideo() {
         int nalNum = encodeFrame(data->data, data->len, ++pts, outBytes, nalSizes);
         int totalLen=0; // 总长度
         int temNalSizes[nalNum]; // 保存nal长度
-        uint8_t *cpy;
+        //uint8_t *cpy;
         for (int i = 0; i < nalNum; i++) {
             totalLen += nalSizes[i];
             temNalSizes[i] = nalSizes[i];
         }
         LOGD("压缩后YUV数据编码成功：%d",totalLen);
-        cpy = new uint8_t[totalLen];
-        memcpy(cpy, outBytes, totalLen);
+//        cpy = new uint8_t[totalLen];
+//        memcpy(cpy, outBytes, totalLen);
         LOGD("压缩后YUV数据的编码结果开始回调");
         // 回调
-        callback(cpy, totalLen, nalNum, temNalSizes);
+        callback(outBytes, totalLen, nalNum, temNalSizes);
         LOGD("压缩后YUV数据的编码结果回调成功");
 
         free(data);
-        free(outBytes);
+       // delete []outBytes;
     }
 
     // 释放

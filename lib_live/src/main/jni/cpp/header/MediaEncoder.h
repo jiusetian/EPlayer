@@ -7,6 +7,7 @@
 
 #include <Thread.h>
 #include "AVQueue.h"
+#include "BlockQueue.h"
 
 class MediaEncoder: public Runnable{
 
@@ -35,7 +36,8 @@ protected:
     bool abortRequest=false; // 停止
     bool pauseRequest=false; // 暂停
 
-    AVQueue *avQueue=NULL;
+    //AVQueue *avQueue=NULL;
+    BlockQueue<AvData *> *avQueue1 = NULL; //阻塞队列
 };
 
 

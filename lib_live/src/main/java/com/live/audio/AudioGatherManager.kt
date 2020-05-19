@@ -5,11 +5,12 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.AutomaticGainControl
+import android.os.Process
 import com.live.FileManager
-import com.live.LiveConfig
+import com.live.LiveInterfaces
 import com.live.LiveNativeManager
-import com.live.LogUtil
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 
@@ -18,7 +19,7 @@ import kotlin.concurrent.thread
  * Date：2019/9/21
  * Note：
  */
-class AudioGatherManager {
+class AudioGatherManager : LiveInterfaces {
 
     companion object {
         // 音频获取
@@ -26,6 +27,8 @@ class AudioGatherManager {
 
         // 设置音频采样率，44100是目前的标准，但是某些设备仍然支 2050 6000 1025
         private const val SAMPLE_HZ = 44100
+
+        private const val BIT_RATE = 64000
 
         // 设置音频的录制的声道CHANNEL_IN_STEREO为双声道，CHANNEL_CONFIGURATION_MONO为单声道
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO
@@ -37,14 +40,16 @@ class AudioGatherManager {
         private const val SAVE_FILE_FOR_TEST = false
     }
 
-    // lateinit不能用来修饰基本类型(因为基本类型的属性在类加载后的准备阶段都会被初始化为默认值)，也不能修饰可null的变量
+    // 一次读取音频数据的大小
     private var mBufferSize: Int = 0
 
     private lateinit var mAudioRecord: AudioRecord
+
     // 回音消除器，场景就是在手机播放声音和声音录制同时进行，但是手机播放的声音不会被本机录制，达到了消除的效果
-    private  var acousticEchoCanceler: AcousticEchoCanceler? = null
+    private var acousticEchoCanceler: AcousticEchoCanceler? = null
+
     // 自动增强控制器
-    private  var automaticGainControl: AutomaticGainControl? = null
+    private var automaticGainControl: AutomaticGainControl? = null
 
     private var bufferSizeInBytes = 0
 
@@ -52,9 +57,12 @@ class AudioGatherManager {
 
     private lateinit var workThread: Thread
 
-    private var isLoop: Boolean = false
+    private var isLoop = true
+
+    private var mPause: AtomicBoolean
 
     init {
+        mPause=AtomicBoolean(true)
         // 是否保存录音
         if (SAVE_FILE_FOR_TEST) {
             fileManager = FileManager(FileManager.TEST_PCM_FILE)
@@ -70,12 +78,11 @@ class AudioGatherManager {
     // 录制音频数据回调方法，参数是字节数组，没有返回值，可为null
     private var audioDataListener: ((data: ByteArray) -> Unit)? = null
 
-    fun setAudioDataListener(audioDataListener: ((data: ByteArray) -> Unit)) {
+    fun onAudioDataListener(audioDataListener: ((data: ByteArray) -> Unit)) {
         this.audioDataListener = audioDataListener
     }
 
-    // 初始化音频录制
-    fun initAudio(): Int {
+    override fun init() {
         // 音频录制对象
         mAudioRecord = AudioRecord(
             SOURCE,
@@ -94,44 +101,44 @@ class AudioGatherManager {
             automaticGainControl = AutomaticGainControl.create(mAudioRecord.audioSessionId)
             automaticGainControl?.setEnabled(true)
         }
-        // 初始化音频编码，返回每次编码数据的合适大小
-        val bufferSize = LiveNativeManager.initAudioEncoder(LiveConfig.SAMPLE_RATE, LiveConfig.CHANNELS, LiveConfig.BIT_RATE)
-        LogUtil.d("音频录制大小赋值=" + bufferSize)
-        // 音频每次录制多少byte
+        // 初始化音频编码，返回每次编码的合适大小
+        val bufferSize = LiveNativeManager.initAudioEncoder(SAMPLE_HZ, 2, BIT_RATE)
+
+        // 每次录制多少byte
         mBufferSize = bufferSize
-        return bufferSize
     }
 
-    private fun releaseAudio() {
-        LiveNativeManager.releaseAudio()
-    }
-
-    fun startAudioGather() {
-
+    override fun start() {
+        mPause.set(false)
+        // 录音线程
         workThread = thread(start = true) {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
             // 开始录制
             mAudioRecord.startRecording()
-            // 保存每次读取的音频数据
+            // 保存一次读取的音频数据
             val audioData = ByteArray(mBufferSize)
-            LogUtil.d("线程录制音频数据大小=" + mBufferSize)
             var readSize = 0
-            isLoop = true
-            // 录音，获取pcm裸音频，这个音频数据文件很大，我们必须编码成aac，主要才能 rtmp传输
+
+            // 录音，获取pcm裸音频，这个音频数据文件很大，必须编码成aac，才能 rtmp传输
             while (isLoop && !Thread.interrupted()) {
                 try {
-                    // 从硬件设置中读取mBufferSize音频数据到audioData中
+                    // 暂停的话不读音频
+                    if (mPause.get()) {
+                        continue
+                    }
+                    // 从硬件设置中读取 mBufferSize音频数据到audioData中
                     readSize = mAudioRecord.read(audioData, readSize, mBufferSize)
 
                     if (readSize < 0) continue
+
                     // 复制音频pcm数据
-                    val ralAudio = ByteArray(readSize)
-                    System.arraycopy(audioData, 0, ralAudio, 0, readSize)
+                    val audioCopy = ByteArray(readSize)
+                    System.arraycopy(audioData, 0, audioCopy, 0, readSize)
                     // 把录音的数据抛给MediaEncoder去编码成aac数据
-                    audioDataListener?.let { it.invoke(ralAudio) }
-                    // 我们可以把裸音频以文件格式保存起来，判断这个一片是否完好的，需要加一个WAV头
+                    audioDataListener?.let { it.invoke(audioCopy) }
+                    // 可以把裸音频以文件格式保存起来，进行测试
                     if (SAVE_FILE_FOR_TEST) {
-                        fileManager.saveFileData(ralAudio)
+                        fileManager.saveFileData(audioCopy)
                     }
                     // 重置
                     readSize = 0
@@ -139,31 +146,34 @@ class AudioGatherManager {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-
             }
-
         }
     }
 
-    fun stopAudioGather() {
+    override fun stop() {
         // 停止线程
         isLoop = false
-        // workThread.interrupt()
+
         mAudioRecord.stop()
         mAudioRecord.release()
         acousticEchoCanceler?.setEnabled(false)
         acousticEchoCanceler?.release()
         automaticGainControl?.setEnabled(false)
         automaticGainControl?.release()
-        // 释放jni层资源
-        releaseAudio()
-    }
-
-    // 释放stream
-    fun realeaseStream() {
+        // 释放文件流
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
+        // 释放底层资源
+        LiveNativeManager.releaseAudio()
+    }
+
+    override fun pause() {
+        mPause.set(true)
+    }
+
+    override fun resume() {
+        mPause.set(false)
     }
 }
 

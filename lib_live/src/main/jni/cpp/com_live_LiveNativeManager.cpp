@@ -311,7 +311,7 @@ Java_com_live_LiveNativeManager_cropYUV(JNIEnv *env, jclass type, jbyteArray src
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint src_width,
+Java_com_live_LiveNativeManager_videoEncoderinit(JNIEnv *env, jclass type, jint src_width,
                                                  jint src_height, jint in_width, jint in_height, jint orientation) {
     //  初始化临时空间
     init(src_width, src_height, in_width, in_height);
@@ -333,8 +333,8 @@ Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint 
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_encoderVideoEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
-                                                   jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
+Java_com_live_LiveNativeManager_videoEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
+                                            jint fps, jbyteArray dstFrame_, jintArray outFramewSize_) {
     //  转为jbyte数组的指针
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
@@ -363,8 +363,8 @@ Java_com_live_LiveNativeManager_initAudioEncoder(JNIEnv *env, jclass type, jint 
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_live_LiveNativeManager_encoderAudioEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
-                                                   jbyteArray dstFrame_, jint dstSize) {
+Java_com_live_LiveNativeManager_audioEncode(JNIEnv *env, jclass type, jbyteArray srcFrame_, jint frameSize,
+                                            jbyteArray dstFrame_, jint dstSize) {
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
 

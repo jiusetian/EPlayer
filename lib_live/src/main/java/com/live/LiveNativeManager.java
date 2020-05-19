@@ -11,6 +11,7 @@ public final class LiveNativeManager {
         System.loadLibrary("live-lib");
     }
 
+    // 释放资源
     public static native int release();
 
     public static native int yuvI420ToNV21(byte[] i420Src, byte[] nv21Src, int width, int height);
@@ -48,11 +49,22 @@ public final class LiveNativeManager {
      * 编码视频数据准备工作
      * @param src_width
      * @param src_height
-     * @param in_width
-     * @param in_height
+     * @param scale_width
+     * @param scale_height
      * @return
      */
-    public static native int encoderVideoinit( int src_width, int src_height,int in_width, int in_height,int orientation);
+    public static native int videoEncoderinit(int src_width, int src_height, int scale_width, int scale_height, int orientation);
+
+    /**
+     * 编码视频数据接口
+     * @param srcFrame      原始数据(YUV420P数据)
+     * @param frameSize     帧大小
+     * @param fps           fps
+     * @param dstFrame      编码后的数据存储
+     * @param outFramewSize 编码后的数据大小
+     * @return
+     */
+    public static native int videoEncode(byte[] srcFrame, int frameSize, int fps, byte[] dstFrame, int[] outFramewSize);
 
     /**
      * 初始化视频编码器
@@ -76,19 +88,9 @@ public final class LiveNativeManager {
 
     public static native void putVideoData(byte[] videoData,int dataLen);
 
-    /**
-     * 编码视频数据接口
-     * @param srcFrame      原始数据(YUV420P数据)
-     * @param frameSize     帧大小
-     * @param fps           fps
-     * @param dstFrame      编码后的数据存储
-     * @param outFramewSize 编码后的数据大小
-     * @return
-     */
-    public static native int encoderVideoEncode(byte[] srcFrame, int frameSize, int fps, byte[] dstFrame, int[] outFramewSize);
 
     /**
-     *
+     * 音频编码器的初始化
      * @param sampleRate 音频采样频率
      * @param channels   音频通道
      * @param bitRate    音频bitRate
@@ -118,7 +120,7 @@ public final class LiveNativeManager {
      */
     public static native void resumeAudioEncode();
 
-    public static native int encoderAudioEncode(byte[] srcFrame, int frameSize, byte[] dstFrame, int dstSize);
+    public static native int audioEncode(byte[] srcFrame, int frameSize, byte[] dstFrame, int dstSize);
 
     /**
      * 初始化RMTP，建立RTMP与RTMP服务器连接
