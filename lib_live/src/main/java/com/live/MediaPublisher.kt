@@ -158,6 +158,7 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         videoGatherManager.switchCamera()
     }
 
+
     // rtmp相关
     fun initRtmp() {
         //初始化rtmp

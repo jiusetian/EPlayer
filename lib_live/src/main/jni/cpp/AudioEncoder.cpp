@@ -18,19 +18,23 @@ AudioEncoder::~AudioEncoder() {
 
 void AudioEncoder::start() {
     MediaEncoder::start();
-
     // 创建编码线程
     if (!encoderThread) {
         encoderThread = new Thread(this);
+        LOGD("开启音频线程");
         encoderThread->start();
     }
 }
 
 void AudioEncoder::putAudioData(uint8_t *data, int len) {
-    AvData avData;
-    avData.data = data;
-    avData.len = len;
-    pushAvData(avData);
+    AvData *avData = static_cast<AvData *>(malloc(sizeof(AvData)));
+    avData->data = data;
+    avData->len = len;
+    avData->type = AUDIO;
+    avData->nalNums = 0;
+    avData->nalSizes = NULL;
+    LOGD("音频数据开始保存");
+    putAvData(avData);
 }
 
 void AudioEncoder::stop() {
@@ -59,10 +63,8 @@ void AudioEncoder::run() {
 }
 
 int AudioEncoder::excuteEncodeAudio() {
-
-    uint8_t outBuffer[1024];
-    int outLen = 1024;
-    AvData *data;
+    LOGD("执行编码音频");
+    AvData *data = NULL;
     int ret = 0; // 返回结果
 
     for (;;) {
@@ -77,14 +79,23 @@ int AudioEncoder::excuteEncodeAudio() {
             continue;
         }
         // 获取原始av数据
-        if (avQueue->getData(data) < 0) {
+        data = avQueue->getData();
+        if (data == NULL) {
+            LOGD("取音频数据失败");
             ret = -1;
             break;
         }
+//        if (avQueue->getData(&data) < 0) {
+//            ret = -1;
+//            break;
+//        }
+        LOGD("取音频数据：%d", data->len);
+        uint8_t outBuffer[1024];
+        int outLen = 1024;
 
         // 编码
         int validLength = encodeAudio(data->data, data->len, outBuffer, outLen);
-
+        LOGD("编码后的音频数据：%d", validLength);
         if (validLength > 0) {
             // 复制编码结果
             uint8_t *cpy = new uint8_t[validLength];
@@ -94,19 +105,19 @@ int AudioEncoder::excuteEncodeAudio() {
                 callback(cpy, validLength);
             }
         }
+
+        // 释放avdata
+        free(data);
     }
-    // 释放avdata
-    free(data);
 
     return ret;
 }
 
 // 初始化编码相关参数
 int AudioEncoder::init() {
-
     // 打开AAC音频编码引擎，创建AAC编码句柄
     if (aacEncOpen(&handle, 0, channels) != AACENC_OK) {
-        LOGE("打开fdkaac编码器失败");
+        LOGE("打开fdkaac编码器失败:%d", aacEncOpen(&handle, 0, channels));
         return -1;
     }
 
@@ -166,7 +177,7 @@ int AudioEncoder::init() {
 
     // 返回数据给上层，表示每次传递多少个数据最佳，这样encode效率最高，frameLength是每帧每个channel的采样点数
     int inputSize = channels * 2 * info.frameLength;
-
+    LOGD("音频编码器打开成功");
     return inputSize; // 返回每次解码最合适的大小
 }
 

@@ -11,4 +11,5 @@ interface PublishInterfaces {
     fun stop()
     fun pause()
     fun resume()
+    fun release()
 }

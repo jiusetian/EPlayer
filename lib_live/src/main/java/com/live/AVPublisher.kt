@@ -1,7 +1,10 @@
 package com.live
 
 import android.content.Context
+import com.live.audio.AudioManager
 import com.live.video.CameraSurface
+import com.live.video.VideoManager
+import kotlin.concurrent.thread
 
 /**
  * Author：Mapogo
@@ -11,24 +14,62 @@ import com.live.video.CameraSurface
 class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) : PublishInterfaces {
 
 
+    private lateinit var videoManager: VideoManager
+
+    private lateinit var audioManager: AudioManager
+
+
     override fun init() {
-        TODO("Not yet implemented")
+        videoManager = VideoManager(cameraSurface, context)
+        audioManager = AudioManager()
+        videoManager.init()
+        audioManager.init()
+
+        thread(start = true) {
+            LiveNativeManager.initRtmpData(rtmpUrl)
+        }
     }
 
+    fun switchCamera(){
+        videoManager.switchCamera()
+    }
+
+    fun openCamera(){
+        videoManager.openCamera()
+    }
+
+    // 改变摄像机方向
+    fun changeCarmeraOrientation(): Int {
+        return videoManager.changeCarmeraOrientation()
+    }
+
+
     override fun start() {
-        TODO("Not yet implemented")
+        videoManager.start()
+        audioManager.start()
+        LiveNativeManager.startRtmpPublish()
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        videoManager.stop()
+        audioManager.stop()
+        LiveNativeManager.stopRtmpPublish()
     }
 
     override fun pause() {
-        TODO("Not yet implemented")
+        videoManager.pause()
+        audioManager.pause()
+        LiveNativeManager.pauseRtmpPublish()
     }
 
     override fun resume() {
-        TODO("Not yet implemented")
+        videoManager.resume()
+        audioManager.resume()
+        LiveNativeManager.resumeRtmpPublish()
+    }
+
+    override fun release() {
+        LiveNativeManager.release()
     }
 
 

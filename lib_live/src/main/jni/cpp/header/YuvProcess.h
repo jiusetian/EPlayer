@@ -57,10 +57,10 @@ private:
 
     Mutex mutex;
     Condition condition;
-    bool abortRequest; // 停止
+    bool abortRequest=false; // 停止
     bool pauseRequest=false; // 暂停
-    AVQueue *avQueue; // 存储视频数据
-    Thread *yuvThread; // yuv处理线程
+    AVQueue *avQueue= nullptr; // 存储视频数据
+    Thread *yuvThread= nullptr; // yuv处理线程
     YuvCallback  *yuvCallback; // 回调函数
 
     // 临时空间

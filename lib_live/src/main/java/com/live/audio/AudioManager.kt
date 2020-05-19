@@ -26,7 +26,9 @@ class AudioManager : AudioInterfaces {
         // 设置音频采样率，44100是目前的标准，但是某些设备仍然支 2050 6000 1025
         private const val SAMPLE_HZ = 44100
 
-        // 设置音频的录制的声道CHANNEL_IN_STEREO为双声道，CHANNEL_CONFIGURATION_MONO为单声道
+        private const val BIT_RATE = 64000
+
+        // 设置音频的录制的声道 CHANNEL_IN_STEREO为双声道，CHANNEL_CONFIGURATION_MONO为单声道
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO
 
         // 音频数据格式:PCM16位，每个样本保证设备支持。PCM 8位每个样本，不一定能得到设备支持
@@ -55,7 +57,7 @@ class AudioManager : AudioInterfaces {
 
     private var isLoop: Boolean = false
 
-    private var pause = false // 是否暂停
+    private var pause = true // 是否暂停
 
     init {
         // 是否保存录音
@@ -89,23 +91,24 @@ class AudioManager : AudioInterfaces {
             automaticGainControl?.setEnabled(true)
         }
         // 初始化音频编码，返回每次编码数据的合适大小
-        val bufferSize =
-            LiveNativeManager.initAudioEncoder(LiveConfig.SAMPLE_RATE, LiveConfig.CHANNELS, LiveConfig.BIT_RATE)
+        val bufferSize = LiveNativeManager.initAudioEncoder(SAMPLE_HZ, 2, BIT_RATE)
 
         mBufferSize = bufferSize
     }
 
     override fun start() {
+        // 录音线程
         workThread = thread(start = true) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
             // 开始录制
             mAudioRecord.startRecording()
-            // 保存每次读取的音频数据
+
+            // 保存一次读取的音频数据
             val audioData = ByteArray(mBufferSize)
 
             var readSize = 0
             isLoop = true
-
+            pause = false
             // 录音，获取pcm裸音频，这个音频数据文件很大，必须编码成aac，才能 rtmp传输
             while (isLoop && !Thread.interrupted()) {
                 try {

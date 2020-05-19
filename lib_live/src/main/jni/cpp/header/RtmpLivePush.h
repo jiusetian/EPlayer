@@ -31,10 +31,10 @@ class RtmpLivePush : public Runnable {
 private:
     Mutex mutex;
     Condition condition;
-    bool abortRequest; // 停止
+    bool abortRequest=false; // 停止
     bool pauseRequest = false; // 暂停
-    AVQueue *avQueue; // 存储视频数据
-    Thread *rtmpThread; // yuv处理线程
+    AVQueue *avQueue=NULL; // 存储视频数据
+    Thread *rtmpThread= nullptr; // yuv处理线程
     bool isSendAudioHeader=false;
 
 public:
@@ -59,13 +59,13 @@ public:
 
     void pause();
 
-    void addAvData(AvData data);
+    void putAvData(AvData* data);
 
     // push video data with rtmp
-    void pushVideoData(AvData data);
+    void pushVideoData(AvData* data);
 
     // push audio data with rtmp
-    void pushAudioData(AvData data);
+    void pushAudioData(AvData* data);
 
     void excuteRtmpPush();
 
@@ -79,7 +79,7 @@ public:
 
     void addSequenceH264Header(unsigned char *sps, int sps_len, unsigned char *pps, int pps_len);
 
-    void addH264Body(unsigned char *buf, int len, long timeStamp);
+    void pushH264Body(unsigned char *buf, int len, long timeStamp);
 
     void releaseRtmp();
 

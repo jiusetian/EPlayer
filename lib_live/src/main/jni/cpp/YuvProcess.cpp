@@ -2,6 +2,7 @@
 // Created by Guns Roses on 2020/5/13.
 //
 #include <malloc.h>
+#include <AndroidLog.h>
 #include "YuvProcess.h"
 #include "YuvUtil.h"
 
@@ -29,11 +30,19 @@ void YuvProcess::init() {
 
 // push av data into queue
 void YuvProcess::putAvData(uint8_t *data, int len) {
-    AvData avData;
-    avData.data = data;
-    avData.len = len;
+    // 分配空间
+    AvData *avData= static_cast<AvData *>(malloc(sizeof(AvData)));
+    avData->data = data;
+    avData->len = len;
+    avData->type=VIDEO;
+    avData->nalNums=0;
+    avData->nalSizes=NULL;
     if (avQueue) {
-        avQueue->pushData(&avData);
+        LOGD("YUV数据开始保存=%d",avData->len);
+        avQueue->putData(avData);
+        LOGD("YUV数据保存成功");
+    } else{
+        free(avData);
     }
 }
 
@@ -46,7 +55,7 @@ void YuvProcess::start() {
     condition.signal();
     mutex.unlock();
     // 开始线程
-    if (yuvThread) {
+    if (!yuvThread) {
         yuvThread = new Thread(this);
         yuvThread->start();
     }
@@ -64,6 +73,7 @@ void YuvProcess::stop() {
     abortRequest = true;
     condition.signal();
     mutex.unlock();
+
     if (avQueue) {
         avQueue->abort();
         avQueue->flush();
@@ -100,26 +110,33 @@ void YuvProcess::setYuvCallback(YuvProcess::YuvCallback callback) {
 }
 
 void YuvProcess::excuteProcessYUV() {
-
     int scaleLen = scaleWidth * scaleHeight * 3 / 2;
-    uint8_t compressData[scaleLen]; // 保存压缩结果
-    AvData *videoData;
+    //AvData *videoData=(AvData *) malloc(sizeof(AvData));
+    AvData *videoData= NULL;
 
     for (;;) {
         // 停止
         if (abortRequest) {
             break;
         }
-
         // 暂停
         if (pauseRequest) {
             continue;
         }
+
+        LOGD("YUV数据开始取");
         // 获取原始av数据
-        if (avQueue->getData(videoData) < 0) {
+        videoData=avQueue->getData();
+        if (videoData==NULL){
+            // 终止
             break;
         }
 
+//        if (avQueue->getData(&videoData) < 0) {
+//            break;
+//        }
+        LOGD("YUV数据取成功：%d",videoData->len);
+        uint8_t* compressData=new uint8_t[scaleLen]; // 保存压缩结果
         // 压缩数据
         if (degress == 0 || degress == 180) { // 横屏
             compressYUV(videoData->data, srcWidth, srcHeight, compressData, scaleWidth, scaleHeight, filterMode,
@@ -130,18 +147,18 @@ void YuvProcess::excuteProcessYUV() {
                         degress,
                         degress == 270);
         }
-
-
+        LOGD("YUV数据压缩成功");
         uint8_t *cpy = new uint8_t[scaleLen];
-        // 复制数据
+        // 复制压缩数据
         memcpy(cpy, compressData, scaleLen);
         // 回调
         yuvCallback(cpy, scaleLen);
+        // 释放
+        free(videoData); // 不再使用的时候需要free
+        free(compressData);
+        LOGD("YUV数据压缩回调完毕");
     }
 
-    // 释放
-    free(compressData);
-    free(videoData);
 }
 
 void YuvProcess::compressYUV(uint8_t *src, int width, int height,

@@ -25,17 +25,17 @@ public:
 
     virtual void resume();
 
-    virtual void pushAvData(AvData data);
+    virtual void putAvData(AvData* data);
 
     virtual void run(); // 虚函数代表子类可以重写
 
 protected:
     Mutex mutex;
     Condition condition;
-    bool abortRequest; // 停止
+    bool abortRequest=false; // 停止
     bool pauseRequest=false; // 暂停
 
-    AVQueue *avQueue;
+    AVQueue *avQueue=NULL;
 };
 
 

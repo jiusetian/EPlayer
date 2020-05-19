@@ -15,7 +15,7 @@ RtmpLivePush::RtmpLivePush() {
 
 RtmpLivePush::~RtmpLivePush() {
     releaseRtmp();
-    if(avQueue){
+    if (avQueue) {
         avQueue->flush();
         delete avQueue;
     }
@@ -31,16 +31,22 @@ void RtmpLivePush::start() {
     condition.signal();
     mutex.unlock();
     // 开始线程
-    if (rtmpThread) {
+    if (!rtmpThread) {
         rtmpThread = new Thread(this);
         rtmpThread->start();
     }
 }
 
 // push av data into queue
-void RtmpLivePush::addAvData(AvData data) {
+void RtmpLivePush::putAvData(AvData *data) {
+    if (data->type == VIDEO) {
+        LOGD("编码后数据开始保存");
+    }
     if (avQueue) {
-        avQueue->pushData(&data);
+        avQueue->putData(data);
+    }
+    if (data->type == VIDEO) {
+        LOGD("编码后数据保存成功");
     }
 }
 
@@ -88,8 +94,9 @@ void RtmpLivePush::flush() {
 
 // start rtmp push
 void RtmpLivePush::excuteRtmpPush() {
-    AvData *data;
-
+   // AvData *data = (AvData *) malloc(sizeof(AvData));
+    //AvData *data= static_cast<AvData *>(malloc(sizeof(AvData)));
+    AvData *data= NULL;
     for (;;) {
         // 停止
         if (abortRequest) {
@@ -99,40 +106,51 @@ void RtmpLivePush::excuteRtmpPush() {
         if (pauseRequest) {
             continue;
         }
-        // 获取原始av数据
-        if (avQueue->getData(data) < 0) {
+        LOGD("编码后数据开始取");
+        data=avQueue->getData();
+        if (data==NULL){
             break;
         }
-
+        // 取编码后的 av数据
+//        if (avQueue->getData(&data) < 0) {
+//            break;
+//        }
+        LOGD("编码后数据取成功：%d", data->len);
         if (data->type == AUDIO) {
-            pushAudioData(*data);
+            LOGD("编码后数据音频推流");
+            pushAudioData(data);
         } else if (data->type == VIDEO) {
-            pushVideoData(*data);
+            LOGE("编码后数据视频推流");
+            for (int i=0;i<data->nalNums;i++){
+                LOGD("推流nal大小：%d",data->nalSizes[i]);
+            }
+            pushVideoData(data);
         }
+        LOGE("编码后数据推流成功");
+
+        free(data);
     }
 
-    free(data);
 }
 
 
-void RtmpLivePush::pushVideoData(AvData data) {
+void RtmpLivePush::pushVideoData(AvData* data) {
 
-    uint8_t *videoData = data.data;
-    int nulNum = data.nalNums;
-    int *nulSizes = data.nalSizes;
+    uint8_t *videoData = data->data;
+    int nulNum = data->nalNums;
+    int *nulSizes = data->nalSizes;
 
     int spsLen = 0;
     int ppsLen = 0;
-    uint8_t *sps;
-    uint8_t *pps;
+    uint8_t *sps= nullptr;
+    uint8_t *pps= nullptr;
     int haveCopy = 0;
 
     // send all the nals
     for (int i = 0; i < nulNum; ++i) {
 
         int nalLen = nulSizes[i];
-        uint8_t *nalBytes;
-        nalBytes = new uint8_t[nalLen];
+        uint8_t *nalBytes = new uint8_t[nalLen];
         // copy nal data
         memcpy(nalBytes, videoData + haveCopy, nalLen);
         haveCopy += nalLen;
@@ -157,25 +175,23 @@ void RtmpLivePush::pushVideoData(AvData data) {
             pushSPSPPS(sps, spsLen, pps, ppsLen);
         } else {
             // send h264 body
-            addH264Body(nalBytes, nalLen, 0L);
+            pushH264Body(nalBytes, nalLen, 0L);
         }
     }
 
     // release memory
     if (videoData)
         free(videoData);
-    if (nulSizes)
-        free(nulSizes);
     if (sps)
         free(sps);
     if (pps)
         free(pps);
 }
 
-void RtmpLivePush::pushAudioData(AvData data) {
+void RtmpLivePush::pushAudioData(AvData* data) {
 
-    uint8_t *audioData = data.data;
-    int audioLen = data.len;
+    uint8_t *audioData = data->data;
+    int audioLen = data->len;
 
     // send the audio header first
     if (!isSendAudioHeader) {
@@ -312,7 +328,7 @@ int RtmpLivePush::send_video_sps_pps(unsigned char *sps, int spsLen, unsigned ch
 
 
 void RtmpLivePush::pushSPSPPS(unsigned char *sps, int spsLen, unsigned char *pps, int ppsLen) {
-
+    LOGD("发送spspps");
     int bodySize = spsLen + ppsLen + 16;
     RTMPPacket *rtmpPacket = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
     RTMPPacket_Alloc(rtmpPacket, bodySize);
@@ -476,7 +492,7 @@ void RtmpLivePush::addSequenceH264Header(unsigned char *sps, int sps_len, unsign
  * @param len
  * @param timeStamp
  */
-void RtmpLivePush::addH264Body(unsigned char *buf, int len, long timeStamp) {
+void RtmpLivePush::pushH264Body(unsigned char *buf, int len, long timeStamp) {
     // LOGI("%s","发送body");
     // 去掉起始码(界定符)
     if (buf[0] == 0x00 && buf[1] == 0x00 && buf[2] == 0x00 && buf[3] == 0x01) {

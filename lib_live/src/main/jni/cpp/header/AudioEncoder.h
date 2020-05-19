@@ -27,10 +27,10 @@ private:
     int bitRate;
     HANDLE_AACENCODER handle;
 
-    Thread *encoderThread; // 编码线程
+    Thread *encoderThread = nullptr; // 编码线程
 
     // 回调函数
-    EncoderCallback *callback= nullptr;
+    EncoderCallback *callback = nullptr;
 
 
 public:
@@ -49,7 +49,7 @@ public:
 
     void flush() override;
 
-    void putAudioData(uint8_t* data,int len);
+    void putAudioData(uint8_t *data, int len);
 
 
     // 其实 uint8_t和 unsigned char 是一样的

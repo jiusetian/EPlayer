@@ -45,6 +45,7 @@ class CameraUtil(val context: Context) {
      * 打开摄像头
      */
     fun openCamera(cameraType: Int) {
+        LogUtil.d("打开摄像头")
         // 摄像头信息
         val info = Camera.CameraInfo()
 
@@ -115,6 +116,7 @@ class CameraUtil(val context: Context) {
 
     // 摄像头预览
     fun handleCameraStartPreview(surfaceHolder: SurfaceHolder, callback: Camera.PreviewCallback) {
+        LogUtil.d("开始预览")
         // 设置摄像头预览回调，用于回调摄像头捕捉的帧数据
         camera.setPreviewCallback(callback)
 

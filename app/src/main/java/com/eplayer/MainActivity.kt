@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         checkPerms() //初始化权限
+
+        // 直播
         btn_live.setOnClickListener {
             if (EasyPermissions.hasPermissions(this, *perms))
                 startActivity(Intent(this, LiveActivity::class.java))
@@ -42,9 +44,17 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 requestPerms(*perms)
         }
 
+        // 直播2
+        btn_live1.setOnClickListener {
+            if (EasyPermissions.hasPermissions(this, *perms))
+                startActivity(Intent(this, AVLiveActivity::class.java))
+            else
+                requestPerms(*perms)
+        }
+
         LogUtil.d("返回媒体信息："+Utils.getVideoList(this).get(0))
 
-        //播放器播放
+        //播放器
         btn_play.setOnClickListener {
             val intent = Intent(this, MediaPlayerActivity::class.java)
             intent.putExtra("path", PATH)

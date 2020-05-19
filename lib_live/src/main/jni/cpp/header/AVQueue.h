@@ -11,7 +11,7 @@
 
 // 节点结构体
 typedef struct AVNode {
-    AvData data;
+    AvData *data;
     struct AVNode *next;
 } AVNode;
 
@@ -24,13 +24,16 @@ public:
     virtual ~AVQueue();
 
     // 数据入列
-    int pushData(AvData *data);
+    int putData(AvData *data);
 
     // 取数据
-    int getData(AvData *data);
+    int getData(AvData **data);
 
     // 取数据
-    int getData(AvData *data, bool block);
+    AvData* getData();
+
+    // 取数据
+    int getData(AvData **data, bool block);
 
     int getSize();
 
@@ -43,14 +46,13 @@ public:
     // 清空队列
     void flush();
 
-private:
-    int putData(AvData *data);
 
 private:
     Mutex mMutex;
     Condition mCondition;
-
-    AVNode *first, *last;
+    // 链表的头和尾
+    AVNode *first;
+    AVNode *last;
     int size;
     int abort_request; // 停止
 

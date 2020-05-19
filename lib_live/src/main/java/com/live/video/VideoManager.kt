@@ -33,13 +33,14 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
 
     // 是否已经初始化
     private var isVideoInit = false
-    private var pause=false //暂停
+    private var pause = true //暂停
 
     // 旋转角度
     private var orientation = 0
 
     // 传感器需要，这边使用的是加速度传感器
     private val sensorManager: SensorManager
+
     // 第一次实例化的时候是不需要的
     private var initialized = false
     private var lastX = 0f
@@ -69,7 +70,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
             while (isLoop && !Thread.interrupted()) {
                 // 获取阻塞队列中的数据，没有数据的时候阻塞
                 val srcData = cameraDatas.take()
-
+                LogUtil.d("相机数据："+srcData.size)
                 // 将摄像头数据交给底层编码
                 LiveNativeManager.putVideoData(srcData, srcData.size)
 
@@ -82,9 +83,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
     }
 
     override fun init() {
-        // 开始线程
-        initWorkThread()
-        // 将视频预览数据压入队列，如果暂停的话停止添加数据
+        // 将视频预览数据压入队列，如果暂停则停止添加
         cameraSurface.onCameraNVDataListener { it?.let { if (!pause) cameraDatas.put(it) } }
 
         cameraSurface.onCameraOrientationChangeListener {
@@ -101,7 +100,13 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
             // 有了摄像头视频帧的宽高，才能初始化视频编码器
             if (!isVideoInit) {
                 isVideoInit = true
-                LiveNativeManager.initVideoEncoder(videoWidth, videoHeight, scaleWidth, scaleHeight, cameraSurface.getCameraUtil().getCameraOrientation())
+                LiveNativeManager.initVideoEncoder(
+                    videoWidth,
+                    videoHeight,
+                    scaleWidth,
+                    scaleHeight,
+                    cameraSurface.getCameraUtil().getCameraOrientation()
+                )
             }
         }
 
@@ -111,8 +116,11 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
     }
 
     override fun start() {
+        pause = false
+        // 开始线程
+        initWorkThread()
         // 打开摄像头
-        cameraSurface.openCamera()
+        //cameraSurface.openCamera()
         // 注册加速度传感器
         sensorManager.registerListener(
             this,
@@ -120,6 +128,11 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
             SensorManager.SENSOR_DELAY_UI
         )
         LiveNativeManager.startVideoEncoder()
+    }
+
+    // 打开摄像头
+    fun openCamera() {
+        cameraSurface.openCamera()
     }
 
     override fun stop() {
@@ -130,23 +143,30 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Vid
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
-        // 底层的释放
+        // 底层的停止
         LiveNativeManager.stopVideoEncoder()
     }
 
     override fun pause() {
-        pause=true
+        pause = true
         cameraDatas.clear()
+
         LiveNativeManager.pauseVideoEncoder()
     }
 
     override fun resume() {
-        pause=false
+        pause = false
+
         LiveNativeManager.resumeVideoEncoder()
     }
 
     fun switchCamera() {
         cameraSurface.switchCamera()
+    }
+
+    // 改变摄像机方向
+    fun changeCarmeraOrientation(): Int {
+        return cameraSurface.changeCarmeraOrientation()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

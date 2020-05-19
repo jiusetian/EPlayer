@@ -25,9 +25,9 @@ void MediaEncoder::pause() {
     mutex.unlock();
 }
 
-void MediaEncoder::pushAvData(AvData data) {
+void MediaEncoder::putAvData(AvData* data) {
     if (avQueue){
-        avQueue->pushData(&data);
+        avQueue->putData(data);
     }
 }
 
@@ -59,6 +59,7 @@ void MediaEncoder::stop() {
     abortRequest = true;
     condition.signal();
     mutex.unlock();
+
     if (avQueue) {
         avQueue->abort();
         flush();

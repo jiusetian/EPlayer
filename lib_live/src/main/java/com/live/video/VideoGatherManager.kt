@@ -116,6 +116,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
             while (isLoop && !Thread.interrupted()) {
                 // 获取阻塞队列中的数据，没有数据的时候阻塞
                 val srcData = mQueue.take()
+                LogUtil.d("相机数据："+srcData.size)
                 // YV12和 NV12所占内存是12bits/Pixel,所以一帧原始图像大小为 mCameraUtil.getCameraWidth()*mCameraUtil.getCameraHeight()*3/2.
                 // 生成 I420(YUV标准格式数据及YUV420P)目标数据，生成后的数据长度 width * height * 3 / 2
                 val dstData = ByteArray(scaleWidth * scaleHeight * 3 / 2)

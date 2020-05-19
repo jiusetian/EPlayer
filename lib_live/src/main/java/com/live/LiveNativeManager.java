@@ -127,6 +127,14 @@ public final class LiveNativeManager {
      */
     public static native int initRtmpData(String url);
 
+    public static native void startRtmpPublish();
+
+    public static native void stopRtmpPublish();
+
+    public static native void pauseRtmpPublish();
+
+    public static native void resumeRtmpPublish();
+
     /**
      * 发送SPS,PPS数据
      * @param sps       sps数据

@@ -14,7 +14,7 @@
 jbyte *temp_i420_data;
 jbyte *temp_i420_data_scale;
 jbyte *temp_i420_data_rotate;
-jint mOriantation=0;
+jint mOriantation = 0;
 
 YuvProcess *yuvProcess = nullptr;
 VideoEncoder *videoEncoder = nullptr;
@@ -113,7 +113,7 @@ void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_d
                            (uint8 *) dst_i420_v_data, height >> 1,
                            width, height,
                            (libyuv::RotationMode) degree);
-    }else { // 横屏
+    } else { // 横屏
         libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
                            (const uint8 *) src_i420_u_data, width >> 1,
                            (const uint8 *) src_i420_v_data, width >> 1,
@@ -181,12 +181,14 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_release(JNIEnv *env, jclass type) {
     LOGD("调用了LiveNativeManager_release");
-    free(temp_i420_data);
-    free(temp_i420_data_scale);
-    free(temp_i420_data_rotate);
-    delete (videoEncoder);
-    delete (audioEncoder);
-    delete (rtmpLivePush);
+    if (videoEncoder)
+        delete (videoEncoder);
+    if (audioEncoder)
+        delete (audioEncoder);
+    if (rtmpLivePush)
+        delete (rtmpLivePush);
+    if (yuvProcess)
+        delete (yuvProcess);
     return 0;
 }
 
@@ -207,7 +209,6 @@ Java_com_live_LiveNativeManager_yuvI420ToNV21(JNIEnv *env, jclass type, jbyteArr
 
     jbyte *src_nv21_y_data = nv21Src;
     jbyte *src_nv21_vu_data = nv21Src + src_y_size;
-
 
     libyuv::I420ToNV21(
             (const uint8 *) src_i420_y_data, width,
@@ -238,12 +239,12 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
     //  进行缩放的操作，这个缩放，会把数据压缩
     scaleI420(temp_i420_data, width, height, temp_i420_data_scale, dst_width, dst_height, mode);
     // 视频角度发生改变
-    if(degree!=mOriantation){
-        mOriantation=degree;
-        if (degree==90||degree==270){
+    if (degree != mOriantation) {
+        mOriantation = degree;
+        if (degree == 90 || degree == 270) {
             videoEncoder->setInWidth(dst_height);
             videoEncoder->setInHeight(dst_width);
-        } else{
+        } else {
             videoEncoder->setInWidth(dst_width);
             videoEncoder->setInHeight(dst_height);
         }
@@ -314,7 +315,7 @@ Java_com_live_LiveNativeManager_encoderVideoinit(JNIEnv *env, jclass type, jint 
                                                  jint src_height, jint in_width, jint in_height, jint orientation) {
     //  初始化临时空间
     init(src_width, src_height, in_width, in_height);
-    mOriantation=orientation;
+    mOriantation = orientation;
     videoEncoder = new VideoEncoder();
     // 设置相关参数
     if (orientation == 90 || orientation == 270) { // 竖屏，输出宽高要交换
@@ -389,7 +390,7 @@ Java_com_live_LiveNativeManager_initRtmpData(JNIEnv *env, jclass type, jstring u
 
     rtmpLivePush = new RtmpLivePush();
     rtmpLivePush->init((unsigned char *) rtmp_path);
-
+    free(rtmp_path);
     env->ReleaseStringUTFChars(url_, url);
 
     return 0;
@@ -419,7 +420,7 @@ Java_com_live_LiveNativeManager_sendRtmpVideoData(JNIEnv *env, jclass type, jbyt
     if (rtmpLivePush) {
         jbyte *data = env->GetByteArrayElements(data_, NULL);
 
-        rtmpLivePush->addH264Body((unsigned char *) data, dataLen, timeStamp);
+        rtmpLivePush->pushH264Body((unsigned char *) data, dataLen, timeStamp);
 
         env->ReleaseByteArrayElements(data_, data, 0);
     }
@@ -493,13 +494,17 @@ Java_com_live_LiveNativeManager_releaseAudio(JNIEnv *env, jclass type) {
  * @param dataLen
  */
 void audioEncoderCallback(uint8_t *data, int dataLen) {
-    AvData avData;
-    avData.data = data;
-    avData.len = dataLen;
-    avData.type = AUDIO;
+    AvData *avData = static_cast<AvData *>(malloc(sizeof(AvData)));
+    avData->data = data;
+    avData->len = dataLen;
+    avData->type = AUDIO;
+    avData->nalNums = 0;
+    avData->nalSizes = NULL;
     //  保存到推流器
     if (rtmpLivePush) {
-        rtmpLivePush->pushAudioData(avData);
+        rtmpLivePush->putAvData(avData);
+    } else {
+        free(avData);
     }
 }
 
@@ -509,25 +514,35 @@ void audioEncoderCallback(uint8_t *data, int dataLen) {
  * @param dataLen
  */
 void yuvProcessCallback(uint8_t *data, int dataLen) {
-    AvData avData;
-    avData.data = data;
-    avData.len = dataLen;
+    AvData *avData = static_cast<AvData *>(malloc(sizeof(AvData)));
+    avData->data = data;
+    avData->len = dataLen;
+    avData->type = VIDEO;
+    avData->nalNums = 0;
+    avData->nalSizes = NULL;
     //  保存视频编码器
     if (videoEncoder) {
-        videoEncoder->pushAvData(avData);
+        videoEncoder->putAvData(avData);
+    } else {
+        free(avData);
     }
 }
 
 void videoEncoderCallback(uint8_t *data, int dataLen, int nalNum, int *nalsSize) {
-    AvData avData;
-    avData.data = data;
-    avData.len = dataLen;
-    avData.nalNums = nalNum;
-    avData.nalSizes = nalsSize;
-    avData.type = VIDEO;
+    AvData *avData = static_cast<AvData *>(malloc(sizeof(AvData)));
+    avData->data = data;
+    avData->len = dataLen;
+    avData->nalNums = nalNum;
+    avData->nalSizes = nalsSize;
+    avData->type = VIDEO;
     //  save
     if (rtmpLivePush) {
-        rtmpLivePush->pushVideoData(avData);
+        for (int i = 0; i < avData->nalNums; i++) {
+            LOGD("保存nal大小：%d", avData->nalSizes[i]);
+        }
+        rtmpLivePush->putAvData(avData);
+    } else {
+        free(avData);
     }
 }
 
@@ -543,7 +558,8 @@ Java_com_live_LiveNativeManager_startAudioEncode(JNIEnv *env, jclass clazz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_live_LiveNativeManager_stopAudioEncode(JNIEnv *env, jclass clazz) {
-    audioEncoder->stop();
+    if (audioEncoder)
+        audioEncoder->stop();
 }
 
 extern "C"
@@ -572,7 +588,7 @@ Java_com_live_LiveNativeManager_putAudioData(JNIEnv *env, jclass clazz, jbyteArr
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_live_LiveNativeManager_initVideoEncoder(JNIEnv *env, jclass clazz, jint video_with, jint video_height,
-                                                 jint scale_width, jint scale_height,jint orientation) {
+                                                 jint scale_width, jint scale_height, jint orientation) {
     //  初始化YUV处理器
     yuvProcess = new YuvProcess();
     yuvProcess->setSrcWH(video_with, video_height);
@@ -614,8 +630,10 @@ Java_com_live_LiveNativeManager_startVideoEncoder(JNIEnv *env, jclass clazz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_live_LiveNativeManager_stopVideoEncoder(JNIEnv *env, jclass clazz) {
-    yuvProcess->stop();
-    videoEncoder->stop();
+    if (yuvProcess)
+        yuvProcess->stop();
+    if (videoEncoder)
+        videoEncoder->stop();
 }
 
 extern "C"
@@ -630,4 +648,29 @@ JNIEXPORT void JNICALL
 Java_com_live_LiveNativeManager_resumeVideoEncoder(JNIEnv *env, jclass clazz) {
     yuvProcess->resume();
     videoEncoder->resume();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_startRtmpPublish(JNIEnv *env, jclass clazz) {
+    rtmpLivePush->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_stopRtmpPublish(JNIEnv *env, jclass clazz) {
+    if (rtmpLivePush)
+        rtmpLivePush->stop();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_pauseRtmpPublish(JNIEnv *env, jclass clazz) {
+    rtmpLivePush->pause();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_live_LiveNativeManager_resumeRtmpPublish(JNIEnv *env, jclass clazz) {
+    rtmpLivePush->resume();
 }

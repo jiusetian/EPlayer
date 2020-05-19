@@ -18,12 +18,22 @@
             app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
+            android:id="@+id/btn_live1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="直播推流2"
+            app:layout_constraintTop_toBottomOf="@+id/btn_live"
+            app:layout_constraintLeft_toLeftOf="@+id/btn_live"
+
+            />
+
+    <Button
             android:id="@+id/btn_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="播放器播放"
-            app:layout_constraintTop_toBottomOf="@+id/btn_live"
-            app:layout_constraintLeft_toLeftOf="@+id/btn_live"
+            app:layout_constraintTop_toBottomOf="@+id/btn_live1"
+            app:layout_constraintLeft_toLeftOf="@+id/btn_live1"
     />
 
 

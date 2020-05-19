@@ -7,14 +7,15 @@
 
 #include <stdio.h>
 #include "MediaEncoder.h"
+#include "BlockQueue.h"
 
 extern "C" {
 #include <libx264/x264.h>
 }
 
-class VideoEncoder :public MediaEncoder{
+class VideoEncoder : public MediaEncoder {
 
-    typedef void (videoEncoderCallback)(uint8_t* data,int len,int nalNum,int* nalsSize);
+    typedef void (videoEncoderCallback)(uint8_t *data, int len, int nalNum, int *nalsSize);
 
 private:
     // 视频宽高
@@ -34,17 +35,17 @@ private:
     /*编码参数结构体*/
     x264_param_t params;
     /*nal数组*/
-    x264_nal_t* nals;
+    x264_nal_t *nals;
     /*nal数组大小*/
     int nal_nums;
     /*编码器*/
-    x264_t* encoder;
+    x264_t *encoder;
 
     FILE *out1;
     FILE *out2;
 
-    Thread *encoderThread; // 编码线程
-    videoEncoderCallback* callback;
+    Thread *encoderThread = nullptr; // 编码线程
+    videoEncoderCallback *callback;
 
 protected:
     // 线程执行函数
@@ -55,44 +56,71 @@ protected:
 
 public:
     VideoEncoder();
+
     ~VideoEncoder();
 
     bool open();
+
     /* encode the given data */
-    int encodeFrame(uint8_t * inBytes, int frameSize, int pts, uint8_t * outBytes, int *outFrameSize);
+    int encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t *outBytes, int *outFrameSize);
+
     /* close the encoder and file, frees all memory */
     bool closeEncoder();
+
     /* validates if all params are set correctly, like width,height, etc.. */
     bool validateSettings();
+
     /* sets the x264 params */
     void setParams();
+
     void setParams2();
+
     int getFps() const;
+
     void setFps(int fps);
+
     int getInHeight() const;
+
     void setInHeight(int inHeight);
+
     int getInWidth() const;
+
     void setInWidth(int inWidth);
+
     int getNumNals() const;
+
     void setNumNals(int numNals);
+
     int getBitrate() const;
+
     void setBitrate(int bitrate);
+
     int getSliceMaxSize() const;
+
     void setSliceMaxSize(int sliceMaxSize);
+
     int getVbvBufferSize() const;
+
     void setVbvBufferSize(int vbvBufferSize);
+
     int getIThreads() const;
+
     void setIThreads(int threads);
+
     int getBFrameFrq() const;
+
     void setBFrameFrq(int frameFrq);
+
     // 设置回调函数
-    void setVideoEncoderCallback(videoEncoderCallback* callback);
+    void setVideoEncoderCallback(videoEncoderCallback *callback);
 
     void start() override;
 
     void stop() override;
 
     void flush() override;
+
+    void putAvData(AvData *data) override;
 };
 
 #endif //EPLAYER_VIDEOENCODER_H
