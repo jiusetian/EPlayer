@@ -20,7 +20,7 @@ import kotlin.concurrent.thread
  * Note：
  */
 class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context) : SensorEventListener,
-    LiveInterfaces {
+    LiveInterfaces, CameraSurface.CameraInfoListener {
 
     companion object {
         // 是否保存视频
@@ -42,7 +42,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private var isVideoInit = false
 
     // 是否暂停
-    private var mPause: AtomicBoolean
+    private var mPause = true
 
     // 第一次实例化的时候是不需要的
     private var initialized = false
@@ -56,8 +56,9 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     // 相机数据
     private val cameraDatas = LinkedBlockingDeque<ByteArray>()
 
+    // lateinit var相当于声明属性为 NotNull，如果属性还没初始化的时候，是不能使用的
     // 压缩数据的线程
-    private lateinit var compressThread: Thread
+    private var compressThread: Thread? = null
     private lateinit var fileManager: FileManager
 
     // 线程是否工作
@@ -67,11 +68,12 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private lateinit var compressDataListener: ((data: ByteArray, width: Int, height: Int) -> Unit)
 
     init {
-        mPause=AtomicBoolean(true)
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
         if (SAVE_FILE_FOR_TEST) {
             fileManager = FileManager(FileManager.TEST_YUV_FILE)
         }
+        // 相机信息的监听
+        cameraSurface.setCameraInfoListener(this)
     }
 
     // 压缩数据回调接口
@@ -81,35 +83,36 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
     // 开始压缩线程
     private fun startCompressThread() {
-        compressThread = thread(start = true) {
+        compressThread = thread {
 
             // 循环执行
             while (isWork && !Thread.interrupted()) {
-                // 暂停
-                if (mPause.get()) continue
-                // 原始相机数据
-                val srcData = cameraDatas.take()
-                // 保存压缩数据
-                val compressData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
+                try {// 原始相机数据
+                    val srcData = cameraDatas.take()
+                    // 保存压缩数据
+                    val compressData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
 
-                // 压缩
-                LiveNativeManager.compressYUV(
-                    srcData,
-                    videoWidth,
-                    videoHeight,
-                    compressData,
-                    scaleWidth,
-                    scaleHeight,
-                    0,
-                    orientation,
-                    orientation == 270
-                )
-                // 回调压缩数据
-                compressDataListener?.let { it.invoke(compressData, scaleWidth, scaleHeight) }
+                    // 压缩
+                    LiveNativeManager.compressYUV(
+                        srcData,
+                        videoWidth,
+                        videoHeight,
+                        compressData,
+                        scaleWidth,
+                        scaleHeight,
+                        0,
+                        orientation,
+                        orientation == 270
+                    )
+                    // 回调压缩数据
+                    compressDataListener?.let { it.invoke(compressData, scaleWidth, scaleHeight) }
 
-                // 是否保存压缩数据
-                if (SAVE_FILE_FOR_TEST) {
-                    fileManager.saveFileData(compressData)
+                    // 是否保存压缩数据
+                    if (SAVE_FILE_FOR_TEST) {
+                        fileManager.saveFileData(compressData)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
@@ -120,52 +123,13 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     override fun init() {
-        // 将视频数据压入队列
-        cameraSurface.onCameraNVDataListener {
-            it?.let {
-                if (!mPause.get()) {
-                    LogUtil.d("添加数据")
-                    cameraDatas.put(it)
-                }
-            }
-        }
-
-        // 相机方向监听
-        cameraSurface.onCameraOrientationChangeListener {
-            LogUtil.d("摄像头方向：" + it)
-            orientation = it
-        }
-
-        // 相机尺寸变换监听
-        cameraSurface.onCameraSizeChangeListener { width, height ->
-            LogUtil.d("摄像头宽高：" + width + "---" + height)
-            videoWidth = width
-            videoHeight = height
-            scaleWidth = videoWidth / 3
-            scaleHeight = scaleWidth * 75 / 100
-
-            // 是否初始化了视频
-            if (!isVideoInit) {
-                LogUtil.d("初始化视频编码器")
-                // 初始化视频编码
-                LiveNativeManager.videoEncoderinit(
-                    videoWidth,
-                    videoHeight,
-                    scaleWidth,
-                    scaleHeight,
-                    cameraSurface.getCameraUtil().getCameraOrientation()
-                )
-                isVideoInit = true
-            }
-        }
-
         // 打开相机
-        cameraSurface.openCamera()
+        // cameraSurface.openCamera()
     }
 
     override fun start() {
         // 开始收集数据并压缩
-        mPause.set(false)
+        mPause = false
         isWork = true
         // 注册加速度传感器
         sensorManager.registerListener(
@@ -178,7 +142,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
     override fun stop() {
         isWork = false
-        compressThread.interrupt()
+        compressThread?.let { it.interrupt() }
         cameraSurface.releaseCamera()
         sensorManager.unregisterListener(this)
         cameraDatas.clear()
@@ -190,11 +154,11 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     override fun pause() {
-        mPause.set(true)
+        mPause = true
     }
 
     override fun resume() {
-        mPause.set(false)
+        mPause = false
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -222,6 +186,36 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         lastX = x
         lastY = y
         lastZ = z
+    }
+
+    override fun onCameraNVDataListener(data: ByteArray) {
+        if (!mPause) cameraDatas.put(data)
+    }
+
+    override fun onCameraOrientationChangeListener(orientation: Int) {
+        LogUtil.d("摄像头方向：" + orientation)
+        this.orientation = orientation
+    }
+
+    override fun onCameraSizeChangeListener(width: Int, height: Int) {
+        LogUtil.d("摄像头宽高：" + width + "---" + height)
+        videoWidth = width
+        videoHeight = height
+        scaleWidth = videoWidth / 3
+        scaleHeight = scaleWidth * 75 / 100
+
+        // 是否初始化了视频
+        if (!isVideoInit) {
+            // 初始化视频编码
+            LiveNativeManager.videoEncoderinit(
+                videoWidth,
+                videoHeight,
+                scaleWidth,
+                scaleHeight,
+                cameraSurface.getCameraUtil().getCameraOrientation()
+            )
+            isVideoInit = true
+        }
     }
 
 }

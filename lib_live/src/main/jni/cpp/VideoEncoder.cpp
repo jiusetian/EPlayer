@@ -68,7 +68,7 @@ void VideoEncoder::setVideoEncoderCallback(videoEncoderCallback *callback) {
 
 void VideoEncoder::excuteEncodeVideo() {
     //AvData *data = (AvData *) malloc(sizeof(AvData));
-    AvData *data= NULL;
+    AvData *data = NULL;
     int pts = 0;
 
     for (;;) {
@@ -83,27 +83,27 @@ void VideoEncoder::excuteEncodeVideo() {
         }
         LOGD("压缩后YUV数据开始取");
         // 获取原始av数据
-        data=avQueue1->getData();
-        if (data==NULL){
+        data = avQueue1->getData();
+        if (data == NULL) {
             break;
         }
 
 //        if (avQueue->getData(&data) < 0) {
 //            break;
 //        }
-        LOGD("压缩后YUV数据取成功：%d",data->len);
-        int nalSizes[10]={0}; // 保存输出数据 nal的大小
+        LOGD("压缩后YUV数据取成功：%d", data->len);
+        int nalSizes[10] = {0}; // 保存输出数据 nal的大小
         uint8_t *outBytes = new uint8_t[in_width * in_height]; // 保存输出数据
         // 编码，返回nal单元数量
         int nalNum = encodeFrame(data->data, data->len, ++pts, outBytes, nalSizes);
-        int totalLen=0; // 总长度
+        int totalLen = 0; // 总长度
         int temNalSizes[nalNum]; // 保存nal长度
         //uint8_t *cpy;
         for (int i = 0; i < nalNum; i++) {
             totalLen += nalSizes[i];
             temNalSizes[i] = nalSizes[i];
         }
-        LOGD("压缩后YUV数据编码成功：%d",totalLen);
+        LOGD("压缩后YUV数据编码成功：%d", totalLen);
 //        cpy = new uint8_t[totalLen];
 //        memcpy(cpy, outBytes, totalLen);
         LOGD("压缩后YUV数据的编码结果开始回调");
@@ -112,7 +112,7 @@ void VideoEncoder::excuteEncodeVideo() {
         LOGD("压缩后YUV数据的编码结果回调成功");
 
         free(data);
-       // delete []outBytes;
+        // delete []outBytes;
     }
 
     // 释放
@@ -206,7 +206,7 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
      * pic_out：图像的输出
      */
     int size = x264_encoder_encode(encoder, &nals, &nal_nums, &pic_in, &pic_out);
-    LOGD("压缩后YUV数据编码后大小：%d", size);
+    //LOGD("压缩后YUV数据编码后大小：%d", size);
     if (size) {
         /*Here first four bytes proceeding the nal unit indicates frame length*/
         int have_copy = 0;
@@ -382,12 +382,19 @@ void VideoEncoder::setParams2() {
 }
 
 bool VideoEncoder::closeEncoder() {
-    LOGD("调用了videoencoder的close函数");
-    if (encoder) {
-        x264_picture_clean(&pic_in);
-        memset((char *) &pic_in, 0, sizeof(pic_in));
-        memset((char *) &pic_out, 0, sizeof(pic_out));
+    int nnal;
+    x264_nal_t *nal;
+    x264_picture_t pic_out;
+    LOGD("关闭视频编码器");
+    if (encoder != NULL) {
+        while (x264_encoder_delayed_frames(encoder)) {
+            x264_encoder_encode(encoder, &nal, &nnal, NULL, &pic_out);
+        }
         x264_encoder_close(encoder);
+//        x264_picture_clean(&pic_in);
+//        memset((char *) &pic_in, 0, sizeof(pic_in));
+//        memset((char *) &pic_out, 0, sizeof(pic_out));
+        //x264_encoder_close(encoder);
         encoder = NULL;
     }
 

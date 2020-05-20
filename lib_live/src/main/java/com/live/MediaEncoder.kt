@@ -24,15 +24,13 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
     }
 
     // 音视频编码线程
-    private lateinit var videoEncoderThread: Thread
-    private lateinit var audioEncoderThread: Thread
+    private  var videoEncoderThread: Thread?=null
+    private  var audioEncoderThread: Thread?=null
 
     // 线程控制
     private var videoEncoderLoop = true
     private var audioEncoderLoop = true
 
-    // 是否暂停
-    private var mPause: AtomicBoolean
 
     // 管理音视频数据的获取
     private lateinit var videoGatherManager: VideoGatherManager
@@ -52,7 +50,6 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
     private lateinit var mediaEncoderCallback: MediaEncoderCallback
 
     init {
-        mPause=AtomicBoolean(true)
         // 文件保存
         if (SAVE_FILE_FOR_TEST) {
             videoFileManager = FileManager(FileManager.TEST_H264_FILE)
@@ -75,11 +72,9 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
 
         // 回调视频压缩数据
         videoGatherManager.onCompressDataListener { data, width, height ->
-            if (!mPause.get()) {
-                val videoData = VideoData(data, width, height)
-                // 保存视频数据
-                videoQueue.put(videoData)
-            }
+            val videoData = VideoData(data, width, height)
+            // 保存视频数据
+            videoQueue.put(videoData)
         }
 
         // 音频采集器的初始化
@@ -88,11 +83,9 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
 
         // 回调音频pcm数据
         audioGatherManager.onAudioDataListener {
-            if (!mPause.get()) {
                 val audioData = AudioData(it)
                 // 保存音频数据
                 audioQueue.put(audioData)
-            }
         }
     }
 
@@ -101,7 +94,6 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
     }
 
     override fun start() {
-        mPause.set(false)
         // 开始音视频的采集
         videoGatherManager.start()
         audioGatherManager.start()
@@ -114,8 +106,8 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
         videoGatherManager.stop()
         audioGatherManager.stop()
 
-        videoEncoderThread.interrupt()
-        audioEncoderThread.interrupt()
+        videoEncoderThread?.interrupt()
+        audioEncoderThread?.interrupt()
         videoEncoderLoop = false
         audioEncoderLoop = false
         // 清空数据
@@ -129,17 +121,11 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
     }
 
     override fun pause() {
-        mPause.set(true)
         videoGatherManager.pause()
         audioGatherManager.pause()
-        // 清空数据
-        videoQueue.clear()
-        audioQueue.clear()
-
     }
 
     override fun resume() {
-        mPause.set(false)
         videoGatherManager.resume()
         audioGatherManager.resume()
     }
@@ -151,9 +137,6 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
 
             while (videoEncoderLoop && !Thread.interrupted()) {
                 try {
-                    // 暂停
-                    if (mPause.get()) continue
-
                     // 队列中取视频数据，这里是指一帧图像的数据
                     val videoData = videoQueue.take()
                     fps++ // 代表第几帧
@@ -215,9 +198,6 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
 
             while (audioEncoderLoop && !Thread.interrupted()) {
                 try {
-                    // 暂停
-                    if (mPause.get()) continue
-
                     // 从保存队列中获取到音频数据
                     val audioData = audioQueue.take()
                     // 我们通过fdk-aac接口获取到了audioEncodeBuffer的数据，即每次编码多少数据为最优

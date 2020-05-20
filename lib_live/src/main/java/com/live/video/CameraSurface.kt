@@ -23,20 +23,14 @@ import com.lib_live.R
 class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallback,
     CameraSurfaceListener {
 
+    // 相机信息的监听
+    private lateinit var cameraListerner: CameraInfoListener
 
     private lateinit var surfaceView: SurfaceView
     private lateinit var ivFoucView: ImageView
     private lateinit var cameraUtil: CameraUtil
     private var targetAspect: Float = -1.0f
 
-    //  这是一个函数的声明，作为回调函数的存在，监听摄像头采集的数据
-    private var cameraNVDataListener: ((data: ByteArray) -> Unit)? = null
-
-    // 摄像头尺寸监听
-    private var cameraSizeChangeListener: ((width: Int, height: Int) -> Unit)? = null
-
-    // 摄像头方向监听
-    private var cameraOrientationChangeListener: ((orientation: Int) -> Unit)? = null
 
     constructor(context: Context) : super(context) {
         init()
@@ -65,19 +59,10 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
 
     fun getCameraUtil() = cameraUtil
 
-    fun onCameraNVDataListener(listener: ((data: ByteArray) -> Unit)) {
-        this.cameraNVDataListener = listener
+    fun setCameraInfoListener(cameraListerner: CameraInfoListener) {
+        this.cameraListerner = cameraListerner
     }
 
-    // 设置摄像头方向的监听
-    fun onCameraOrientationChangeListener(listener: (orientation: Int) -> Unit) {
-        cameraOrientationChangeListener = listener
-    }
-
-    // 设置摄像头尺寸变换的监听
-    fun onCameraSizeChangeListener(listener: (width: Int, height: Int) -> Unit) {
-        cameraSizeChangeListener = listener
-    }
 
     /**
      * 摄像头预览帧回调
@@ -88,7 +73,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         // LogUtil.d("原始摄像头数据="+data.size)
         // LogUtil.d("摄像头宽高="+camera.parameters.previewSize.width+"///"+camera.parameters.previewSize.height)
         // 获取NV数据
-        cameraNVDataListener?.let { it.invoke(data) }
+        cameraListerner?.let { it.onCameraNVDataListener(data) }
     }
 
 
@@ -100,6 +85,8 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        // 打开摄像头
+        openCamera()
         // 设置摄像头接口和surfaceview的关联还有摄像头的数据回调相关
         // 第二个参数是摄像头的回调接口，回调方法为onPreviewFrame，这个方法可以捕捉到摄像头数据byte[] data,这就是摄像头的原始数据流，即YUV420SP格式的数据
         cameraUtil.handleCameraStartPreview(holder, this)
@@ -187,9 +174,14 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         //  打开摄像头
         cameraUtil.openCamera(cameraUtil.getCurrentCameraType())
 
-        cameraOrientationChangeListener?.let { it.invoke(cameraUtil.getCameraOrientation()) }
+        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getCameraOrientation()) }
 
-        cameraSizeChangeListener?.let { it.invoke(cameraUtil.getCameraWidth(), cameraUtil.getCameraHeight()) }
+        cameraListerner?.let {
+            it.onCameraSizeChangeListener(
+                cameraUtil.getCameraWidth(),
+                cameraUtil.getCameraHeight()
+            )
+        }
 
         // 等待surfaceview创建好以后会执行post里面的内容
         surfaceView.post {
@@ -204,7 +196,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     // 改变摄像机方向
     fun changeCarmeraOrientation(): Int {
         val or = cameraUtil.changeCarmeraOrientation()
-        cameraOrientationChangeListener?.let { it.invoke(cameraUtil.getCameraOrientation()) }
+        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getCameraOrientation()) }
         return or
     }
 
@@ -222,6 +214,18 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         openCamera()
 
         return cameraUtil.getCurrentCameraType()
+    }
+
+    // 相机信息的相关监听
+    interface CameraInfoListener {
+        // 摄像头数据监听
+        fun onCameraNVDataListener(data: ByteArray)
+
+        // 摄像头方向的监听
+        fun onCameraOrientationChangeListener(orientation: Int)
+
+        // 摄像头尺寸变换的监听
+        fun onCameraSizeChangeListener(width: Int, height: Int)
     }
 }
 

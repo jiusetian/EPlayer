@@ -241,6 +241,7 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
     // 视频角度发生改变
     if (degree != mOriantation) {
         mOriantation = degree;
+        // 竖屏宽高要交换，因为手机摄像头的视频输出总是宽大于高的，而实际上竖屏的图像显示是高大于宽的
         if (degree == 90 || degree == 270) {
             videoEncoder->setInWidth(dst_height);
             videoEncoder->setInHeight(dst_width);
@@ -248,9 +249,6 @@ Java_com_live_LiveNativeManager_compressYUV(JNIEnv *env, jclass type, jbyteArray
             videoEncoder->setInWidth(dst_width);
             videoEncoder->setInHeight(dst_height);
         }
-
-        videoEncoder->closeEncoder();
-        videoEncoder->open();
     }
 
     //  如果是前置摄像头，进行镜像操作
@@ -483,7 +481,8 @@ JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeManager_releaseAudio(JNIEnv *env, jclass type) {
 
     if (audioEncoder) {
-        delete (audioEncoder);
+        //delete (audioEncoder);
+        audioEncoder->close();
     }
     return 0;
 }

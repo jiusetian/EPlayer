@@ -9,6 +9,7 @@ import android.os.Process
 import com.live.FileManager
 import com.live.LiveInterfaces
 import com.live.LiveNativeManager
+import com.live.LogUtil
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
@@ -59,10 +60,10 @@ class AudioGatherManager : LiveInterfaces {
 
     private var isLoop = true
 
-    private var mPause: AtomicBoolean
+    private var mPause = true
 
     init {
-        mPause=AtomicBoolean(true)
+
         // 是否保存录音
         if (SAVE_FILE_FOR_TEST) {
             fileManager = FileManager(FileManager.TEST_PCM_FILE)
@@ -109,7 +110,7 @@ class AudioGatherManager : LiveInterfaces {
     }
 
     override fun start() {
-        mPause.set(false)
+        mPause = false
         // 录音线程
         workThread = thread(start = true) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
@@ -123,7 +124,7 @@ class AudioGatherManager : LiveInterfaces {
             while (isLoop && !Thread.interrupted()) {
                 try {
                     // 暂停的话不读音频
-                    if (mPause.get()) {
+                    if (mPause) {
                         continue
                     }
                     // 从硬件设置中读取 mBufferSize音频数据到audioData中
@@ -169,11 +170,11 @@ class AudioGatherManager : LiveInterfaces {
     }
 
     override fun pause() {
-        mPause.set(true)
+        mPause = true
     }
 
     override fun resume() {
-        mPause.set(false)
+        mPause = false
     }
 }
 

@@ -195,7 +195,6 @@ int AudioEncoder::encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, i
     int in_elem_size = 2; // 每个采样点2个字节，量化宽度
     // 输入数据配置
     inptr = inBytes;
-    // 为什么是二级指针，因为需要给指针赋值
     in_buf.bufs = &inptr;
     in_buf.bufSizes = &length;
     in_buf.numBufs = 1;
@@ -220,18 +219,20 @@ int AudioEncoder::encodeAudio(uint8_t *inBytes, int length, uint8_t *outBytes, i
 
     AACENC_OutArgs out_args = {0}; // 输出参数
     AACENC_ERROR err;
-
+    //LOGD("音频编码");
     // 利用aacEncEncode来编码PCM裸音频数据，上面的代码都是fdk-aac的流程步骤
     if ((err = aacEncEncode(handle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK) {
         LOGE("Encoding aac failed：%d\n",err);
         return 0;
     }
+    //LOGD("音频编码成功=%d",out_args.numOutBytes);
     // 返回编码后的有效字段长度
     return out_args.numOutBytes;
 }
 
 bool AudioEncoder::close() {
     if (handle) {
+        LOGD("关闭音频编码器");
         aacEncClose(&handle);
         handle = NULL;
     }

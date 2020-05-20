@@ -17,7 +17,8 @@ import kotlin.concurrent.thread
  * Date：2020/5/15
  * Note：
  */
-class VideoManager(val cameraSurface: CameraSurface, val context: Context) : LiveInterfaces, SensorEventListener {
+class VideoManager(val cameraSurface: CameraSurface, val context: Context) : LiveInterfaces, SensorEventListener
+    , CameraSurface.CameraInfoListener{
 
     companion object {
         // 是否保存视频
@@ -84,33 +85,6 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
     }
 
     override fun init() {
-        // 将视频预览数据压入队列，如果暂停则停止添加
-        cameraSurface.onCameraNVDataListener { it?.let { if (!pause) cameraDatas.put(it) } }
-
-        cameraSurface.onCameraOrientationChangeListener {
-            LogUtil.d("摄像头方向：" + it)
-            orientation = it
-        }
-
-        cameraSurface.onCameraSizeChangeListener { width, height ->
-            LogUtil.d("摄像头宽高：" + width + "---" + height)
-            videoWidth = width
-            videoHeight = height
-            scaleWidth = videoWidth / 3
-            scaleHeight = scaleWidth * 75 / 100
-            // 有了摄像头视频帧的宽高，才能初始化视频编码器
-            if (!isVideoInit) {
-                isVideoInit = true
-                LiveNativeManager.initVideoEncoder(
-                    videoWidth,
-                    videoHeight,
-                    scaleWidth,
-                    scaleHeight,
-                    cameraSurface.getCameraUtil().getCameraOrientation()
-                )
-            }
-        }
-
         if (SAVE_FILE_FOR_TEST) {
             fileManager = FileManager(FileManager.TEST_YUV_FILE)
         }
@@ -194,5 +168,35 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
         lastX = x
         lastY = y
         lastZ = z
+    }
+
+    override fun onCameraNVDataListener(data: ByteArray) {
+        if (!pause) cameraDatas.put(data)
+    }
+
+    override fun onCameraOrientationChangeListener(orientation: Int) {
+        LogUtil.d("摄像头方向：" + orientation)
+        this.orientation = orientation
+    }
+
+    override fun onCameraSizeChangeListener(width: Int, height: Int) {
+        LogUtil.d("摄像头宽高：" + width + "---" + height)
+        videoWidth = width
+        videoHeight = height
+        scaleWidth = videoWidth / 3
+        scaleHeight = scaleWidth * 75 / 100
+
+        // 是否初始化了视频
+        if (!isVideoInit) {
+            // 初始化视频编码
+            LiveNativeManager.videoEncoderinit(
+                videoWidth,
+                videoHeight,
+                scaleWidth,
+                scaleHeight,
+                cameraSurface.getCameraUtil().getCameraOrientation()
+            )
+            isVideoInit = true
+        }
     }
 }

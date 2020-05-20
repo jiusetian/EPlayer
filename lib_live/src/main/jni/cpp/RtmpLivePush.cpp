@@ -11,7 +11,7 @@
 
 RtmpLivePush::RtmpLivePush() {
     //avQueue = new AVQueue();
-    avQueue1=new BlockQueue<AvData*>();
+    avQueue1 = new BlockQueue<AvData *>();
 }
 
 RtmpLivePush::~RtmpLivePush() {
@@ -95,9 +95,9 @@ void RtmpLivePush::flush() {
 
 // start rtmp push
 void RtmpLivePush::excuteRtmpPush() {
-   // AvData *data = (AvData *) malloc(sizeof(AvData));
+    // AvData *data = (AvData *) malloc(sizeof(AvData));
     //AvData *data= static_cast<AvData *>(malloc(sizeof(AvData)));
-    AvData *data= NULL;
+    AvData *data = NULL;
     for (;;) {
         // 停止
         if (abortRequest) {
@@ -108,8 +108,8 @@ void RtmpLivePush::excuteRtmpPush() {
             continue;
         }
         LOGD("编码后数据开始取");
-        data=avQueue1->getData();
-        if (data==NULL){
+        data = avQueue1->getData();
+        if (data == NULL) {
             break;
         }
         // 取编码后的 av数据
@@ -122,8 +122,8 @@ void RtmpLivePush::excuteRtmpPush() {
             pushAudioData(data);
         } else if (data->type == VIDEO) {
             LOGE("编码后数据视频推流");
-            for (int i=0;i<data->nalNums;i++){
-                LOGD("推流nal大小：%d",data->nalSizes[i]);
+            for (int i = 0; i < data->nalNums; i++) {
+                LOGD("推流nal大小：%d", data->nalSizes[i]);
             }
             pushVideoData(data);
         }
@@ -135,7 +135,7 @@ void RtmpLivePush::excuteRtmpPush() {
 }
 
 
-void RtmpLivePush::pushVideoData(AvData* data) {
+void RtmpLivePush::pushVideoData(AvData *data) {
 
     uint8_t *videoData = data->data;
     int nulNum = data->nalNums;
@@ -143,8 +143,8 @@ void RtmpLivePush::pushVideoData(AvData* data) {
 
     int spsLen = 0;
     int ppsLen = 0;
-    uint8_t *sps= nullptr;
-    uint8_t *pps= nullptr;
+    uint8_t *sps = nullptr;
+    uint8_t *pps = nullptr;
     int haveCopy = 0;
 
     // send all the nals
@@ -189,7 +189,7 @@ void RtmpLivePush::pushVideoData(AvData* data) {
         free(pps);
 }
 
-void RtmpLivePush::pushAudioData(AvData* data) {
+void RtmpLivePush::pushAudioData(AvData *data) {
 
     uint8_t *audioData = data->data;
     int audioLen = data->len;
@@ -227,7 +227,7 @@ void RtmpLivePush::init(unsigned char *url) {
     }
 
     if (!RTMP_ConnectStream(rtmp, 0)) {
-        LOGE("rtmp连接流错误");
+        LOGE("rtmp连接流错误：%d", RTMP_ConnectStream(rtmp, 0));
     } else {
         LOGE("rtmp连接流成功");
     }
@@ -329,7 +329,7 @@ int RtmpLivePush::send_video_sps_pps(unsigned char *sps, int spsLen, unsigned ch
 
 
 void RtmpLivePush::pushSPSPPS(unsigned char *sps, int spsLen, unsigned char *pps, int ppsLen) {
-    LOGD("发送spspps");
+    //LOGD("发送spspps");
     int bodySize = spsLen + ppsLen + 16;
     RTMPPacket *rtmpPacket = static_cast<RTMPPacket *>(malloc(sizeof(RTMPPacket)));
     RTMPPacket_Alloc(rtmpPacket, bodySize);
@@ -701,6 +701,7 @@ void RtmpLivePush::addAccBody(unsigned char *buf, int len, long timeStamp) {
 }
 
 void RtmpLivePush::releaseRtmp() {
+    LOGD("释放rtmp");
     RTMP_Close(rtmp);
     RTMP_Free(rtmp);
 }

@@ -32,14 +32,11 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
     // 编码器
     private val mediaEncoder: MediaEncoder
 
-    // 是否暂停
-    private var mPause: AtomicBoolean
-
     // 任务队列
     private val tasks = LinkedBlockingQueue<Runnable>()
 
     // 推流线程
-    private lateinit var rtmpThread: Thread
+    private var rtmpThread: Thread? = null
     private var loop = true
 
     private var videoID = 0L
@@ -49,28 +46,24 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
     private var isSendAudioSpec = false
 
     init {
-        mPause=AtomicBoolean(true)
         mediaEncoder = MediaEncoder(context, cameraSurface)
     }
 
     override fun init() {
         mediaEncoder.init()
         mediaEncoder.onMediaEncoderCallback(this)
-        //初始化rtmp
-        val rtmpInitTask = Runnable { LiveNativeManager.initRtmpData(rtmpUrl) }
-        addTask(rtmpInitTask)
+        //初始化 rtmp
+        thread {
+            LiveNativeManager.initRtmpData(rtmpUrl)
+        }
     }
 
     override fun start() {
-        mPause.set(false)
         mediaEncoder.start()
-
         // rtmp推流线程
-        rtmpThread = thread(start = true, name = "publish_thread") {
+        rtmpThread = thread(start = true) {
             while (loop && !Thread.interrupted()) {
                 try {
-                    // 暂停推流
-                    if (mPause.get()) continue
                     // 执行 runnable
                     tasks.take().run()
                 } catch (e: Exception) {
@@ -92,23 +85,17 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
 
     override fun stop() {
         mediaEncoder.stop()
-
         loop = false
-        Thread.interrupted()
+        rtmpThread?.interrupt()
         tasks.clear()
-        val runnable = Runnable { LiveNativeManager.releaseRtmp() }
-        addTask(runnable)
-
+        thread { LiveNativeManager.releaseRtmp() }
     }
 
     override fun pause() {
-        mPause.set(true)
         mediaEncoder.pause()
-        tasks.clear()
     }
 
     override fun resume() {
-        mPause.set(false)
         mediaEncoder.resume()
     }
 
