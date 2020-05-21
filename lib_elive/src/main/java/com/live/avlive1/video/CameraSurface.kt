@@ -32,8 +32,6 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     private lateinit var cameraUtil: CameraUtil
     private var targetAspect: Float = -1.0f
 
-
-
     constructor(context: Context) : super(context) {
         init()
     }
@@ -94,7 +92,6 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         // 第二个参数是摄像头的回调接口，回调方法为onPreviewFrame，这个方法可以捕捉到摄像头数据byte[] data,这就是摄像头的原始数据流，即YUV420SP格式的数据
         cameraUtil.handleCameraStartPreview(holder, this)
     }
-
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var widthMeasureSpec = widthMeasureSpec
