@@ -11,8 +11,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/lib_elive" />
             <option value="$PROJECT_DIR$/lib_eplayer" />
-            <option value="$PROJECT_DIR$/lib_live" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

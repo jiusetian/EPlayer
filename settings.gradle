@@ -1,1 +1,1 @@
-include ':app', ':lib_eplayer', ':lib_live'
+include ':app', ':lib_eplayer', ':lib_elive'
