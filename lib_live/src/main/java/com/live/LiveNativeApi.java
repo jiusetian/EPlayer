@@ -5,7 +5,7 @@ package com.live;
  * Date：2019/9/18
  * Note：对接jni层函数的java接口
  */
-public final class LiveNativeManager {
+public final class LiveNativeApi {
 
     static {
         System.loadLibrary("live-lib");

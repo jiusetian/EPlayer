@@ -6,9 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import com.live.AVPublisher
-import com.live.LiveNativeManager
-import com.live.LogUtil
+import com.live.avlive2.AVPublisher
+import com.live.common.LogUtil
 import kotlinx.android.synthetic.main.activity_a_v_live.*
 
 class AVLiveActivity : AppCompatActivity(), View.OnClickListener {

@@ -6,12 +6,10 @@ import android.media.MediaRecorder
 import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.AutomaticGainControl
 import android.os.Process
-import com.live.FileManager
-import com.live.LiveInterfaces
-import com.live.LiveNativeManager
-import com.live.LogUtil
+import com.live.common.FileManager
+import com.live.common.LiveInterfaces
+import com.live.LiveNativeApi
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 
@@ -66,7 +64,8 @@ class AudioGatherManager : LiveInterfaces {
 
         // 是否保存录音
         if (SAVE_FILE_FOR_TEST) {
-            fileManager = FileManager(FileManager.TEST_PCM_FILE)
+            fileManager =
+                FileManager(FileManager.TEST_PCM_FILE)
         }
 
         bufferSizeInBytes = AudioRecord.getMinBufferSize(
@@ -103,7 +102,7 @@ class AudioGatherManager : LiveInterfaces {
             automaticGainControl?.setEnabled(true)
         }
         // 初始化音频编码，返回每次编码的合适大小
-        val bufferSize = LiveNativeManager.initAudioEncoder(SAMPLE_HZ, 2, BIT_RATE)
+        val bufferSize = LiveNativeApi.initAudioEncoder(SAMPLE_HZ, 2, BIT_RATE)
 
         // 每次录制多少byte
         mBufferSize = bufferSize
@@ -166,7 +165,7 @@ class AudioGatherManager : LiveInterfaces {
             fileManager.closeFile()
         }
         // 释放底层资源
-        LiveNativeManager.releaseAudio()
+        LiveNativeApi.releaseAudio()
     }
 
     override fun destrory() {

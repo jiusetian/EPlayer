@@ -6,12 +6,11 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.live.FileManager
-import com.live.LiveInterfaces
-import com.live.LiveNativeManager
-import com.live.LogUtil
+import com.live.common.FileManager
+import com.live.common.LiveInterfaces
+import com.live.LiveNativeApi
+import com.live.common.LogUtil
 import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 /**
@@ -70,7 +69,8 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     init {
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
         if (SAVE_FILE_FOR_TEST) {
-            fileManager = FileManager(FileManager.TEST_YUV_FILE)
+            fileManager =
+                FileManager(FileManager.TEST_YUV_FILE)
         }
         // 相机信息的监听
         cameraSurface.setCameraInfoListener(this)
@@ -94,7 +94,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                     val compressData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
 
                     // 压缩
-                    LiveNativeManager.compressYUV(
+                    LiveNativeApi.compressYUV(
                         srcData,
                         videoWidth,
                         videoHeight,
@@ -150,7 +150,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
-        LiveNativeManager.releaseVideo()
+        LiveNativeApi.releaseVideo()
     }
 
     override fun destrory() {
@@ -211,7 +211,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         // 是否初始化了视频
         if (!isVideoInit) {
             // 初始化视频编码
-            LiveNativeManager.videoEncoderinit(
+            LiveNativeApi.videoEncoderinit(
                 videoWidth,
                 videoHeight,
                 scaleWidth,

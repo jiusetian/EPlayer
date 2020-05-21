@@ -1,4 +1,4 @@
-package com.live
+package com.live.common
 
 import android.util.Log
 
@@ -33,7 +33,9 @@ object LogUtil {
         if (debugEnabled)
             d(
                 LOGTAG,
-                getDebugInfo() + getLogInfoByArray(s as Array<String>)
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
             )
     }
 
@@ -41,7 +43,9 @@ object LogUtil {
         if (debugEnabled)
             v(
                 LOGTAG,
-                getDebugInfo() + getLogInfoByArray(s as Array<String>)
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
             )
     }
 
@@ -49,7 +53,9 @@ object LogUtil {
         if (debugEnabled)
             w(
                 LOGTAG,
-                getDebugInfo() + getLogInfoByArray(s as Array<String>)
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
             )
     }
 
@@ -57,7 +63,9 @@ object LogUtil {
         if (debugEnabled)
             e(
                 LOGTAG,
-                getDebugInfo() + getLogInfoByArray(s as Array<String>)
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
             )
     }
 
@@ -65,7 +73,9 @@ object LogUtil {
         if (debugEnabled)
             i(
                 LOGTAG,
-                getDebugInfo() + getLogInfoByArray(s as Array<String>)
+                getDebugInfo() + getLogInfoByArray(
+                    s as Array<String>
+                )
             )
     }
 

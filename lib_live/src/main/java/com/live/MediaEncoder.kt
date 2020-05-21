@@ -3,12 +3,13 @@ package com.live
 import android.content.Context
 import com.live.audio.AudioData
 import com.live.audio.AudioGatherManager
+import com.live.common.FileManager
+import com.live.common.LiveInterfaces
 import com.live.video.CameraSurface
 import com.live.video.VideoData
 import com.live.video.VideoGatherManager
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 /**
@@ -16,7 +17,8 @@ import kotlin.concurrent.thread
  * Date：2019/10/7
  * Note：
  */
-class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : LiveInterfaces {
+class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
+    LiveInterfaces {
 
     companion object {
         var SAVE_FILE_FOR_TEST = false
@@ -52,8 +54,10 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
     init {
         // 文件保存
         if (SAVE_FILE_FOR_TEST) {
-            videoFileManager = FileManager(FileManager.TEST_H264_FILE)
-            audioFileManager = FileManager(FileManager.TEST_AAC_FILE)
+            videoFileManager =
+                FileManager(FileManager.TEST_H264_FILE)
+            audioFileManager =
+                FileManager(FileManager.TEST_AAC_FILE)
         }
         // 音视频数据队列
         videoQueue = LinkedBlockingQueue()
@@ -150,7 +154,7 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
                     val nalLengths = IntArray(10) // 保存nal单元的大小
 
                     // 对YUV420P进行h264编码，返回数据为nal单元的个数，编码出来的是 h264数据，nalsNum是此次编码生成的nal单元数量
-                    val nalsNum = LiveNativeManager.videoEncode(
+                    val nalsNum = LiveNativeApi.videoEncode(
                         videoData.videoData,
                         videoData.videoData.size,
                         fps,
@@ -212,7 +216,7 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
                     System.arraycopy(audioData.audioData, 0, inBuffer, 0, audioLength)
 
                     // 发送给 NDK层的 fdk-aac编码 PCM裸音频数据，返回可用长度的有效字段
-                    val validLength = LiveNativeManager.audioEncode(
+                    val validLength = LiveNativeApi.audioEncode(
                         inBuffer,
                         audioLength,
                         outBuffer,

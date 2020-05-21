@@ -1,10 +1,9 @@
 package com.live
 
 import android.content.Context
+import com.live.common.LiveInterfaces
 import com.live.video.CameraSurface
-import com.live.video.VideoGatherManager
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 /**
@@ -54,7 +53,7 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         mediaEncoder.onMediaEncoderCallback(this)
         //初始化 rtmp
         thread {
-            LiveNativeManager.initRtmpData(rtmpUrl)
+            LiveNativeApi.initRtmpData(rtmpUrl)
         }
     }
 
@@ -88,7 +87,7 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         loop = false
         rtmpThread?.interrupt()
         tasks.clear()
-        thread { LiveNativeManager.releaseRtmp() }
+        thread { LiveNativeApi.releaseRtmp() }
     }
 
     override fun destrory() {
@@ -195,25 +194,25 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
 
     // 发送视频头信息
     private fun sendVideoSPSAndPPS(sps: ByteArray, pps: ByteArray, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeManager.sendRtmpVideoSpsPPS(sps, sps.size, pps, pps.size, timeStamp) }
+        val runnable = Runnable { LiveNativeApi.sendRtmpVideoSpsPPS(sps, sps.size, pps, pps.size, timeStamp) }
         addTask(runnable)
     }
 
     // 发送视频数据
     private fun sendVideoData(data: ByteArray, datalen: Int, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeManager.sendRtmpVideoData(data, datalen, timeStamp) }
+        val runnable = Runnable { LiveNativeApi.sendRtmpVideoData(data, datalen, timeStamp) }
         addTask(runnable)
     }
 
     // 发送音频头信息
     private fun sendAudioSpec(timeStamp: Long) {
-        val runnable = Runnable { LiveNativeManager.sendRtmpAudioSpec(timeStamp) }
+        val runnable = Runnable { LiveNativeApi.sendRtmpAudioSpec(timeStamp) }
         addTask(runnable)
     }
 
     // 发送音频数据
     private fun sendAudioData(data: ByteArray, datalen: Int, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeManager.sendRtmpAudioData(data, datalen, timeStamp) }
+        val runnable = Runnable { LiveNativeApi.sendRtmpAudioData(data, datalen, timeStamp) }
         addTask(runnable)
     }
 

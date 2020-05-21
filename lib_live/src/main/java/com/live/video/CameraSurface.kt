@@ -14,7 +14,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.lib_live.R
-import com.live.LogUtil
+import com.live.common.LogUtil
 
 /**
  * Author：Alex

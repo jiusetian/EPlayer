@@ -2,13 +2,11 @@ package com.live.video
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.hardware.Camera
 import android.view.Surface
 import android.view.SurfaceHolder
-import com.live.LiveConfig
-import com.live.LogUtil
+import com.live.common.LogUtil
 
 
 /**

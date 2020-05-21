@@ -1,15 +1,15 @@
-package com.live
+package com.live.common
 
 /**
  * Author：Mapogo
- * Date：2020/5/16
+ * Date：2020/5/20
  * Note：
  */
-interface PublishInterfaces {
+interface LiveInterfaces {
     fun init()
     fun start()
     fun stop()
     fun pause()
     fun resume()
-    fun release()
+    fun destrory()
 }

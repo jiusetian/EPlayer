@@ -7,8 +7,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
-import com.live.LiveConfig
-import com.live.LogUtil
+import com.live.common.LogUtil
 import com.live.MediaPublisher
 
 import kotlinx.android.synthetic.main.activity_live.*
@@ -121,40 +120,6 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
                     mediaPublisher.pause()
                 }
             }
-        }
-    }
-
-
-    private fun initCameraInfo() {
-        LiveConfig.apply {
-            //摄像头预览信息
-            val cameraWidth = cameraWidth
-            val cameraHeight = cameraHeight
-            val orientation = cameraOrientation
-            tv_camera_info.setText(
-                String.format(
-                    "摄像头预览大小:%d*%d\n旋转的角度:%d度",
-                    cameraWidth, cameraHeight, orientation
-                )
-            )
-            if (cameraOrientation == 0 || cameraOrientation == 180) { //横屏
-                //缩放大小信息
-                tv_scale_width.setText(scaleWidthLand.toString())
-                tv_scale_height.setText(scaleHeightLand.toString())
-                //剪裁信息
-                et_crop_width.setText(cropWidthLand.toString())
-                et_crop_height.setText(cropHeightLand.toString())
-            } else { //竖屏
-                //缩放大小信息
-                tv_scale_width.setText(scaleWidthVer.toString())
-                tv_scale_height.setText(scaleHeightVer.toString())
-                //剪裁信息
-                et_crop_width.setText(cropWidthVer.toString())
-                et_crop_height.setText(cropHeightVer.toString())
-            }
-
-            et_crop_start_x.setText(cropStartX.toString())
-            et_crop_start_y.setText(cropStartY.toString())
         }
     }
 

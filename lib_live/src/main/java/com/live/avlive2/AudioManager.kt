@@ -1,4 +1,4 @@
-package com.live.audio
+package com.live.avlive2
 
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -6,10 +6,9 @@ import android.media.MediaRecorder
 import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.AutomaticGainControl
 import android.os.Process
-import com.live.FileManager
-import com.live.LiveConfig
-import com.live.LiveInterfaces
-import com.live.LiveNativeManager
+import com.live.common.FileManager
+import com.live.common.LiveInterfaces
+import com.live.LiveNativeApi
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -63,7 +62,8 @@ class AudioManager : LiveInterfaces {
     init {
         // 是否保存录音
         if (SAVE_FILE_FOR_TEST) {
-            fileManager = FileManager(FileManager.TEST_PCM_FILE)
+            fileManager =
+                FileManager(FileManager.TEST_PCM_FILE)
         }
 
         bufferSizeInBytes = AudioRecord.getMinBufferSize(
@@ -92,7 +92,10 @@ class AudioManager : LiveInterfaces {
             automaticGainControl?.setEnabled(true)
         }
         // 初始化音频编码，返回每次编码数据的合适大小
-        val bufferSize = LiveNativeManager.initAudioEncoder(SAMPLE_HZ, 2, BIT_RATE)
+        val bufferSize = LiveNativeApi.initAudioEncoder(
+            SAMPLE_HZ, 2,
+            BIT_RATE
+        )
 
         mBufferSize = bufferSize
     }
@@ -126,7 +129,7 @@ class AudioManager : LiveInterfaces {
                     System.arraycopy(audioData, 0, rawAudio, 0, readSize)
 
                     // 把录音数据抛给底层进行编码
-                    LiveNativeManager.putAudioData(rawAudio, readSize)
+                    LiveNativeApi.putAudioData(rawAudio, readSize)
 
                     // 可以把裸音频以文件格式保存起来，进行测试
                     if (SAVE_FILE_FOR_TEST) {
@@ -141,7 +144,7 @@ class AudioManager : LiveInterfaces {
             }
         }
         // 底层开始编码工作
-        LiveNativeManager.startAudioEncode()
+        LiveNativeApi.startAudioEncode()
     }
 
     override fun destrory() {
@@ -164,16 +167,16 @@ class AudioManager : LiveInterfaces {
             fileManager.closeFile()
         }
         // 底层停止编码工作
-        LiveNativeManager.stopAudioEncode()
+        LiveNativeApi.stopAudioEncode()
     }
 
     override fun pause() {
         pause = true
-        LiveNativeManager.pauseAudioEncode()
+        LiveNativeApi.pauseAudioEncode()
     }
 
     override fun resume() {
         pause = false
-        LiveNativeManager.resumeAudioEncode()
+        LiveNativeApi.resumeAudioEncode()
     }
 }

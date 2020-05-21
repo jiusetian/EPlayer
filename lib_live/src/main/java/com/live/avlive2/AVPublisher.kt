@@ -1,9 +1,9 @@
-package com.live
+package com.live.avlive2
 
 import android.content.Context
-import com.live.audio.AudioManager
+import com.live.LiveNativeApi
+import com.live.common.PublishInterfaces
 import com.live.video.CameraSurface
-import com.live.video.VideoManager
 import kotlin.concurrent.thread
 
 /**
@@ -11,7 +11,8 @@ import kotlin.concurrent.thread
  * Date：2020/5/16
  * Note：
  */
-class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) : PublishInterfaces {
+class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) :
+    PublishInterfaces {
 
 
     private lateinit var videoManager: VideoManager
@@ -26,7 +27,7 @@ class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rt
         audioManager.init()
 
         thread(start = true) {
-            LiveNativeManager.initRtmpData(rtmpUrl)
+            LiveNativeApi.initRtmpData(rtmpUrl)
         }
     }
 
@@ -47,29 +48,29 @@ class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rt
     override fun start() {
         videoManager.start()
         audioManager.start()
-        LiveNativeManager.startRtmpPublish()
+        LiveNativeApi.startRtmpPublish()
     }
 
     override fun stop() {
         videoManager.stop()
         audioManager.stop()
-        LiveNativeManager.stopRtmpPublish()
+        LiveNativeApi.stopRtmpPublish()
     }
 
     override fun pause() {
         videoManager.pause()
         audioManager.pause()
-        LiveNativeManager.pauseRtmpPublish()
+        LiveNativeApi.pauseRtmpPublish()
     }
 
     override fun resume() {
         videoManager.resume()
         audioManager.resume()
-        LiveNativeManager.resumeRtmpPublish()
+        LiveNativeApi.resumeRtmpPublish()
     }
 
     override fun release() {
-        LiveNativeManager.release()
+        LiveNativeApi.release()
     }
 
 

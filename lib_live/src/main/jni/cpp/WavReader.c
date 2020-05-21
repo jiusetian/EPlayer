@@ -16,7 +16,7 @@
  * -------------------------------------------------------------------
  */
 
-#include "header/wavreader.h"
+#include "WavReader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

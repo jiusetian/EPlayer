@@ -1,14 +1,15 @@
-package com.live.video
+package com.live.avlive2
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.live.FileManager
-import com.live.LiveInterfaces
-import com.live.LiveNativeManager
-import com.live.LogUtil
+import com.live.common.FileManager
+import com.live.common.LiveInterfaces
+import com.live.LiveNativeApi
+import com.live.common.LogUtil
+import com.live.video.CameraSurface
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
@@ -18,7 +19,7 @@ import kotlin.concurrent.thread
  * Note：
  */
 class VideoManager(val cameraSurface: CameraSurface, val context: Context) : LiveInterfaces, SensorEventListener
-    , CameraSurface.CameraInfoListener{
+    , CameraSurface.CameraInfoListener {
 
     companion object {
         // 是否保存视频
@@ -74,7 +75,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
                 val srcData = cameraDatas.take()
                 LogUtil.d("相机数据："+srcData.size)
                 // 将摄像头数据交给底层编码
-                LiveNativeManager.putVideoData(srcData, srcData.size)
+                LiveNativeApi.putVideoData(srcData, srcData.size)
 
                 // 设置为true，我们把生成的YUV文件用播放器播放一下，看我们的数据是否有误，起调试作用
                 if (SAVE_FILE_FOR_TEST) {
@@ -86,7 +87,8 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
 
     override fun init() {
         if (SAVE_FILE_FOR_TEST) {
-            fileManager = FileManager(FileManager.TEST_YUV_FILE)
+            fileManager =
+                FileManager(FileManager.TEST_YUV_FILE)
         }
     }
 
@@ -102,7 +104,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
             sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
             SensorManager.SENSOR_DELAY_UI
         )
-        LiveNativeManager.startVideoEncoder()
+        LiveNativeApi.startVideoEncoder()
     }
 
     // 打开摄像头
@@ -119,20 +121,20 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
             fileManager.closeFile()
         }
         // 底层的停止
-        LiveNativeManager.stopVideoEncoder()
+        LiveNativeApi.stopVideoEncoder()
     }
 
     override fun pause() {
         pause = true
         cameraDatas.clear()
 
-        LiveNativeManager.pauseVideoEncoder()
+        LiveNativeApi.pauseVideoEncoder()
     }
 
     override fun resume() {
         pause = false
 
-        LiveNativeManager.resumeVideoEncoder()
+        LiveNativeApi.resumeVideoEncoder()
     }
 
     override fun destrory() {
@@ -193,7 +195,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
         // 是否初始化了视频
         if (!isVideoInit) {
             // 初始化视频编码
-            LiveNativeManager.videoEncoderinit(
+            LiveNativeApi.videoEncoderinit(
                 videoWidth,
                 videoHeight,
                 scaleWidth,
