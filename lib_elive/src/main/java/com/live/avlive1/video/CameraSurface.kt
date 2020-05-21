@@ -33,6 +33,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     private var targetAspect: Float = -1.0f
 
 
+
     constructor(context: Context) : super(context) {
         init()
     }

@@ -4,14 +4,15 @@ import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
-import com.live.common.LogUtil
 import com.live.avlive1.MediaPusher
-
+import com.live.common.LogUtil
 import kotlinx.android.synthetic.main.activity_live.*
-import kotlinx.android.synthetic.main.activity_live.camera_surface
+
 
 class LiveActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -68,7 +69,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         super.onResume()
         // 如果推流中并且暂停状态
         if (isStart && mPause) {
-            mPause=false
+            mPause = false
             mediaPusher.resume()
         }
     }
@@ -76,8 +77,8 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
     override fun onPause() {
         super.onPause()
         // 如果推流中并
-        if (isStart && !mPause){
-            mPause=true
+        if (isStart && !mPause) {
+            mPause = true
             LogUtil.d("暂停")
             mediaPusher.pause()
         }
