@@ -127,10 +127,9 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
 
         // 待线程结束再释放编码器
         videoEncoderThread?.join()
-        audioEncoderThread?.join()
-        // 释放底层资源
-        LiveNativeApi.releaseAudio()
         LiveNativeApi.releaseVideo()
+        audioEncoderThread?.join()
+        LiveNativeApi.releaseAudio()
     }
 
     override fun destrory() {
