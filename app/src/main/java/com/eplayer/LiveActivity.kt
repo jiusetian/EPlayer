@@ -51,9 +51,9 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         super.onConfigurationChanged(newConfig)
         val orientation = newConfig!!.orientation
         if (orientation == ORIENTATION_LANDSCAPE) {
-            LogUtil.i("-------------横屏-------------")
+            LogUtil.i("横屏")
         } else {
-            LogUtil.i("-------------竖屏-------------")
+            LogUtil.i("竖屏")
         }
         mediaPublisher.changeCarmeraOrientation()
     }
@@ -105,16 +105,16 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
             // 开始或暂停推流
             rtmp_publish_img -> {
 
-                if (!isStart) { // 还没开始推流
+                if (!isStart) { // 开始推流
                     isStart = true
                     mPause = false
                     rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
                     mediaPublisher.start()
-                } else if (mPause) { // 暂停状态
+                } else if (mPause) { // 开始
                     mPause = false
                     rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
                     mediaPublisher.resume()
-                } else if (!mPause) { // 推流中状态
+                } else if (!mPause) { // 暂停
                     mPause = true
                     rtmp_publish_img.setImageResource(R.mipmap.start_publish)
                     mediaPublisher.pause()
