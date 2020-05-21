@@ -241,7 +241,8 @@ Java_com_live_LiveNativeApi_compressYUV(JNIEnv *env, jclass type, jbyteArray src
     // 视频角度发生改变
     if (degree != mOriantation) {
         mOriantation = degree;
-        // 竖屏宽高要交换，因为手机摄像头的视频输出总是宽大于高的，而实际上竖屏的图像显示是高大于宽的
+        // 因为手机不管是竖屏还是横屏，拍出来的视频都是宽大于高的，如果是竖屏拍的视频，需要将采集的视频数据旋转90度或270度（前置摄像头
+        // 的竖屏要旋转270度），所以竖屏的时候设置解码出来的宽高是交换的
         if (degree == 90 || degree == 270) {
             videoEncoder->setInWidth(dst_height);
             videoEncoder->setInHeight(dst_width);

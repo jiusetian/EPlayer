@@ -111,6 +111,7 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
         videoGatherManager.stop()
         audioGatherManager.stop()
 
+        // 结束线程
         videoEncoderThread?.interrupt()
         audioEncoderThread?.interrupt()
         videoEncoderLoop = false
@@ -123,6 +124,13 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
             videoFileManager.closeFile()
             audioFileManager.closeFile()
         }
+
+        // 待线程结束再释放编码器
+        videoEncoderThread?.join()
+        audioEncoderThread?.join()
+        // 释放底层资源
+        LiveNativeApi.releaseAudio()
+        LiveNativeApi.releaseVideo()
     }
 
     override fun destrory() {

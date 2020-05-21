@@ -169,8 +169,6 @@ bool VideoEncoder::open() {
  * @return 返回编码后的nal单元的数量
  */
 int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t *outBytes, int *outFrameSize) {
-    if (isClose) return -1;
-    isEncoding = true; //代表正在编码中
     // YUV420数据的大小
     int i420_y_size = in_width * in_height;
     int i420_u_size = (in_width >> 1) * (in_height >> 1);
@@ -239,10 +237,8 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
         fwrite(outBytes, 1, size, out2);
         *outFrameSize = size;
 #endif
-        isEncoding = false;
         return nal_nums;
     }
-    isEncoding = false;
     return -1;
 }
 
@@ -388,13 +384,13 @@ void VideoEncoder::setParams2() {
 bool VideoEncoder::closeEncoder() {
     LOGD("关闭视频编码器");
     if (encoder != NULL) {
-        isClose = true;
+       // isClose = true;
         //while (x264_encoder_delayed_frames(encoder)) {
         //x264_encoder_encode(encoder, &nal, &nnal, NULL, &pic_out);
-        while (isEncoding) {
-            //LOGD("正在编码");
-            continue;
-        }
+//        while (isEncoding) {
+//            //LOGD("正在编码");
+//            continue;
+//        }
         x264_picture_clean(&pic_in);
         memset((char *) &pic_in, 0, sizeof(pic_in));
         memset((char *) &pic_out, 0, sizeof(pic_out));

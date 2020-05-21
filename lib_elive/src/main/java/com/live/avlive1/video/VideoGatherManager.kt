@@ -61,7 +61,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     private lateinit var fileManager: FileManager
 
     // 线程是否工作
-    private var isWork: Boolean = true
+    private var isLoop: Boolean = true
 
     // 压缩回调接口
     private lateinit var compressDataListener: ((data: ByteArray, width: Int, height: Int) -> Unit)
@@ -86,7 +86,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         compressThread = thread {
 
             // 循环执行
-            while (isWork && !Thread.interrupted()) {
+            while (isLoop && !Thread.interrupted()) {
                 try {// 原始相机数据
                     val srcData = cameraDatas.take()
                     //LogUtil.d("压缩视频数据")
@@ -131,7 +131,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     override fun start() {
         // 开始收集数据并压缩
         mPause = false
-        isWork = true
+        isLoop = true
         // 注册加速度传感器
         sensorManager.registerListener(
             this,
@@ -142,15 +142,16 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     override fun stop() {
-        isWork = false
-        compressThread?.let { it.interrupt() }
+        isLoop = false
+        compressThread?.let {
+            it.interrupt()
+        }
         //cameraSurface.releaseCamera()
         sensorManager.unregisterListener(this)
         cameraDatas.clear()
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
-        LiveNativeApi.releaseVideo()
     }
 
     override fun destrory() {

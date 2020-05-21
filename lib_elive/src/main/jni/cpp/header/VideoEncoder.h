@@ -28,8 +28,6 @@ private:
     int i_vbv_buffer_size; //码率控制缓冲区的大小，单位Kbit，默认为0
     int i_slice_max_size; //每片字节的最大数，包括预计的NAL开销.
     int b_frame_frq; //B帧频率
-    bool isEncoding = false; // 是否正在编码
-    bool isClose=false; // 是否关闭了编码器
 
     /*描述视频的特征的结构体*/
     x264_picture_t pic_in;

@@ -88,7 +88,9 @@ class MediaPusher(val context: Context, val cameraSurface: CameraSurface, val rt
         loop = false
         rtmpThread?.interrupt()
         tasks.clear()
-        thread { LiveNativeApi.releaseRtmp() }
+
+        rtmpThread?.join()
+        LiveNativeApi.releaseRtmp()
     }
 
     override fun destrory() {
@@ -103,11 +105,11 @@ class MediaPusher(val context: Context, val cameraSurface: CameraSurface, val rt
         mediaEncoder.resume()
     }
 
-    fun openCamera(){
+    fun openCamera() {
         cameraSurface.openCamera()
     }
 
-    fun closeCamera(){
+    fun closeCamera() {
         cameraSurface.releaseCamera()
     }
 

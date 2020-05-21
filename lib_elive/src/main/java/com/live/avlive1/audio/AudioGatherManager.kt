@@ -54,7 +54,8 @@ class AudioGatherManager : LiveInterfaces {
 
     private lateinit var fileManager: FileManager
 
-    private lateinit var workThread: Thread
+    // 录音线程
+    private lateinit var recordThread: Thread
 
     private var isLoop = true
 
@@ -111,7 +112,7 @@ class AudioGatherManager : LiveInterfaces {
     override fun start() {
         mPause = false
         // 录音线程
-        workThread = thread(start = true) {
+        recordThread = thread(start = true) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
             // 开始录制
             mAudioRecord.startRecording()
@@ -164,8 +165,6 @@ class AudioGatherManager : LiveInterfaces {
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
-        // 释放底层资源
-        LiveNativeApi.releaseAudio()
     }
 
     override fun destrory() {
