@@ -5,7 +5,7 @@
         android:background="#000000">
 
     <!-- 摄像头预览的控件 -->
-    <com.live.video.CameraSurface
+    <com.live.avlive1.video.CameraSurface
             android:id="@+id/camera_surface"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

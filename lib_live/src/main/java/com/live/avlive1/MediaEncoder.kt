@@ -1,13 +1,14 @@
-package com.live
+package com.live.avlive1
 
 import android.content.Context
-import com.live.audio.AudioData
-import com.live.audio.AudioGatherManager
+import com.live.LiveNativeApi
+import com.live.avlive1.audio.AudioData
+import com.live.avlive1.audio.AudioGatherManager
 import com.live.common.FileManager
 import com.live.common.LiveInterfaces
-import com.live.video.CameraSurface
-import com.live.video.VideoData
-import com.live.video.VideoGatherManager
+import com.live.avlive1.video.CameraSurface
+import com.live.avlive1.video.VideoData
+import com.live.avlive1.video.VideoGatherManager
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread

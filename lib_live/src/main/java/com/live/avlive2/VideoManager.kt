@@ -9,7 +9,7 @@ import com.live.common.FileManager
 import com.live.common.LiveInterfaces
 import com.live.LiveNativeApi
 import com.live.common.LogUtil
-import com.live.video.CameraSurface
+import com.live.avlive1.video.CameraSurface
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 

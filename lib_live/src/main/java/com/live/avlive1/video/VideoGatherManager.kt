@@ -1,4 +1,4 @@
-package com.live.video
+package com.live.avlive1.video
 
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE

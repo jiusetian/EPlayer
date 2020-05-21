@@ -3,7 +3,7 @@ package com.live.avlive2
 import android.content.Context
 import com.live.LiveNativeApi
 import com.live.common.PublishInterfaces
-import com.live.video.CameraSurface
+import com.live.avlive1.video.CameraSurface
 import kotlin.concurrent.thread
 
 /**

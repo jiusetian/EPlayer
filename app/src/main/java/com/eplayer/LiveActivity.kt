@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
 import com.live.common.LogUtil
-import com.live.MediaPublisher
+import com.live.avlive1.MediaPublisher
 
 import kotlinx.android.synthetic.main.activity_live.*
 import kotlinx.android.synthetic.main.activity_live.camera_surface

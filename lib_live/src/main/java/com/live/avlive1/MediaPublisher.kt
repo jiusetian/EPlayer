@@ -1,8 +1,9 @@
-package com.live
+package com.live.avlive1
 
 import android.content.Context
+import com.live.LiveNativeApi
 import com.live.common.LiveInterfaces
-import com.live.video.CameraSurface
+import com.live.avlive1.video.CameraSurface
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 
@@ -194,13 +195,27 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
 
     // 发送视频头信息
     private fun sendVideoSPSAndPPS(sps: ByteArray, pps: ByteArray, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeApi.sendRtmpVideoSpsPPS(sps, sps.size, pps, pps.size, timeStamp) }
+        val runnable = Runnable {
+            LiveNativeApi.sendRtmpVideoSpsPPS(
+                sps,
+                sps.size,
+                pps,
+                pps.size,
+                timeStamp
+            )
+        }
         addTask(runnable)
     }
 
     // 发送视频数据
     private fun sendVideoData(data: ByteArray, datalen: Int, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeApi.sendRtmpVideoData(data, datalen, timeStamp) }
+        val runnable = Runnable {
+            LiveNativeApi.sendRtmpVideoData(
+                data,
+                datalen,
+                timeStamp
+            )
+        }
         addTask(runnable)
     }
 
@@ -212,7 +227,13 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
 
     // 发送音频数据
     private fun sendAudioData(data: ByteArray, datalen: Int, timeStamp: Long) {
-        val runnable = Runnable { LiveNativeApi.sendRtmpAudioData(data, datalen, timeStamp) }
+        val runnable = Runnable {
+            LiveNativeApi.sendRtmpAudioData(
+                data,
+                datalen,
+                timeStamp
+            )
+        }
         addTask(runnable)
     }
 
