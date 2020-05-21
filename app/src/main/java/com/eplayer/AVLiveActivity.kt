@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import com.live.avlive2.AVPublisher
+import com.live.avlive2.AVPusher
 import com.live.common.LogUtil
 import kotlinx.android.synthetic.main.activity_a_v_live.*
 
@@ -17,7 +17,7 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 音视频推流器
-    private lateinit var avPublisher: AVPublisher
+    private lateinit var avPusher: AVPusher
 
     private var isPublish = false // 是否正在推流
 
@@ -32,8 +32,8 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar!!.hide()
 
         initView()
-        avPublisher = AVPublisher(this, camera_surface, rtmpUrl)
-        avPublisher.init() // 初始化推流器
+        avPusher = AVPusher(this, camera_surface, rtmpUrl)
+        avPusher.init() // 初始化推流器
     }
 
     private fun initView() {
@@ -43,7 +43,7 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        avPublisher.openCamera()
+        avPusher.openCamera()
     }
 
     override fun onResume() {
@@ -52,8 +52,8 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStop() {
         super.onStop()
-        avPublisher.stop()
-        avPublisher.release() // 释放资源
+        avPusher.stop()
+        avPusher.release() // 释放资源
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -64,14 +64,14 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             LogUtil.i("-------------竖屏-------------")
         }
-        avPublisher.changeCarmeraOrientation()
+        avPusher.changeCarmeraOrientation()
     }
 
     override fun onClick(v: View?) {
         when (v) {
             // 切换相机
             switch_camera -> {
-                avPublisher.switchCamera()
+                avPusher.switchCamera()
             }
 
             // 推流
@@ -79,11 +79,11 @@ class AVLiveActivity : AppCompatActivity(), View.OnClickListener {
                 if (!isPublish) {
                     isPublish = true
                     rtmp_publish.setImageResource(R.mipmap.pause_publish)
-                    avPublisher.start()
+                    avPusher.start()
                 } else {
                     isPublish = false
                     rtmp_publish.setImageResource(R.mipmap.start_publish)
-                    avPublisher.pause()
+                    avPusher.pause()
                 }
 
             }

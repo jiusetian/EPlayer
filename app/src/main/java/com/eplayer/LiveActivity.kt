@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
 import com.live.common.LogUtil
-import com.live.avlive1.MediaPublisher
+import com.live.avlive1.MediaPusher
 
 import kotlinx.android.synthetic.main.activity_live.*
 import kotlinx.android.synthetic.main.activity_live.camera_surface
@@ -20,7 +20,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     // 音视频推流器
-    private lateinit var mediaPublisher: MediaPublisher
+    private lateinit var mediaPusher: MediaPusher
     private var isStart = false // 是否已经开始推流
     private var mPause = true // 是否暂停推流
 
@@ -35,9 +35,9 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar!!.hide()
 
         initView()
-        mediaPublisher = MediaPublisher(this, camera_surface, rtmpUrl)
+        mediaPusher = MediaPusher(this, camera_surface, rtmpUrl)
         // 初始化推流器
-        mediaPublisher.init()
+        mediaPusher.init()
     }
 
     private fun initView() {
@@ -55,13 +55,13 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             LogUtil.i("竖屏")
         }
-        mediaPublisher.changeCarmeraOrientation()
+        mediaPusher.changeCarmeraOrientation()
     }
 
     override fun onStart() {
         super.onStart()
         // 打开摄像头
-        mediaPublisher.openCamera()
+        mediaPusher.openCamera()
     }
 
     override fun onResume() {
@@ -69,7 +69,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         // 如果推流中并且暂停状态
         if (isStart && mPause) {
             mPause=false
-            mediaPublisher.resume()
+            mediaPusher.resume()
         }
     }
 
@@ -79,27 +79,27 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         if (isStart && !mPause){
             mPause=true
             LogUtil.d("暂停")
-            mediaPublisher.pause()
+            mediaPusher.pause()
         }
     }
 
     override fun onStop() {
         super.onStop()
         // 关闭摄像头
-        mediaPublisher.closeCamera()
+        mediaPusher.closeCamera()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         // 停止推流，销毁推流上下文
-        mediaPublisher.stop()
+        mediaPusher.stop()
     }
 
     override fun onClick(v: View) {
         when (v) {
             // 切换摄像头
             switch_camera_img -> {
-                mediaPublisher.switchCamera()
+                mediaPusher.switchCamera()
             }
 
             // 开始或暂停推流
@@ -109,15 +109,15 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
                     isStart = true
                     mPause = false
                     rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
-                    mediaPublisher.start()
+                    mediaPusher.start()
                 } else if (mPause) { // 开始
                     mPause = false
                     rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
-                    mediaPublisher.resume()
+                    mediaPusher.resume()
                 } else if (!mPause) { // 暂停
                     mPause = true
                     rtmp_publish_img.setImageResource(R.mipmap.start_publish)
-                    mediaPublisher.pause()
+                    mediaPusher.pause()
                 }
             }
         }

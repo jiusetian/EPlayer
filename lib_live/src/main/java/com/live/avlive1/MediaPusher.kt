@@ -12,7 +12,7 @@ import kotlin.concurrent.thread
  * Date：2019/10/8
  * Note：
  */
-class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) : LiveInterfaces,
+class MediaPusher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) : LiveInterfaces,
     MediaEncoder.MediaEncoderCallback {
 
     companion object {

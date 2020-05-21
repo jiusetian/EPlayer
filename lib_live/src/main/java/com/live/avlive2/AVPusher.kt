@@ -2,7 +2,7 @@ package com.live.avlive2
 
 import android.content.Context
 import com.live.LiveNativeApi
-import com.live.common.PublishInterfaces
+import com.live.common.PushInterfaces
 import com.live.avlive1.video.CameraSurface
 import kotlin.concurrent.thread
 
@@ -11,8 +11,8 @@ import kotlin.concurrent.thread
  * Date：2020/5/16
  * Note：
  */
-class AVPublisher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) :
-    PublishInterfaces {
+class AVPusher(val context: Context, val cameraSurface: CameraSurface, val rtmpUrl: String) :
+    PushInterfaces {
 
 
     private lateinit var videoManager: VideoManager

@@ -5,7 +5,7 @@ package com.live.common
  * Date：2020/5/16
  * Note：
  */
-interface PublishInterfaces {
+interface PushInterfaces {
     fun init()
     fun start()
     fun stop()
