@@ -392,7 +392,7 @@ bool VideoEncoder::closeEncoder() {
         //while (x264_encoder_delayed_frames(encoder)) {
         //x264_encoder_encode(encoder, &nal, &nnal, NULL, &pic_out);
         while (isEncoding) {
-            LOGD("正在编码");
+            //LOGD("正在编码");
             continue;
         }
         x264_picture_clean(&pic_in);

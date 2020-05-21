@@ -370,7 +370,7 @@ class MediaPlayerActivity : AppCompatActivity(), View.OnClickListener, SeekBar.O
                     0 -> addImageWatermark(R.mipmap.ic_launcher, it)
 //                    1 -> addTextWatermark("EPlayer", 100, 100, it)
 //                    2 -> addImageWatermark(R.mipmap.ghost, it)
-//                    3 -> addTextWatermark("刘兴荣", 100, 100, it)
+//                    3 -> addTextWatermark("lllxxrrr", 100, 100, it)
                 }
                 markIndex++
             }
