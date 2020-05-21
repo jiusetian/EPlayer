@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         setContentView(R.layout.activity_main)
         checkPerms() //初始化权限
 
-        // 直播
+        // 直播1
         btn_live.setOnClickListener {
             if (EasyPermissions.hasPermissions(this, *perms))
                 startActivity(Intent(this, LiveActivity::class.java))
@@ -45,9 +45,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
 
         // 直播2
-        btn_live1.setOnClickListener {
+        btn_live2.setOnClickListener {
             if (EasyPermissions.hasPermissions(this, *perms))
-                startActivity(Intent(this, AVLiveActivity::class.java))
+                //startActivity(Intent(this, AVLiveActivity::class.java))
             else
                 requestPerms(*perms)
         }
