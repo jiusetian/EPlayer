@@ -5,7 +5,6 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.SurfaceHolder
 import android.view.View
 import android.view.WindowManager
 import com.live.LiveConfig
@@ -15,8 +14,6 @@ import com.live.MediaPublisher
 import kotlinx.android.synthetic.main.activity_live.*
 import kotlinx.android.synthetic.main.activity_live.camera_surface
 
-import kotlin.concurrent.thread
-
 class LiveActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
@@ -25,7 +22,7 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
 
     // 音视频推流器
     private lateinit var mediaPublisher: MediaPublisher
-    private var isPublish = false // 是否正在推流
+    private var isStart = false // 是否已经开始推流
     private var mPause = true // 是否暂停推流
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,10 +37,8 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
 
         initView()
         mediaPublisher = MediaPublisher(this, camera_surface, rtmpUrl)
-        //thread {
-            // 初始化推流器
-            mediaPublisher.init()
-        //}
+        // 初始化推流器
+        mediaPublisher.init()
     }
 
     private fun initView() {
@@ -51,13 +46,6 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         switch_camera_img.setOnClickListener(this)
         // 开始或暂停推流
         rtmp_publish_img.setOnClickListener(this)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // 如果推流中并且暂停状态
-        if (isPublish && mPause)
-            mediaPublisher.resume()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -71,19 +59,42 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         mediaPublisher.changeCarmeraOrientation()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // 停止推流，销毁推流上下文
-        mediaPublisher.stop()
+    override fun onStart() {
+        super.onStart()
+        // 打开摄像头
+        mediaPublisher.openCamera()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 如果推流中并且暂停状态
+        if (isStart && mPause) {
+            mPause=false
+            mediaPublisher.resume()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         // 如果推流中并
-        if (isPublish && !mPause)
+        if (isStart && !mPause){
+            mPause=true
+            LogUtil.d("暂停")
             mediaPublisher.pause()
+        }
     }
 
+    override fun onStop() {
+        super.onStop()
+        // 关闭摄像头
+        mediaPublisher.closeCamera()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // 停止推流，销毁推流上下文
+        mediaPublisher.stop()
+    }
 
     override fun onClick(v: View) {
         when (v) {
@@ -95,8 +106,8 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
             // 开始或暂停推流
             rtmp_publish_img -> {
 
-                if (!isPublish) { // 还没开始推流
-                    isPublish = true
+                if (!isStart) { // 还没开始推流
+                    isStart = true
                     mPause = false
                     rtmp_publish_img.setImageResource(R.mipmap.pause_publish)
                     mediaPublisher.start()

@@ -102,6 +102,7 @@ class CameraUtil(val context: Context) {
     // 对焦
     fun startAutoFocus() {
         try {
+            camera.lock()
             if (camera != null && !isFocusing && isStartPreview) {
                 camera.cancelAutoFocus()
                 isFocusing = true
@@ -131,7 +132,7 @@ class CameraUtil(val context: Context) {
         camera.startPreview()
         isStartPreview = true
         isFocusing = false
-        // 进行一次自动对焦
+        // 进行一次对焦
         startAutoFocus()
     }
 
@@ -209,6 +210,7 @@ class CameraUtil(val context: Context) {
     // 释放摄像头
     fun releaseCamera() {
         camera?.let {
+            LogUtil.d("释放摄像头")
             it.stopPreview()
             it.setPreviewCallback(null)
             it.release()

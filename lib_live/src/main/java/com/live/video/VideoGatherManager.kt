@@ -89,6 +89,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
             while (isWork && !Thread.interrupted()) {
                 try {// 原始相机数据
                     val srcData = cameraDatas.take()
+                    //LogUtil.d("压缩视频数据")
                     // 保存压缩数据
                     val compressData = ByteArray(scaleWidth * scaleHeight * 3 / 2)
 
@@ -143,14 +144,16 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     override fun stop() {
         isWork = false
         compressThread?.let { it.interrupt() }
-        cameraSurface.releaseCamera()
+        //cameraSurface.releaseCamera()
         sensorManager.unregisterListener(this)
         cameraDatas.clear()
         if (SAVE_FILE_FOR_TEST) {
             fileManager.closeFile()
         }
-
         LiveNativeManager.releaseVideo()
+    }
+
+    override fun destrory() {
     }
 
     override fun pause() {
@@ -181,7 +184,8 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
         val deltaZ = Math.abs(lastZ - z)
 
         if (cameraSurface != null && (deltaX > 0.6 || deltaY > 0.6 || deltaZ > 0.6)) {
-            cameraSurface.startAutoFocus(-1f, -1f)
+            // 传感器感应对焦，貌似对焦太频繁了
+            //cameraSurface.startAutoFocus(-1f, -1f)
         }
         lastX = x
         lastY = y

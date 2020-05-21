@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.lib_live.R
+import com.live.LogUtil
 
 /**
  * Author：Alex
@@ -81,12 +82,13 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        // cameraUtil.releaseCamera()
+        LogUtil.d("调用了Surface销毁")
+        //cameraUtil.releaseCamera()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         // 打开摄像头
-        openCamera()
+        //openCamera()
         // 设置摄像头接口和surfaceview的关联还有摄像头的数据回调相关
         // 第二个参数是摄像头的回调接口，回调方法为onPreviewFrame，这个方法可以捕捉到摄像头数据byte[] data,这就是摄像头的原始数据流，即YUV420SP格式的数据
         cameraUtil.handleCameraStartPreview(holder, this)

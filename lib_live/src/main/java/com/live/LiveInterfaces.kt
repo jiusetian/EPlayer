@@ -11,4 +11,5 @@ interface LiveInterfaces {
     fun stop()
     fun pause()
     fun resume()
+    fun destrory()
 }

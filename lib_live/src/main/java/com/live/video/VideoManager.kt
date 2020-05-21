@@ -135,6 +135,10 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
         LiveNativeManager.resumeVideoEncoder()
     }
 
+    override fun destrory() {
+        TODO("Not yet implemented")
+    }
+
     fun switchCamera() {
         cameraSurface.switchCamera()
     }

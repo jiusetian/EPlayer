@@ -169,6 +169,10 @@ class AudioGatherManager : LiveInterfaces {
         LiveNativeManager.releaseAudio()
     }
 
+    override fun destrory() {
+        TODO("Not yet implemented")
+    }
+
     override fun pause() {
         mPause = true
     }

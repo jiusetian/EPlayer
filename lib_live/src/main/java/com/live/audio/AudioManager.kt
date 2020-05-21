@@ -144,6 +144,10 @@ class AudioManager : LiveInterfaces {
         LiveNativeManager.startAudioEncode()
     }
 
+    override fun destrory() {
+        TODO("Not yet implemented")
+    }
+
     override fun stop() {
         // 停止线程
         isLoop = false

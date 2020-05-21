@@ -91,12 +91,24 @@ class MediaPublisher(val context: Context, val cameraSurface: CameraSurface, val
         thread { LiveNativeManager.releaseRtmp() }
     }
 
+    override fun destrory() {
+        TODO("Not yet implemented")
+    }
+
     override fun pause() {
         mediaEncoder.pause()
     }
 
     override fun resume() {
         mediaEncoder.resume()
+    }
+
+    fun openCamera(){
+        cameraSurface.openCamera()
+    }
+
+    fun closeCamera(){
+        cameraSurface.releaseCamera()
     }
 
     // 添加任务

@@ -120,6 +120,10 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) : Liv
         }
     }
 
+    override fun destrory() {
+        TODO("Not yet implemented")
+    }
+
     override fun pause() {
         videoGatherManager.pause()
         audioGatherManager.pause()
