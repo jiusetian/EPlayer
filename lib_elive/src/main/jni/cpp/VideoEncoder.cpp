@@ -254,7 +254,7 @@ void VideoEncoder::setParams() {
     // 设置帧宽度和高度
     params.i_width = in_width;
     params.i_height = in_height;
-    // LOGD("设置的宽高=%d /// %d",getOutWidth(),getOutHeight());
+
     // 并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
     params.i_fps_num = 25; //getFps(); //设置帧率

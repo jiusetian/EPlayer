@@ -239,18 +239,18 @@ Java_com_live_LiveNativeApi_compressYUV(JNIEnv *env, jclass type, jbyteArray src
     //  进行缩放的操作，这个缩放，会把数据压缩
     scaleI420(temp_i420_data, width, height, temp_i420_data_scale, dst_width, dst_height, mode);
     // 视频角度发生改变
-    if (degree != mOriantation) {
-        mOriantation = degree;
-        // 因为手机不管是竖屏还是横屏，拍出来的视频都是宽大于高的，如果是竖屏拍的视频，需要将采集的视频数据旋转90度或270度（前置摄像头
-        // 的竖屏要旋转270度），所以竖屏的时候设置解码出来的宽高是交换的
-        if (degree == 90 || degree == 270) {
-            videoEncoder->setInWidth(dst_height);
-            videoEncoder->setInHeight(dst_width);
-        } else {
-            videoEncoder->setInWidth(dst_width);
-            videoEncoder->setInHeight(dst_height);
-        }
-    }
+//    if (degree != mOriantation) {
+//        mOriantation = degree;
+//        // 因为手机不管是竖屏还是横屏，拍出来的视频都是宽大于高的，如果是竖屏拍的视频，需要将采集的视频数据旋转90度或270度（前置摄像头
+//        // 的竖屏要旋转270度），所以竖屏的时候设置解码出来的宽高是交换的
+//        if (degree == 90 || degree == 270) {
+//            videoEncoder->setInWidth(dst_height);
+//            videoEncoder->setInHeight(dst_width);
+//        } else {
+//            videoEncoder->setInWidth(dst_width);
+//            videoEncoder->setInHeight(dst_height);
+//        }
+//    }
 
     //  如果是前置摄像头，进行镜像操作
     if (isMirror) {
@@ -469,6 +469,7 @@ Java_com_live_LiveNativeApi_releaseVideo(JNIEnv *env, jclass type) {
 
     if (videoEncoder) {
         delete (videoEncoder);
+        // 释放临时空间
         free(temp_i420_data);
         free(temp_i420_data_scale);
         free(temp_i420_data_rotate);
@@ -482,8 +483,7 @@ JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeApi_releaseAudio(JNIEnv *env, jclass type) {
 
     if (audioEncoder) {
-        //delete (audioEncoder);
-        audioEncoder->close();
+        delete (audioEncoder);
     }
     return 0;
 }
