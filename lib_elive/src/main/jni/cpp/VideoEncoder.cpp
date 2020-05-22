@@ -1,14 +1,14 @@
-//
+// 
 // Created by lxr on 2019/9/19.
-//
+// 
 #include <cstring>
 #include <cstdlib>
 #include "header/VideoEncoder.h"
 #include "header/AndroidLog.h"
 // 供测试文件使用,测试的时候打开
-//#define ENCODE_OUT_FILE_1
+// #define ENCODE_OUT_FILE_1
 // 供测试文件使用
-//#define ENCODE_OUT_FILE_2
+// #define ENCODE_OUT_FILE_2
 
 VideoEncoder::VideoEncoder() : in_width(0), in_height(0), fps(0), encoder(NULL),
                                nal_nums(0) {
@@ -67,7 +67,7 @@ void VideoEncoder::setVideoEncoderCallback(videoEncoderCallback *callback) {
 }
 
 void VideoEncoder::excuteEncodeVideo() {
-    //AvData *data = (AvData *) malloc(sizeof(AvData));
+    // AvData *data = (AvData *) malloc(sizeof(AvData));
     AvData *data = NULL;
     int pts = 0;
 
@@ -88,9 +88,9 @@ void VideoEncoder::excuteEncodeVideo() {
             break;
         }
 
-//        if (avQueue->getData(&data) < 0) {
-//            break;
-//        }
+        // if (avQueue->getData(&data) < 0) {
+        //     break;
+        // }
         LOGD("压缩后YUV数据取成功：%d", data->len);
         int nalSizes[10] = {0}; // 保存输出数据 nal的大小
         uint8_t *outBytes = new uint8_t[in_width * in_height]; // 保存输出数据
@@ -98,14 +98,14 @@ void VideoEncoder::excuteEncodeVideo() {
         int nalNum = encodeFrame(data->data, data->len, ++pts, outBytes, nalSizes);
         int totalLen = 0; // 总长度
         int temNalSizes[nalNum]; // 保存nal长度
-        //uint8_t *cpy;
+        // uint8_t *cpy;
         for (int i = 0; i < nalNum; i++) {
             totalLen += nalSizes[i];
             temNalSizes[i] = nalSizes[i];
         }
         LOGD("压缩后YUV数据编码成功：%d", totalLen);
-//        cpy = new uint8_t[totalLen];
-//        memcpy(cpy, outBytes, totalLen);
+        // cpy = new uint8_t[totalLen];
+        // memcpy(cpy, outBytes, totalLen);
         LOGD("压缩后YUV数据的编码结果开始回调");
         // 回调
         callback(outBytes, totalLen, nalNum, temNalSizes);
@@ -114,7 +114,6 @@ void VideoEncoder::excuteEncodeVideo() {
         free(data);
         // delete []outBytes;
     }
-
 }
 
 
@@ -142,7 +141,7 @@ bool VideoEncoder::open() {
 
     if (!encoder) {
         LOGE("不能打开编码器");
-        closeEncoder(); //关闭
+        closeEncoder(); // 关闭
         return false;
     }
 
@@ -181,7 +180,7 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
     // 的plane用来存放每个图像平面存放数据的起始地址, plane[0]是Y平面，plane[1]和plane[2]分别代表U和V平面
 
     // pic_in.img.i_csp = X264_CSP_I420;
-    // pic_in.img.i_plane = 3; //plane的数量
+    // pic_in.img.i_plane = 3; // plane的数量
     memcpy(pic_in.img.plane[0], i420_y_data, i420_y_size); // 保存Y数据
     // pic_in.img.i_stride[0] = i420_y_size;
     memcpy(pic_in.img.plane[1], i420_u_data, i420_u_size); // 保存U数据
@@ -191,8 +190,8 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
     // pic_in.i_type = X264_TYPE_AUTO;
 
     // and encode and store into pic_out
-    pic_in.i_pts = pts; //代表第几帧
-    //LOGD("帧数：%d",pts);
+    pic_in.i_pts = pts; // 代表第几帧
+    // LOGD("帧数：%d",pts);
 
     /**
      * 编码最主要的函数，代表编码一帧图像，返回编码后的数据大小
@@ -203,7 +202,7 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
      * pic_out：图像的输出
      */
     int size = x264_encoder_encode(encoder, &nals, &nal_nums, &pic_in, &pic_out);
-    //LOGD("压缩后YUV数据编码后大小：%d", size);
+    // LOGD("压缩后YUV数据编码后大小：%d", size);
     if (size) {
         /*Here first four bytes proceeding the nal unit indicates frame length*/
         int have_copy = 0;
@@ -211,7 +210,7 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
         // 或者是否是关键帧，nals[i].i_payload表示数据长度，nals[i].p_payload表示存储的数据
         // 编码后，我们按照nals[i].i_payload的长度来保存copy h264数据的，然后抛给java端用作
         // rtmp发送数据，outFrameSize是变长的，当有sps pps的时候大于1，其它时候值为1
-        for (int i = 0; i < nal_nums; i++) { //当有sps和pps的时候，nal单元的数量大于1，其他时候为1
+        for (int i = 0; i < nal_nums; i++) { // 当有sps和pps的时候，nal单元的数量大于1，其他时候为1
             outFrameSize[i] = nals[i].i_payload;
             // 将 nals单元的数据复制到输出数据outBytes中
             memcpy(outBytes + have_copy, nals[i].p_payload, nals[i].i_payload);
@@ -220,10 +219,10 @@ int VideoEncoder::encodeFrame(uint8_t *inBytes, int frameSize, int pts, uint8_t 
 
         // #ifdef后面跟一个宏定义，意思是如果有定义这个宏，就执行下一步
 #ifdef ENCODE_OUT_FILE_1
-        //    ptr -- 这是指向要被写入的元素数组的指针。
-        //    size -- 这是要被写入的每个元素的大小，以字节为单位。
-        //    nmemb -- 这是元素的个数，每个元素的大小为 size 字节。
-        //    stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输出流。
+        // ptr -- 这是指向要被写入的元素数组的指针。
+        // size -- 这是要被写入的每个元素的大小，以字节为单位。
+        // nmemb -- 这是元素的个数，每个元素的大小为 size 字节。
+        // stream -- 这是指向 FILE 对象的指针，该 FILE 对象指定了一个输出流。
                 fwrite(outBytes, 1, size, out1);
 #endif
 
@@ -257,11 +256,11 @@ void VideoEncoder::setParams() {
 
     // 并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
-    params.i_fps_num = 25; //getFps(); //设置帧率
-    params.i_fps_den = 1; //帧率时间，1秒
-    params.b_sliced_threads = 0;//true; //多slice并行编码模式
+    params.i_fps_num = 25; // getFps(); // 设置帧率
+    params.i_fps_den = 1; // 帧率时间，1秒
+    params.b_sliced_threads = 0;// true; // 多slice并行编码模式
 
-    //0为根据fps而不是timebase,timestamps来计算帧间距离，可以避免在码率控制为ABR的情况下失效的问题
+    // 0为根据fps而不是timebase,timestamps来计算帧间距离，可以避免在码率控制为ABR的情况下失效的问题
     params.b_vfr_input = 0;
 
     // Intra refres:关键帧即I帧的最大间隔和最小间隔，即GOP
@@ -270,16 +269,16 @@ void VideoEncoder::setParams() {
     // For streaming:
     // 码率(比特率,单位Kbps)x264使用的bitrate需要/1000
     // 设置码率,在ABR(平均码率)模式下才生效，且必须在设置ABR前先设置bitrate
-    params.rc.i_bitrate = 1200;// getBitrate() / 1000;
-    // params.rc.b_mb_tree = 0;//这个不为0,将导致编码延时帧...在实时编码时,必须为0
+    params.rc.i_bitrate = 1200;// getBitrate() / 1000; 1200属于高清了
+    // params.rc.b_mb_tree = 0;// 这个不为0,将导致编码延时帧...在实时编码时,必须为0
     // 参数i_rc_method表示码率控制，CQP(恒定质量)，CRF(恒定码率)，ABR(平均码率)
     // 恒定码率，会尽量控制在固定码率
-    params.rc.i_rc_method = X264_RC_ABR;//X264_RC_CRF;
+    params.rc.i_rc_method = X264_RC_ABR;// X264_RC_CRF;
 
     // 是否把SPS和PPS放入每一个关键帧
     // SPS Sequence Parameter Set 序列参数集，PPS Picture Parameter Set 图像参数集
     // 为了提高图像的纠错能力,该参数设置是让每个I帧都附带sps/pps。
-    params.b_repeat_headers = 1; //1;
+    params.b_repeat_headers = 1; // 1;
     // 设置Level级别,编码复杂度,用于控制视频画质，取值为[0-51]，数值越低画质越好，默认值23，通常取值范围：[18-28]
     // params.i_level_idc = 51;
 
@@ -317,10 +316,10 @@ void VideoEncoder::setParams2() {
     params.i_width = in_width;
     params.i_height = in_height;
 
-    // LOGD("设置的宽高=%d /// %d",getOutWidth(),getOutHeight()); //并行编码多帧
+    // LOGD("设置的宽高=%d /// %d",getOutWidth(),getOutHeight()); // 并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
-    params.i_fps_num = 25; //getFps(); //设置帧率
-    params.i_fps_den = 1; //帧率时间，1秒
+    params.i_fps_num = 25; // getFps(); // 设置帧率
+    params.i_fps_den = 1; // 帧率时间，1秒
 
     // I帧和P帧之间的B帧数量，若设置为0则表示不使用B帧，B帧会同时参考其前面与后面的帧，因此增加B帧数量可以提高压缩比，但也因此会降低压缩的速度。
     params.i_bframe = 5;
@@ -330,7 +329,7 @@ void VideoEncoder::setParams2() {
      * 多slice会稍微降低编码性能。frame并行是同时开启多帧编码，x264在N个frame并行的时候需要集齐N帧再开始一起编码，
      * 因此x264 frame并行是一种延时性的并行模式
      */
-    params.b_sliced_threads = true; //多slice并行编码模式
+    params.b_sliced_threads = true; // 多slice并行编码模式
 
     // 0为根据fps而不是timebase,timestamps来计算帧间距离，VFR输入。1 ：时间基和时间戳用于码率控制，0 ：仅帧率用于码率控制
     params.b_vfr_input = 0;
@@ -340,19 +339,19 @@ void VideoEncoder::setParams2() {
     // Intra refres:关键帧即I帧的最大间隔和最小间隔
     params.i_keyint_max = 25;
     params.i_keyint_min = 1;
-    // params.b_intra_refresh = 1; //是否使用周期帧内刷新替代IDR帧,这个要注释，不然在中途接流的时候会出现只有声音没有画面的bug
+    // params.b_intra_refresh = 1; // 是否使用周期帧内刷新替代IDR帧,这个要注释，不然在中途接流的时候会出现只有声音没有画面的bug
 
-    params.rc.b_mb_tree = 0;//这个不为0,将导致编码延时帧...在实时编码时,必须为0
+    params.rc.b_mb_tree = 0;// 这个不为0,将导致编码延时帧...在实时编码时,必须为0
     // 参数i_rc_method表示码率控制，CQP(恒定质量)，CRF(恒定码率)，ABR(平均码率)
     // 恒定码率，会尽量控制在固定码率
-    params.rc.i_rc_method = X264_RC_CRF;//X264_RC_ABR;// ;
+    params.rc.i_rc_method = X264_RC_CRF;// X264_RC_ABR;// ;
     // ABR模式下调整i_bitrate，CQP下调整i_qp_constant调整QP值，范围0~51，值越大图像越模糊，默认23
     // CRF下调整f_rf_constant和f_rf_constant_max影响编码速度和图像质量
     // 图像质量控制,rc.f_rf_constant是实际质量，越大图像越花，越小越清晰
     // param.rc.f_rf_constant_max ，图像质量的最大值
     // 和QP的范围一样RF的范围也是[0, 51]。其中0为无损模式，23为缺省，51质量最差。和QP一样的趋势。RF值加6，输出码率大概减少一半；减6，输出码率翻倍
-    params.rc.f_rf_constant = 25; //实际质量，值越大图像越花,越小越清晰
-    params.rc.f_rf_constant_max = 35; //最大码率因子，该选项仅在使用CRF并开启VBV时有效，
+    params.rc.f_rf_constant = 25; // 实际质量，值越大图像越花,越小越清晰
+    params.rc.f_rf_constant_max = 35; // 最大码率因子，该选项仅在使用CRF并开启VBV时有效，
 
     // For streaming:
     // 码率(比特率,单位Kbps)x264使用的bitrate需要/1000

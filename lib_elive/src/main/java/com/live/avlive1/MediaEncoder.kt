@@ -9,6 +9,7 @@ import com.live.common.LiveInterfaces
 import com.live.avlive1.video.CameraSurface
 import com.live.avlive1.video.VideoData
 import com.live.avlive1.video.VideoGatherManager
+import com.live.common.LogUtil
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
@@ -27,8 +28,8 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
     }
 
     // 音视频编码线程
-    private  var videoEncoderThread: Thread?=null
-    private  var audioEncoderThread: Thread?=null
+    private var videoEncoderThread: Thread? = null
+    private var audioEncoderThread: Thread? = null
 
     // 线程控制
     private var videoEncoderLoop = true
@@ -78,6 +79,7 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
         // 回调视频压缩数据
         videoGatherManager.onCompressDataListener { data, width, height ->
             val videoData = VideoData(data, width, height)
+            //LogUtil.d("保存压缩数据")
             // 保存视频数据
             videoQueue.put(videoData)
         }
@@ -88,9 +90,9 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
 
         // 回调音频pcm数据
         audioGatherManager.onAudioDataListener {
-                val audioData = AudioData(it)
-                // 保存音频数据
-                audioQueue.put(audioData)
+            val audioData = AudioData(it)
+            // 保存音频数据
+            audioQueue.put(audioData)
         }
     }
 
@@ -149,12 +151,13 @@ class MediaEncoder(val context: Context, val cameraSurface: CameraSurface) :
     // 开始视频的解码
     private fun startVideoEncoder() {
         // 编码线程
-        videoEncoderThread = thread(start = true) {
-
+        videoEncoderThread = thread {
+            videoEncoderLoop = true
             while (videoEncoderLoop && !Thread.interrupted()) {
                 try {
                     // 队列中取视频数据，这里是指一帧图像的数据
                     val videoData = videoQueue.take()
+                    //LogUtil.d("取视频")
                     fps++ // 代表第几帧
 
                     // 保存编码输出数据

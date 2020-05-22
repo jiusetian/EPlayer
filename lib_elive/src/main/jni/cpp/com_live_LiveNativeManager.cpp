@@ -14,7 +14,6 @@
 jbyte *temp_i420_data;
 jbyte *temp_i420_data_scale;
 jbyte *temp_i420_data_rotate;
-jint mOriantation = 0;
 
 YuvProcess *yuvProcess = nullptr;
 VideoEncoder *videoEncoder = nullptr;
@@ -311,18 +310,20 @@ Java_com_live_LiveNativeApi_cropYUV(JNIEnv *env, jclass type, jbyteArray src_, j
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_live_LiveNativeApi_videoEncoderinit(JNIEnv *env, jclass type, jint src_width,
-                                             jint src_height, jint in_width, jint in_height, jint orientation) {
+                                             jint src_height, jint scale_width, jint scale_height, jint orientation) {
     //  初始化临时空间
-    init(src_width, src_height, in_width, in_height);
-    mOriantation = orientation;
+    init(src_width, src_height, scale_width, scale_height);
+
     videoEncoder = new VideoEncoder();
     // 设置相关参数
-    if (orientation == 90 || orientation == 270) { // 竖屏，输出宽高要交换
-        videoEncoder->setInWidth(in_height);
-        videoEncoder->setInHeight(in_width);
+    // 因为手机摄像头拍出的视频始终都是宽大于高的，为了正常显示在竖屏上，需要旋转，这里的宽高是旋转之前的宽高，
+    // 所以在竖屏的时候需要交换宽高才是正确的
+    if (orientation == 90 || orientation == 270) { // 竖屏
+        videoEncoder->setInWidth(scale_height);
+        videoEncoder->setInHeight(scale_width);
     } else { // 横屏
-        videoEncoder->setInWidth(in_width);
-        videoEncoder->setInHeight(in_height);
+        videoEncoder->setInWidth(scale_width);
+        videoEncoder->setInHeight(scale_height);
     }
     videoEncoder->setBitrate(1200 * 1000); // 设置比特率
     videoEncoder->open();

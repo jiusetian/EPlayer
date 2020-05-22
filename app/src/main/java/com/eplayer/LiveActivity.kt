@@ -56,6 +56,13 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             LogUtil.i("竖屏")
         }
+//        mediaPusher.stop()
+//        mediaPusher.init()
+//        mediaPusher.closeCamera()
+//        // 打开摄像头
+//        mediaPusher.openCamera()
+//        mediaPusher.start()
+
         mediaPusher.changeCarmeraOrientation()
     }
 

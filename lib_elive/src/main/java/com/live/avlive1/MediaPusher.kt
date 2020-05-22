@@ -61,7 +61,9 @@ class MediaPusher(val context: Context, val cameraSurface: CameraSurface, val rt
     override fun start() {
         mediaEncoder.start()
         // rtmp推流线程
-        rtmpThread = thread(start = true) {
+        rtmpThread = thread {
+            loop=true
+
             while (loop && !Thread.interrupted()) {
                 try {
                     // 执行 runnable

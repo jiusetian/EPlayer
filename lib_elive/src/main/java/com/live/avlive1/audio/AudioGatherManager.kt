@@ -111,6 +111,7 @@ class AudioGatherManager : LiveInterfaces {
 
     override fun start() {
         mPause = false
+        isLoop=true
         // 录音线程
         recordThread = thread(start = true) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);

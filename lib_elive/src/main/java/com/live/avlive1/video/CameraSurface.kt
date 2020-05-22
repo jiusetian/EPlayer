@@ -70,7 +70,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     override fun onPreviewFrame(data: ByteArray, camera: Camera) {
         camera.addCallbackBuffer(data)
         // 如果是1080*1920像素的摄像头，那么一帧图像的大小为1080*1920*1.5=3110400 byte
-        // LogUtil.d("原始摄像头数据="+data.size)
+        //LogUtil.d("原始摄像头数据="+data.size)
         // LogUtil.d("摄像头宽高="+camera.parameters.previewSize.width+"///"+camera.parameters.previewSize.height)
         // 获取NV数据
         cameraListerner?.let { it.onCameraNVDataListener(data) }
@@ -173,9 +173,9 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     override fun openCamera() {
         //  打开摄像头
         cameraUtil.openCamera(cameraUtil.getCurrentCameraType())
-
+        // 相机方向改变
         cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getCameraOrientation()) }
-
+        // 相机尺寸改变
         cameraListerner?.let {
             it.onCameraSizeChangeListener(
                 cameraUtil.getCameraWidth(),

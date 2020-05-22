@@ -143,6 +143,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
 
     override fun stop() {
         isLoop = false
+        isVideoInit = false
         compressThread?.let {
             it.interrupt()
         }
@@ -194,7 +195,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
     }
 
     override fun onCameraNVDataListener(data: ByteArray) {
-        if (!mPause) cameraDatas.put(data)
+        if (!mPause && isVideoInit) cameraDatas.put(data)
     }
 
     override fun onCameraOrientationChangeListener(orientation: Int) {
