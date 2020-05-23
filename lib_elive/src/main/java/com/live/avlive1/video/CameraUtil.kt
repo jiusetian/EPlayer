@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.ImageFormat
 import android.hardware.Camera
+import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import com.live.common.LogUtil
@@ -187,21 +188,21 @@ class CameraUtil(val context: Context) {
             Surface.ROTATION_180 -> degrees = 180
             Surface.ROTATION_270 -> degrees = 270
         }
-
+        LogUtil.d("degrees等于=$degrees，相机方向=${info.orientation}")
         // info.orientation手机正常方向并且为后置摄像头为90，前置摄像头为270
         var result: Int
-
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) { // 前置摄像头
             // 前置摄像头需要镜像,转化后进行设置
             result = (info.orientation + degrees) % 360
             camera.setDisplayOrientation((360 - result) % 360)
-        } else {
+        } else { //后置
             // 如果正常的手机后置摄像头方向，此时degrees是0，后置摄像头的orientation是90，所以 result是90
             result = (info.orientation - degrees + 360) % 360
             // 后置摄像头直接进行显示
             camera.setDisplayOrientation(result)
         }
-
+        LogUtil.d("摄像头=" + info.orientation + "...." + "屏幕=" + degrees + "...." + "结果=" + result)
+        orientation = result
         return result
     }
 
@@ -222,7 +223,7 @@ class CameraUtil(val context: Context) {
         this.currentCameraType = currentCameraType
     }
 
-    fun getCameraOrientation() = orientation
+    fun getOrientation() = orientation
 
     // 当前相机类型
     fun getCurrentCameraType() = currentCameraType

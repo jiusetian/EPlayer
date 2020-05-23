@@ -218,7 +218,7 @@ class VideoGatherManager(val cameraSurface: CameraSurface, val context: Context)
                 videoHeight,
                 scaleWidth,
                 scaleHeight,
-                cameraSurface.getCameraUtil().getCameraOrientation()
+                cameraSurface.getCameraUtil().getOrientation()
             )
             isVideoInit = true
         }

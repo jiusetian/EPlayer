@@ -14,6 +14,7 @@
 jbyte *temp_i420_data;
 jbyte *temp_i420_data_scale;
 jbyte *temp_i420_data_rotate;
+jint mOrienation; // 当前视频角度
 
 YuvProcess *yuvProcess = nullptr;
 VideoEncoder *videoEncoder = nullptr;
@@ -112,16 +113,25 @@ void rotateI420(jbyte *src_i420_data, jint width, jint height, jbyte *dst_i420_d
                            (uint8 *) dst_i420_v_data, height >> 1,
                            width, height,
                            (libyuv::RotationMode) degree);
-    } else { // 横屏
+    } else if (degree == libyuv::kRotate180||degree == libyuv::kRotate0) { // 横屏
+
         libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
                            (const uint8 *) src_i420_u_data, width >> 1,
                            (const uint8 *) src_i420_v_data, width >> 1,
-                           (uint8 *) dst_i420_y_data, width,
-                           (uint8 *) dst_i420_u_data, width >> 1,
-                           (uint8 *) dst_i420_v_data, width >> 1,
+                           (uint8 *) dst_i420_y_data, height,
+                           (uint8 *) dst_i420_u_data, height >> 1,
+                           (uint8 *) dst_i420_v_data, height >> 1,
                            width, height,
-                           (libyuv::RotationMode) degree);
+                           libyuv::kRotate90);
 
+//        libyuv::I420Rotate((const uint8 *) src_i420_y_data, width,
+//                           (const uint8 *) src_i420_u_data, width >> 1,
+//                           (const uint8 *) src_i420_v_data, width >> 1,
+//                           (uint8 *) dst_i420_y_data, width,
+//                           (uint8 *) dst_i420_u_data, width >> 1,
+//                           (uint8 *) dst_i420_v_data, width >> 1,
+//                           width, height,
+//                           (libyuv::RotationMode) degree);
     }
 }
 
@@ -237,18 +247,21 @@ Java_com_live_LiveNativeApi_compressYUV(JNIEnv *env, jclass type, jbyteArray src
     nv21ToI420(src, width, height, temp_i420_data);
     //  进行缩放的操作，这个缩放，会把数据压缩
     scaleI420(temp_i420_data, width, height, temp_i420_data_scale, dst_width, dst_height, mode);
-    // 视频角度发生改变
-//    if (degree != mOriantation) {
-//        mOriantation = degree;
-//        // 因为手机不管是竖屏还是横屏，拍出来的视频都是宽大于高的，如果是竖屏拍的视频，需要将采集的视频数据旋转90度或270度（前置摄像头
-//        // 的竖屏要旋转270度），所以竖屏的时候设置解码出来的宽高是交换的
-//        if (degree == 90 || degree == 270) {
+    LOGD("角度=%d", degree);
+
+    // 如果视频角度发生改变
+//    if (degree != mOrienation) {
+//        mOrienation = degree;
+//        if (degree == 90 || degree == 270) { // 竖屏后置摄像头为90，竖屏前置摄像头为270
 //            videoEncoder->setInWidth(dst_height);
 //            videoEncoder->setInHeight(dst_width);
-//        } else {
+//        } else { // 横屏
 //            videoEncoder->setInWidth(dst_width);
 //            videoEncoder->setInHeight(dst_height);
 //        }
+//        // 重置视频编码器
+//        videoEncoder->closeEncoder();
+//        videoEncoder->open();
 //    }
 
     //  如果是前置摄像头，进行镜像操作
@@ -313,12 +326,13 @@ Java_com_live_LiveNativeApi_videoEncoderinit(JNIEnv *env, jclass type, jint src_
                                              jint src_height, jint scale_width, jint scale_height, jint orientation) {
     //  初始化临时空间
     init(src_width, src_height, scale_width, scale_height);
-
+    // 视频角度
+    mOrienation = orientation;
     videoEncoder = new VideoEncoder();
     // 设置相关参数
     // 因为手机摄像头拍出的视频始终都是宽大于高的，为了正常显示在竖屏上，需要旋转，这里的宽高是旋转之前的宽高，
     // 所以在竖屏的时候需要交换宽高才是正确的
-    if (orientation == 90 || orientation == 270) { // 竖屏
+    if (orientation == 90 || orientation == 270) { // 竖屏后置摄像头为90，竖屏前置摄像头为270
         videoEncoder->setInWidth(scale_height);
         videoEncoder->setInHeight(scale_width);
     } else { // 横屏
@@ -339,6 +353,7 @@ Java_com_live_LiveNativeApi_videoEncode(JNIEnv *env, jclass type, jbyteArray src
     jbyte *srcFrame = env->GetByteArrayElements(srcFrame_, NULL);
     jbyte *dstFrame = env->GetByteArrayElements(dstFrame_, NULL);
     jint *outFramewSize = env->GetIntArrayElements(outFramewSize_, NULL);
+
 
     int numNals = videoEncoder->encodeFrame((uint8_t *) srcFrame, frameSize, fps, (unsigned char *) dstFrame,
                                             outFramewSize);

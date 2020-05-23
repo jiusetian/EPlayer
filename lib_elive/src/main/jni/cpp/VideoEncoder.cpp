@@ -251,6 +251,7 @@ void VideoEncoder::setParams() {
 
     params.i_csp = X264_CSP_I420; // 设置帧数据格式为420
     // 设置帧宽度和高度
+    // LOGD("参数宽高=%d,%d",in_width,in_height);
     params.i_width = in_width;
     params.i_height = in_height;
 

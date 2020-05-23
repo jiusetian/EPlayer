@@ -200,7 +200,7 @@ class VideoManager(val cameraSurface: CameraSurface, val context: Context) : Liv
                 videoHeight,
                 scaleWidth,
                 scaleHeight,
-                cameraSurface.getCameraUtil().getCameraOrientation()
+                cameraSurface.getCameraUtil().getOrientation()
             )
             isVideoInit = true
         }

@@ -62,7 +62,6 @@ class LiveActivity : AppCompatActivity(), View.OnClickListener {
 //        // 打开摄像头
 //        mediaPusher.openCamera()
 //        mediaPusher.start()
-
         mediaPusher.changeCarmeraOrientation()
     }
 

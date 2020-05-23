@@ -174,7 +174,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
         //  打开摄像头
         cameraUtil.openCamera(cameraUtil.getCurrentCameraType())
         // 相机方向改变
-        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getCameraOrientation()) }
+        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getOrientation()) }
         // 相机尺寸改变
         cameraListerner?.let {
             it.onCameraSizeChangeListener(
@@ -196,7 +196,7 @@ class CameraSurface : FrameLayout, SurfaceHolder.Callback, Camera.PreviewCallbac
     // 改变摄像机方向
     fun changeCarmeraOrientation(): Int {
         val or = cameraUtil.changeCarmeraOrientation()
-        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getCameraOrientation()) }
+        cameraListerner?.let { it.onCameraOrientationChangeListener(cameraUtil.getOrientation()) }
         return or
     }
 
